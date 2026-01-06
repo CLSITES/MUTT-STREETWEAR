@@ -9,163 +9,148 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; overflow-x: hidden; }
-        .nav-link { transition: all 0.3s ease; }
-        .nav-link:hover { color: #fff; opacity: 0.7; }
-        .active-link { border-bottom: 2px solid white; padding-bottom: 2px; }
-        .modal-blur { backdrop-filter: blur(12px); background: rgba(0,0,0,0.85); }
+        .nav-link { transition: all 0.3s ease; opacity: 0.6; }
+        .nav-link:hover, .active-link { opacity: 1; border-bottom: 1px solid white; }
+        .modal-blur { backdrop-filter: blur(15px); background: rgba(0,0,0,0.95); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .size-btn.active { background: white; color: black; border-color: white; }
     </style>
 </head>
 <body>
 
     <header class="sticky top-0 z-50 bg-black border-b border-zinc-900">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="index.html" class="w-24 hover:scale-105 transition">
-                <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" alt="MUTT Home" class="w-full">
+            <a href="index.html" class="w-20">
+                <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" alt="MUTT" class="w-full invert">
             </a>
-
-            <nav class="hidden md:flex space-x-8 font-bold uppercase text-[11px] tracking-widest">
+            <nav class="hidden md:flex space-x-8 font-black uppercase text-[10px] tracking-[0.2em]">
                 <a href="camisetas.html" class="nav-link">Camisetas</a>
                 <a href="jaquetas.html" class="nav-link">Jaquetas</a>
                 <a href="shorts.html" class="nav-link">Shorts</a>
                 <a href="acessorios.html" class="nav-link">Acessórios</a>
                 <a href="calcas.html" class="nav-link active-link">Calças</a>
             </nav>
-
             <div class="flex items-center">
-                <button onclick="toggleCart()" class="relative p-2">
+                <a href="carrinho.html" class="relative p-2">
                     <i class="fa-solid fa-bag-shopping text-xl"></i>
-                    <span id="cart-count" class="absolute top-0 right-0 bg-white text-black text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-black">0</span>
-                </button>
+                    <span id="cart-count" class="absolute top-0 right-0 bg-white text-black text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-black">0</span>
+                </a>
             </div>
         </div>
     </header>
 
-    <main class="container mx-auto px-6 py-12">
-        <div class="mb-12">
-            <h1 class="text-5xl font-black italic uppercase tracking-tighter">Pants & Cargo</h1>
-            <p class="text-zinc-500 text-sm mt-2 font-medium uppercase tracking-widest">Street Utility Cuts</p>
+    <main class="container mx-auto px-6 py-16">
+        <div class="mb-16">
+            <h1 class="text-6xl font-black italic uppercase tracking-tighter">Calças</h1>
+            <p class="text-zinc-500 text-[10px] font-black uppercase tracking-[0.5em] mt-2">Streetwear Trousers & Denim</p>
         </div>
 
-        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12">
             </div>
     </main>
 
     <div id="product-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 modal-blur">
-        <div class="bg-zinc-950 border border-zinc-800 w-full max-w-4xl rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-2xl relative">
-            <button onclick="closeModal()" class="absolute top-6 right-6 text-3xl z-10 hover:text-zinc-500 transition">&times;</button>
+        <div class="bg-zinc-950 border border-zinc-900 w-full max-w-5xl flex flex-col md:flex-row shadow-2xl relative overflow-hidden">
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-2xl z-20 hover:rotate-90 transition">&times;</button>
             
-            <div class="w-full md:w-1/2 bg-zinc-900">
-                <img id="modal-img" src="" class="w-full h-full object-cover aspect-[3/4]">
+            <div class="w-full md:w-1/2 bg-zinc-900 relative">
+                <div id="modal-carousel" class="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-[450px] md:h-full"></div>
             </div>
-            
+
             <div class="w-full md:w-1/2 p-10 flex flex-col justify-center">
                 <h2 id="modal-name" class="text-4xl font-black uppercase italic mb-2 tracking-tighter"></h2>
-                <p id="modal-price" class="text-2xl font-bold text-white mb-8"></p>
                 
+                <div class="flex items-center gap-4 mb-8">
+                    <p id="modal-price" class="text-2xl font-bold"></p>
+                    <p id="modal-price-old" class="text-sm text-zinc-600 line-through font-bold"></p>
+                </div>
+
                 <div class="mb-8">
-                    <h3 class="text-xs font-black uppercase text-zinc-500 mb-3 tracking-widest">Especificações</h3>
-                    <p id="modal-desc" class="text-sm text-zinc-400 leading-relaxed italic">
-                        Modelagem cargo com múltiplos bolsos funcionais. Tecido de sarja premium com elastano para maior conforto. Ajuste em cordão na cintura e acabamento reforçado. Peça indispensável para compor o look streetwear.
-                    </p>
+                    <h3 class="text-[9px] font-black uppercase text-zinc-500 mb-4 tracking-widest">Tamanho Disponível</h3>
+                    <div id="modal-sizes" class="flex flex-wrap gap-2"></div>
                 </div>
 
                 <div class="mb-10">
-                    <h3 class="text-xs font-black uppercase text-zinc-500 mb-3 tracking-widest">Selecione o Tamanho</h3>
-                    <div class="flex gap-4">
-                        <button class="w-12 h-12 border border-zinc-800 hover:bg-white hover:text-black font-black transition text-xs">38</button>
-                        <button class="w-12 h-12 border border-zinc-800 hover:bg-white hover:text-black font-black transition text-xs">40</button>
-                        <button class="w-12 h-12 border border-zinc-800 hover:bg-white hover:text-black font-black transition text-xs">42</button>
-                        <button class="w-12 h-12 border border-zinc-800 hover:bg-white hover:text-black font-black transition text-xs">44</button>
-                    </div>
+                    <h3 class="text-[9px] font-black uppercase text-zinc-500 mb-2 tracking-widest">Descrição</h3>
+                    <p id="modal-desc" class="text-xs text-zinc-400 leading-relaxed italic"></p>
                 </div>
 
-                <button id="add-to-cart-btn" class="w-full bg-white text-black py-5 font-black uppercase text-xs tracking-widest hover:bg-zinc-200 transition-all active:scale-95">
-                    Adicionar à Bag
-                </button>
+                <button id="add-to-cart-btn" class="w-full bg-white text-black py-5 font-black uppercase text-[11px] tracking-widest hover:bg-zinc-200 transition">Adicionar à Bag</button>
             </div>
         </div>
     </div>
 
     <script>
+        // ======= O SEGREDO ESTÁ AQUI =======
+        const categoriaPagina = 'calcas'; // Mude para 'camisetas', 'shorts', etc nas outras páginas
+        // ===================================
+
         let db = JSON.parse(localStorage.getItem('mutt_products')) || [];
         let carrinho = JSON.parse(localStorage.getItem('mutt_cart')) || [];
+        let itemSelecionado = null;
 
-        function renderizarProdutos() {
-            const grid = document.getElementById('product-grid');
-            const calcas = db.filter(p => p.cat === 'calcas');
-            
-            if(calcas.length === 0) {
-                grid.innerHTML = '<p class="text-zinc-600 col-span-full uppercase font-black py-20 text-center tracking-widest">Nenhuma calça disponível.</p>';
-            } else {
-                grid.innerHTML = calcas.map(p => `
-                    <div class="group cursor-pointer" onclick="openModal(${p.id})">
-                        <div class="relative overflow-hidden bg-zinc-900 aspect-[3/4] mb-4">
-                            <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
-                            <div class="absolute bottom-0 left-0 w-full bg-white/10 backdrop-blur-sm p-2 translate-y-full group-hover:translate-y-0 transition-transform">
-                                <p class="text-[9px] text-center font-black uppercase tracking-widest">Clique para ver descrição</p>
-                            </div>
-                        </div>
-                        <h3 class="text-[11px] font-black uppercase tracking-widest mb-1">${p.nome}</h3>
-                        <p class="text-zinc-500 text-xs font-bold">R$ ${p.preco.toFixed(2)}</p>
-                    </div>
-                `).join('');
-            }
+        function renderizar() {
             document.getElementById('cart-count').innerText = carrinho.length;
+            const grid = document.getElementById('product-grid');
+            
+            // Aqui ele olha no seu ADM e pega só o que você salvou como 'calcas'
+            const produtos = db.filter(p => p.cat === categoriaPagina);
+
+            if(produtos.length === 0) {
+                grid.innerHTML = `<p class="col-span-full text-center text-zinc-600 uppercase font-black py-20 tracking-widest text-xs">Aguardando novo drop de ${categoriaPagina}.</p>`;
+                return;
+            }
+
+            grid.innerHTML = produtos.map(p => `
+                <div class="group cursor-pointer" onclick="openModal(${p.id})">
+                    <div class="relative overflow-hidden aspect-[3/4] mb-4 bg-zinc-900 border border-zinc-900">
+                        <img src="${p.imgs[0]}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                        ${p.precoAntigo ? `<span class="absolute top-4 left-4 bg-white text-black text-[9px] font-black px-2 py-1 italic">PROMO</span>` : ''}
+                    </div>
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-zinc-300">${p.nome}</h3>
+                    <p class="text-sm font-bold mt-1 italic">R$ ${p.preco.toFixed(2)}</p>
+                </div>
+            `).join('');
         }
 
-        function carregarProdutos() {
-    const grid = document.getElementById('destaques-grid'); // ou o ID da sua grid
-    // Filtramos pela categoria se não for a index
-    const categoriaPagina = window.location.pathname.split('/').pop().replace('.html', '');
-    const produtos = (categoriaPagina === 'index' || categoriaPagina === '') ? db : db.filter(p => p.cat === categoriaPagina);
+        function openModal(id) {
+            const p = db.find(x => x.id === id);
+            itemSelecionado = { ...p, tamanhoEscolhido: null };
 
-    grid.innerHTML = produtos.map(p => `
-        <div class="group cursor-pointer" onclick="openModal(${p.id})">
-            <div class="relative overflow-hidden aspect-[3/4] mb-4">
-                <img src="${p.imgs[0]}" class="w-full h-full object-cover">
-            </div>
-            <h3 class="text-[11px] font-black uppercase italic">${p.nome}</h3>
-            <p class="text-xs font-bold text-zinc-400">R$ ${p.preco.toFixed(2)}</p>
-        </div>
-    `).join('');
-}
+            document.getElementById('modal-name').innerText = p.nome;
+            document.getElementById('modal-price').innerText = `R$ ${p.preco.toFixed(2)}`;
+            document.getElementById('modal-price-old').innerText = p.precoAntigo ? `R$ ${p.precoAntigo.toFixed(2)}` : '';
+            document.getElementById('modal-desc').innerText = p.desc || "Produto exclusivo Mutt Streetwear.";
 
-function openModal(id) {
-    const prod = db.find(p => p.id === id);
-    
-    // FOTO PRINCIPAL
-    document.getElementById('modal-img').src = prod.imgs[0];
-    
-    // CRIAR MINIATURAS (Se quiser mostrar as outras fotos abaixo da principal)
-    // Se tiver uma div id="modal-thumbnails" no seu HTML:
-    // const thumbContainer = document.getElementById('modal-thumbnails');
-    // thumbContainer.innerHTML = prod.imgs.map(img => `<img src="${img}" class="w-12 h-12 object-cover" onclick="document.getElementById('modal-img').src='${img}'">`).join('');
+            const carousel = document.getElementById('modal-carousel');
+            carousel.innerHTML = p.imgs.map(url => `<img src="${url}" class="w-full h-full object-cover flex-shrink-0 snap-center">`).join('');
 
-    document.getElementById('modal-name').innerText = prod.nome;
-    document.getElementById('modal-price').innerText = `R$ ${prod.preco.toFixed(2)}`;
-    document.getElementById('modal-desc').innerText = prod.desc || "Peça exclusiva Mutt Streetwear.";
+            const sizesDiv = document.getElementById('modal-sizes');
+            sizesDiv.innerHTML = p.tamanhos.map(s => `
+                <button onclick="selectSize(this, '${s}')" class="size-btn border border-zinc-800 px-5 py-2 text-[10px] font-black uppercase hover:border-white transition">${s}</button>
+            `).join('');
 
-    // MOSTRAR SÓ OS TAMANHOS SELECIONADOS
-    // Se tiver uma div id="modal-sizes" no seu HTML:
-    // const sizeArea = document.getElementById('modal-sizes');
-    // sizeArea.innerHTML = prod.tamanhos.map(t => `<button class="border border-white p-2 text-xs">${t}</button>`).join('');
+            document.getElementById('product-modal').classList.replace('hidden', 'flex');
+        }
 
-    document.getElementById('product-modal').classList.replace('hidden', 'flex');
-}
+        function selectSize(btn, size) {
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            itemSelecionado.tamanhoEscolhido = size;
+        }
+
         function closeModal() {
             document.getElementById('product-modal').classList.replace('flex', 'hidden');
-            document.body.style.overflow = 'auto';
         }
 
-        function addAoCarrinho(id) {
-            const prod = db.find(p => p.id === id);
-            carrinho.push(prod);
+        document.getElementById('add-to-cart-btn').onclick = () => {
+            if(!itemSelecionado.tamanhoEscolhido) { alert("Selecione um tamanho"); return; }
+            carrinho.push({ ...itemSelecionado, cartId: Date.now(), img: itemSelecionado.imgs[0], tamanho: itemSelecionado.tamanhoEscolhido });
             localStorage.setItem('mutt_cart', JSON.stringify(carrinho));
-            document.getElementById('cart-count').innerText = carrinho.length;
-            alert("Calça adicionada com sucesso!");
-        }
+            window.location.href = "carrinho.html";
+        };
 
-        window.onload = renderizarProdutos;
+        window.onload = renderizar;
     </script>
 </body>
 </html>
