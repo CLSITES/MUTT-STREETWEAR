@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MUTT STREETWEAR | Official Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
+        .nav-link { transition: all 0.3s ease; }
+        .nav-link:hover { color: #888; text-decoration: underline; }
+        .product-card:hover img { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+    <div class="bg-white text-black text-center py-2 text-xs font-bold tracking-widest">
+        FRETE GRÁTIS EM COMPRAS ACIMA DE R$ 299
+    </div>
+
+    <header class="sticky top-0 z-50 bg-black border-b border-zinc-800">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="w-32">
+                <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" alt="MUTT Logo" class="w-full">
+            </div>
+
+            <nav class="hidden md:flex space-x-8 font-bold uppercase text-sm tracking-tighter">
+                <a href="#" class="nav-link">Camisetas</a>
+                <a href="#" class="nav-link">Jaquetas</a>
+                <a href="#" class="nav-link">Shorts</a>
+                <a href="#" class="nav-link">Acessórios</a>
+                <a href="#" class="nav-link">Calças</a>
+            </nav>
+
+            <div class="flex items-center space-x-5">
+                <i class="fa-solid fa-magnifying-glass cursor-pointer"></i>
+                <i class="fa-solid fa-user cursor-pointer"></i>
+                <div class="relative">
+                    <i class="fa-solid fa-cart-shopping cursor-pointer"></i>
+                    <span class="absolute -top-2 -right-2 bg-white text-black text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="relative h-[80vh] flex items-center justify-center bg-zinc-900">
+        <div class="absolute inset-0 overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070" alt="New Collection" class="w-full h-full object-cover opacity-60">
+        </div>
+        <div class="relative text-center">
+            <h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-4">NEW DROP</h1>
+            <button class="bg-white text-black px-10 py-3 font-bold uppercase hover:bg-zinc-200 transition">Comprar Agora</button>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-6 py-16">
+        <h2 class="text-3xl font-black italic mb-10 border-l-4 border-white pl-4">DESTAQUES</h2>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div class="product-card group cursor-pointer">
+                <div class="overflow-hidden bg-zinc-800 aspect-[3/4] mb-4">
+                    <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1780" alt="Produto" class="w-full h-full object-cover transition duration-500">
+                </div>
+                <h3 class="font-bold text-sm uppercase">Camiseta Mutt Oversized</h3>
+                <p class="text-zinc-400 text-sm">R$ 149,90</p>
+            </div>
+
+            <div class="product-card group cursor-pointer">
+                <div class="overflow-hidden bg-zinc-800 aspect-[3/4] mb-4">
+                    <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1936" alt="Produto" class="w-full h-full object-cover transition duration-500">
+                </div>
+                <h3 class="font-bold text-sm uppercase">Jaqueta Puffer Dark</h3>
+                <p class="text-zinc-400 text-sm">R$ 389,00</p>
+            </div>
+            
+            </div>
+    </main>
+
+    <footer class="bg-zinc-950 border-t border-zinc-900 py-10 mt-20">
+        <div class="container mx-auto px-6 text-center text-zinc-500 text-xs uppercase tracking-widest">
+            <p>&copy; 2026 MUTT STREETWEAR. TODOS OS DIREITOS RESERVADOS.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
