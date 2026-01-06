@@ -9,9 +9,12 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; overflow-x: hidden; }
-        .modal-blur { backdrop-filter: blur(15px); background: rgba(0,0,0,0.9); }
+        .modal-blur { backdrop-filter: blur(15px); background: rgba(0,0,0,0.95); }
         .size-btn.active { background: white; color: black; border-color: white; }
         .thumb-active { border: 2px solid white; opacity: 1 !important; }
+        /* Esconde barra de rolagem mas mantém funcionalidade */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body>
@@ -22,16 +25,16 @@
 
     <header class="sticky top-0 z-50 bg-black border-b border-zinc-900">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a id="secret-adm" href="index.html" class="w-24 select-none" onmousedown="startSecret()" onmouseup="stopSecret()" ontouchstart="startSecret()" ontouchend="stopSecret()">
+            <a href="index.html" class="w-24">
                 <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" alt="MUTT Logo" class="w-full">
             </a>
 
-            <nav class="hidden md:flex space-x-8 font-bold uppercase text-[11px] tracking-widest">
-                <a href="camisetas.html" class="hover:text-zinc-500 transition">Camisetas</a>
-                <a href="jaquetas.html" class="hover:text-zinc-500 transition">Jaquetas</a>
-                <a href="shorts.html" class="hover:text-zinc-500 transition">Shorts</a>
-                <a href="acessorios.html" class="hover:text-zinc-500 transition">Acessórios</a>
-                <a href="calcas.html" class="hover:text-zinc-500 transition">Calças</a>
+            <nav class="hidden md:flex space-x-8 font-bold uppercase text-[11px] tracking-widest text-zinc-400">
+                <a href="camisetas.html" class="hover:text-white transition">Camisetas</a>
+                <a href="jaquetas.html" class="hover:text-white transition">Jaquetas</a>
+                <a href="shorts.html" class="hover:text-white transition">Shorts</a>
+                <a href="acessorios.html" class="hover:text-white transition">Acessórios</a>
+                <a href="calcas.html" class="hover:text-white transition">Calças</a>
             </nav>
 
             <div class="flex items-center space-x-5">
@@ -43,113 +46,122 @@
         </div>
     </header>
 
-    <section class="relative h-[80vh] flex items-center justify-center bg-zinc-900">
-        <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070" class="absolute inset-0 w-full h-full object-cover opacity-40">
+    <section class="relative h-[85vh] flex items-center justify-center bg-zinc-900 overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070" class="absolute inset-0 w-full h-full object-cover opacity-50 scale-110">
         <div class="relative text-center px-4">
-            <h1 class="text-7xl md:text-9xl font-black italic tracking-tighter leading-none mb-6">MUTT</h1>
-            <p class="text-[10px] font-black tracking-[0.6em] uppercase">The New Standard of Streetwear</p>
+            <p class="text-white text-[10px] font-black tracking-[0.5em] mb-4 uppercase opacity-70">New Era Streetwear</p>
+            <h1 class="text-7xl md:text-9xl font-black italic tracking-tighter mb-8 leading-none italic">DROP 01</h1>
+            <a href="#lancamentos" class="bg-white text-black px-12 py-4 font-black uppercase text-xs tracking-widest hover:bg-zinc-200 transition inline-block">Ver Produtos</a>
         </div>
     </section>
 
-    <main class="container mx-auto px-6 py-20">
-        <h2 class="text-3xl font-black italic uppercase italic mb-12">Lançamentos</h2>
-        <div id="destaques-grid" class="grid grid-cols-2 md:grid-cols-4 gap-8"></div>
+    <main id="lancamentos" class="container mx-auto px-6 py-20">
+        <div class="flex justify-between items-end mb-12 border-b border-zinc-900 pb-6">
+            <h2 class="text-4xl font-black italic uppercase tracking-tighter">Lançamentos</h2>
+            <p class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Season 2026</p>
+        </div>
+        
+        <div id="destaques-grid" class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12">
+            </div>
     </main>
 
     <div id="product-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 modal-blur overflow-y-auto">
-        <div class="bg-black border border-zinc-900 w-full max-w-5xl rounded-3xl overflow-hidden flex flex-col md:flex-row relative">
-            <button onclick="closeModal()" class="absolute top-6 right-6 text-3xl z-50">&times;</button>
+        <div class="bg-zinc-950 border border-zinc-900 w-full max-w-5xl rounded-3xl overflow-hidden flex flex-col md:flex-row relative">
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-3xl z-50 text-white/50 hover:text-white">&times;</button>
             
-            <div class="w-full md:w-1/2 flex flex-col">
-                <div class="aspect-[3/4] overflow-hidden">
+            <div class="w-full md:w-1/2 flex flex-col bg-zinc-900">
+                <div class="aspect-[3/4] overflow-hidden flex items-center justify-center">
                     <img id="modal-img" src="" class="w-full h-full object-cover">
                 </div>
-                <div id="modal-thumbnails" class="flex gap-2 p-4 bg-zinc-950 overflow-x-auto">
+                <div id="modal-thumbnails" class="flex gap-2 p-4 bg-black overflow-x-auto no-scrollbar">
                     </div>
             </div>
 
-            <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-between">
-                <div>
-                    <h2 id="modal-name" class="text-4xl font-black uppercase italic mb-2 tracking-tighter text-white"></h2>
-                    <p id="modal-price" class="text-2xl font-bold text-zinc-400 mb-6"></p>
-                    
-                    <div class="mb-8">
-                        <h3 class="text-[10px] font-black uppercase text-zinc-600 mb-3 tracking-widest">Descrição</h3>
-                        <p id="modal-desc" class="text-sm text-zinc-400 leading-relaxed font-medium"></p>
-                    </div>
-
-                    <div class="mb-8">
-                        <h3 class="text-[10px] font-black uppercase text-zinc-600 mb-3 tracking-widest text-white">Selecione o Tamanho</h3>
-                        <div id="modal-sizes" class="flex flex-wrap gap-2">
-                            </div>
-                    </div>
+            <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+                <h2 id="modal-name" class="text-4xl font-black uppercase italic mb-2 tracking-tighter italic"></h2>
+                <div class="flex items-center gap-4 mb-8">
+                    <span id="modal-price" class="text-2xl font-bold"></span>
+                    <span id="modal-discount" class="text-sm text-zinc-600 line-through"></span>
+                </div>
+                
+                <div class="mb-8">
+                    <h3 class="text-[10px] font-black uppercase text-zinc-500 mb-3 tracking-widest italic">Descrição</h3>
+                    <p id="modal-desc" class="text-sm text-zinc-400 leading-relaxed"></p>
                 </div>
 
-                <button id="add-to-cart-btn" class="w-full bg-white text-black py-5 font-black uppercase text-[11px] tracking-[0.2em] hover:bg-zinc-300 transition mt-6">
+                <div class="mb-10">
+                    <h3 class="text-[10px] font-black uppercase text-zinc-500 mb-3 tracking-widest italic">Selecione o Tamanho</h3>
+                    <div id="modal-sizes" class="flex flex-wrap gap-2">
+                        </div>
+                </div>
+
+                <button id="add-to-cart-btn" class="w-full bg-white text-black py-5 font-black uppercase text-[11px] tracking-[0.2em] hover:bg-zinc-300 transition shadow-2xl">
                     Adicionar à Bag
                 </button>
             </div>
         </div>
     </div>
 
+    <footer class="bg-black border-t border-zinc-900 py-16">
+        <div class="container mx-auto px-6 text-center">
+            <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" class="w-20 mx-auto mb-8 opacity-20 grayscale invert">
+            <p class="text-zinc-600 text-[10px] uppercase tracking-[0.4em]">&copy; 2026 MUTT STREETWEAR.</p>
+        </div>
+    </footer>
+
     <script>
         let db = JSON.parse(localStorage.getItem('mutt_products')) || [];
         let carrinho = JSON.parse(localStorage.getItem('mutt_cart')) || [];
-        let pressTimer;
         let selectedSize = "";
-
-        // ACESSO SECRETO AO ADM (Segurar logo por 3 segundos)
-        function startSecret() { pressTimer = window.setTimeout(() => { location.href = 'admin.html'; }, 3000); }
-        function stopSecret() { clearTimeout(pressTimer); }
 
         function renderLoja() {
             document.getElementById('cart-count').innerText = carrinho.length;
             const grid = document.getElementById('destaques-grid');
             
             if (db.length === 0) {
-                grid.innerHTML = "<p class='col-span-full text-center text-zinc-700 py-10 uppercase font-black text-xs'>Aguardando reposição de estoque...</p>";
+                grid.innerHTML = "<p class='col-span-full text-center text-zinc-800 py-20 uppercase font-black text-xs'>Reposição de estoque em breve.</p>";
                 return;
             }
 
             grid.innerHTML = db.map(p => `
                 <div class="group cursor-pointer" onclick="openModal(${p.id})">
-                    <div class="relative aspect-[3/4] bg-zinc-900 mb-4 overflow-hidden rounded-sm">
-                        <img src="${p.imgs[0]}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                    <div class="relative aspect-[3/4] bg-zinc-900 mb-4 overflow-hidden border border-zinc-900">
+                        <img src="${p.imgs[0]}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                        <div class="absolute bottom-4 left-4 bg-black/80 px-3 py-1 text-[9px] font-black uppercase italic tracking-widest opacity-0 group-hover:opacity-100 transition">Ver Detalhes</div>
                     </div>
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">${p.nome}</h3>
-                    <p class="text-sm font-bold tracking-tighter">R$ ${p.preco.toFixed(2)}</p>
+                    <h3 class="text-[11px] font-black uppercase tracking-widest text-zinc-300 mb-1">${p.nome}</h3>
+                    <p class="text-white text-xs font-bold italic">R$ ${p.preco.toFixed(2)}</p>
                 </div>
             `).join('');
         }
 
         function openModal(id) {
             const p = db.find(x => x.id == id);
-            selectedSize = ""; // Reseta seleção
+            selectedSize = ""; 
             
-            // Foto Principal
             document.getElementById('modal-img').src = p.imgs[0];
             
-            // Miniaturas (As fotos que você colou linha por linha no ADM)
+            // Gerar Galeria lateral/inferior
             const thumbContainer = document.getElementById('modal-thumbnails');
             thumbContainer.innerHTML = p.imgs.map((img, idx) => `
-                <img src="${img}" class="w-16 h-20 object-cover cursor-pointer opacity-40 hover:opacity-100 transition rounded-md ${idx === 0 ? 'thumb-active' : ''}" 
-                     onclick="changeModalImg(this, '${img}')">
+                <img src="${img}" class="w-16 h-20 object-cover cursor-pointer opacity-30 hover:opacity-100 transition rounded ${idx === 0 ? 'thumb-active' : ''}" 
+                     onclick="changeImg(this, '${img}')">
             `).join('');
 
             document.getElementById('modal-name').innerText = p.nome;
             document.getElementById('modal-price').innerText = `R$ ${p.preco.toFixed(2)}`;
-            document.getElementById('modal-desc').innerText = p.desc || "Produto exclusivo da coleção MUTT Streetwear 2026.";
+            document.getElementById('modal-desc').innerText = p.desc || "Peça exclusiva de alta qualidade.";
 
-            // Gerar Tamanhos Dinâmicos do ADM
+            // Gerar Grade de Tamanhos
             const sizeArea = document.getElementById('modal-sizes');
-            if (p.tamanhos && p.tamanhos.length > 0) {
+            if(p.tamanhos && p.tamanhos.length > 0) {
                 sizeArea.innerHTML = p.tamanhos.map(t => `
-                    <button onclick="selectSize(this, '${t}')" class="size-btn border border-zinc-800 px-5 py-2 text-[10px] font-black uppercase hover:border-white transition">
+                    <button onclick="selectSize(this, '${t}')" class="size-btn border border-zinc-800 px-6 py-2 text-[10px] font-black uppercase hover:border-white transition">
                         ${t}
                     </button>
                 `).join('');
             } else {
-                sizeArea.innerHTML = "<p class='text-zinc-600 text-[10px]'>Tamanho Único</p>";
+                sizeArea.innerHTML = "<p class='text-zinc-600 text-[10px] uppercase font-bold'>Tamanho Único</p>";
                 selectedSize = "UN";
             }
 
@@ -158,7 +170,7 @@
             document.body.style.overflow = 'hidden';
         }
 
-        function changeModalImg(el, src) {
+        function changeImg(el, src) {
             document.getElementById('modal-img').src = src;
             document.querySelectorAll('#modal-thumbnails img').forEach(i => i.classList.remove('thumb-active'));
             el.classList.add('thumb-active');
@@ -171,12 +183,8 @@
         }
 
         function addToCart(p) {
-            if (!selectedSize) {
-                alert("Por favor, selecione um tamanho.");
-                return;
-            }
-            const item = { ...p, tamanho: selectedSize, uniqueId: Date.now() };
-            carrinho.push(item);
+            if (!selectedSize) { alert("SELECIONE UM TAMANHO PRIMEIRO."); return; }
+            carrinho.push({ ...p, tamanho: selectedSize, cartId: Date.now() });
             localStorage.setItem('mutt_cart', JSON.stringify(carrinho));
             location.href = 'carrinho.html';
         }
