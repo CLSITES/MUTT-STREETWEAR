@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calças | MUTT STREETWEAR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
+        .cart-sidebar { transition: transform 0.4s ease; }
+        .product-img { aspect-ratio: 3/4; object-fit: cover; }
+    </style>
+</head>
+<body>
+
+    <header class="sticky top-0 z-50 bg-black border-b border-zinc-900 px-6 py-4 flex justify-between items-center">
+        <a href="index.html" class="w-24"><img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" alt="Logo"></a>
+        <nav class="hidden md:flex space-x-6 font-bold uppercase text-xs">
+            <a href="camisetas.html" class="text-zinc-500 hover:text-white transition">Camisetas</a>
+            <a href="jaquetas.html" class="text-zinc-500 hover:text-white transition">Jaquetas</a>
+            <a href="shorts.html" class="text-zinc-500 hover:text-white transition">Shorts</a>
+            <a href="acessorios.html" class="text-zinc-500 hover:text-white transition">Acessórios</a>
+            <a href="calcas.html" class="text-white border-b border-white">Calças</a>
+        </nav>
+        <div class="flex items-center space-x-4">
+            <button onclick="toggleCart()" class="relative">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-white text-black text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">0</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="p-8">
+        <div class="mb-12">
+            <h1 class="text-5xl font-black italic uppercase tracking-tighter">Pants & Cargo</h1>
+            <p class="text-zinc-600 text-xs font-bold tracking-[0.3em] mt-2">ESSENTIAL CUTS FOR EVERYDAY</p>
+        </div>
+
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12">
+            </div>
+    </main>
+
+    <div id="cart-sidebar" class="fixed top-0 right-0 w-full md:w-[450px] h-full bg-zinc-950 z-[100] translate-x-full cart-sidebar border-l border-zinc-800 shadow-2xl">
+        <div class="p-8 h-full flex flex-col">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-xl font-black uppercase tracking-tighter italic">Shopping Bag</h2>
+                <button onclick="toggleCart()" class="text-3xl">&times;</button>
+            </div>
+            
+            <div id="cart-items" class="flex-1 overflow-y-auto space-y-6">
+                </div>
+
+            <div class="border-t border-zinc-800 pt-6 mt-6">
+                <div class="flex justify-between font-bold mb-6 text-xl tracking-tighter uppercase">
+                    <span>Subtotal</span>
+                    <span id="cart-total">R$ 0,00</span>
+                </div>
+                <button onclick="window.location.href='checkout.html'" class="w-full bg-white text-black py-5 font-black uppercase text-xs tracking-widest hover:bg-zinc-200 transition">
+                    Finalizar Compra
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados Iniciais de Calças
+        const calcasPadrao = [
+            { id: 401, nome: "Calça Cargo Mutt Black 'V2'", preco: 249.90, img: "https://images.unsplash.com/photo-1624371414361-e6e9ea58ac37?q=80&w=1887", cat: "calcas" },
+            { id: 402, nome: "Jeans Baggy Fit Raw Denim", preco: 299.00, img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=1887", cat: "calcas" },
+            { id: 403, nome: "Jogger Techwear Minimalist", preco: 219.00, img: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=80&w=1887", cat: "calcas" }
+        ];
+
+        let db = JSON.parse(localStorage.getItem('mutt_products')) || calcasPadrao;
+        let carrinho = JSON.parse(localStorage.getItem('mutt_cart')) || [];
+
+        function renderizar() {
+            const grid = document.getElementById('product-grid');
+            const itens = db.filter(p => p.cat === 'calcas');
+            
+            grid.innerHTML = itens.map(p => `
+                <div class="group">
+                    <div class="relative overflow-hidden bg-zinc-900 mb-4 cursor-pointer">
+                        <img src="${p.img}" class="product-img w-full transition duration-1000 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                            <button onclick="addAoCarrinho(${p.id})" class="w-full bg-white text-black py-3 font-black text-[10px] uppercase tracking-widest">
+                                Adicionar +
+                            </button>
+                        </div>
+                    </div>
+                    <h3 class="text-[11px] font-bold uppercase tracking-widest mb-1">${p.nome}</h3>
+                    <p class="text-zinc-400 font-bold">R$ ${p.preco.toFixed(2)}</p>
+                </div>
+            `).join('');
+            atualizarCarrinhoVisual();
+        }
+
+        function toggleCart() {
+            document.getElementById('cart-sidebar').classList.toggle('translate-x-full');
+        }
+
+        function addAoCarrinho(id) {
+            const prod = db.find(p => p.id === id);
+            carrinho.push(prod);
+            localStorage.setItem('mutt_cart', JSON.stringify(carrinho));
+            atualizarCarrinhoVisual();
+            toggleCart();
+        }
+
+        function atualizarCarrinhoVisual() {
+            document.getElementById('cart-count').innerText = carrinho.length;
+            const itensDiv = document.getElementById('cart-items');
+            
+            itensDiv.innerHTML = carrinho.length === 0 
+                ? '<p class="text-zinc-600 text-center font-bold uppercase text-[10px]">Bag está vazia</p>'
+                : carrinho.map((item, index) => `
+                    <div class="flex gap-6 items-center">
+                        <img src="${item.img}" class="w-24 h-32 object-cover rounded">
+                        <div class="flex-1">
+                            <p class="font-black uppercase text-[11px] mb-2">${item.nome}</p>
+                            <p class="text-zinc-500 text-xs">R$ ${item.preco.toFixed(2)}</p>
+                        </div>
+                        <button onclick="remover(${index})" class="text-zinc-800 hover:text-red-500 transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `).join('');
+            
+            const total = carrinho.reduce((sum, item) => sum + item.preco, 0);
+            document.getElementById('cart-total').innerText = `R$ ${total.toFixed(2)}`;
+        }
+
+        function remover(index) {
+            carrinho.splice(index, 1);
+            localStorage.setItem('mutt_cart', JSON.stringify(carrinho));
+            atualizarCarrinhoVisual();
+        }
+
+        renderizar();
+    </script>
+</body>
+</html>
