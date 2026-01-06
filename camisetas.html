@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camisetas | MUTT STREETWEAR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
+        .cart-sidebar { transition: transform 0.3s ease-in-out; }
+    </style>
+</head>
+<body>
+
+    <header class="sticky top-0 z-50 bg-black border-b border-zinc-800 px-6 py-4 flex justify-between items-center">
+        <a href="index.html" class="w-24"><img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" alt="Logo"></a>
+        <nav class="hidden md:flex space-x-6 font-bold uppercase text-xs">
+            <a href="camisetas.html" class="text-white border-b border-white">Camisetas</a>
+            <a href="#" class="text-zinc-500 hover:text-white">Jaquetas</a>
+            <a href="#" class="text-zinc-500 hover:text-white">Shorts</a>
+            <a href="#" class="text-zinc-500 hover:text-white">Calças</a>
+        </nav>
+        <div class="flex items-center space-x-4">
+            <button onclick="toggleCart()" class="relative">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-white text-black text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">0</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="p-8">
+        <div class="flex justify-between items-end mb-10">
+            <div>
+                <h1 class="text-4xl font-black italic uppercase">Camisetas</h1>
+                <p class="text-zinc-500 text-sm">Mostrando todos os drops exclusivos</p>
+            </div>
+            <select class="bg-black border border-zinc-800 p-2 text-xs uppercase font-bold">
+                <option>Ordenar por: Lançamentos</option>
+                <option>Menor Preço</option>
+            </select>
+        </div>
+
+        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            </div>
+    </main>
+
+    <div id="cart-sidebar" class="fixed top-0 right-0 w-full md:w-96 h-full bg-zinc-900 z-[100] translate-x-full cart-sidebar border-l border-zinc-800 shadow-2xl">
+        <div class="p-6 h-full flex flex-col">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-xl font-bold uppercase">Seu Carrinho</h2>
+                <button onclick="toggleCart()" class="text-2xl">&times;</button>
+            </div>
+            
+            <div id="cart-items" class="flex-1 overflow-y-auto space-y-4">
+                </div>
+
+            <div class="border-t border-zinc-800 pt-6">
+                <div class="flex justify-between font-bold mb-4">
+                    <span>Total:</span>
+                    <span id="cart-total">R$ 0,00</span>
+                </div>
+                <button onclick="window.location.href='checkout.html'" class="w-full bg-white text-black py-4 font-black uppercase hover:bg-zinc-200 transition">
+                    Finalizar Compra
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulação de Banco de Dados que o ADM altera
+        const produtosIniciais = [
+            { id: 1, nome: "T-Shirt Mutt Classic", preco: 149.90, img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1780", cat: "camisetas" },
+            { id: 2, nome: "Oversized Street Off-White", preco: 169.00, img: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1887", cat: "camisetas" }
+        ];
+
+        // Carregar do LocalStorage ou usar os iniciais
+        let db = JSON.parse(localStorage.getItem('mutt_products')) || produtosIniciais;
+        let carrinho = [];
+
+        function renderizarProdutos() {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = db.filter(p => p.cat === 'camisetas').map(p => `
+                <div class="group cursor-pointer">
+                    <div class="relative overflow-hidden bg-zinc-900 aspect-[3/4] mb-3">
+                        <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <button onclick="addAoCarrinho(${p.id})" class="absolute bottom-0 w-full bg-white text-black py-2 font-bold opacity-0 group-hover:opacity-100 transition">ADICIONAR +</button>
+                    </div>
+                    <h3 class="text-xs font-bold uppercase">${p.nome}</h3>
+                    <p class="text-zinc-400">R$ ${p.preco.toFixed(2)}</p>
+                </div>
+            `).join('');
+        }
+
+        function toggleCart() {
+            const side = document.getElementById('cart-sidebar');
+            side.classList.toggle('translate-x-full');
+        }
+
+        function addAoCarrinho(id) {
+            const prod = db.find(p => p.id === id);
+            carrinho.push(prod);
+            atualizarCarrinho();
+            toggleCart();
+        }
+
+        function atualizarCarrinho() {
+            document.getElementById('cart-count').innerText = carrinho.length;
+            const itensDiv = document.getElementById('cart-items');
+            itensDiv.innerHTML = carrinho.map(item => `
+                <div class="flex gap-4 border-b border-zinc-800 pb-4">
+                    <img src="${item.img}" class="w-20 h-24 object-cover">
+                    <div>
+                        <p class="font-bold text-sm uppercase">${item.nome}</p>
+                        <p class="text-zinc-500">R$ ${item.preco.toFixed(2)}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            const total = carrinho.reduce((sum, item) => sum + item.preco, 0);
+            document.getElementById('cart-total').innerText = `R$ ${total.toFixed(2)}`;
+        }
+
+        renderizarProdutos();
+    </script>
+</body>
+</html>
