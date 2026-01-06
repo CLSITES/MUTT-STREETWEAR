@@ -13,22 +13,19 @@
         .nav-link:hover, .active-link { opacity: 1; border-bottom: 1px solid white; }
         .modal-blur { backdrop-filter: blur(15px); background: rgba(0,0,0,0.95); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .size-btn.active { background: white; color: black; }
+        .size-btn.active { background: white; color: black; border-color: white; }
+        .thumb-active { border: 2px solid white; opacity: 1 !important; }
     </style>
 </head>
 <body>
 
     <header class="sticky top-0 z-50 bg-black border-b border-zinc-900">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            
             <a href="index.html" class="w-20 hover:scale-110 transition-transform">
-                <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" alt="MUTT" class="w-full invert">
+                <img src="https://image2url.com/r2/bucket1/images/1767740170915-55b841e3-1465-4bb9-8927-b83b3bd8824d.jpg" alt="MUTT" class="w-full invert">
             </a>
 
             <nav class="hidden md:flex space-x-8 font-black uppercase text-[10px] tracking-[0.2em]">
-                
-                <a href="index.html" class="nav-link">Início</a>
-
                 <a href="camisetas.html" class="nav-link">Camisetas</a>
                 <a href="jaquetas.html" class="nav-link">Jaquetas</a>
                 <a href="shorts.html" class="nav-link">Shorts</a>
@@ -51,8 +48,7 @@
             <p class="text-zinc-500 text-[10px] font-black uppercase tracking-[0.5em] mt-2">Mutt Streetwear / 2026 Edition</p>
         </div>
 
-        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12">
-        </div>
+        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12"></div>
 
         <div class="mt-20 border-t border-zinc-900 pt-10 text-center">
             <a href="index.html" class="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition">
@@ -61,39 +57,127 @@
         </div>
     </main>
 
-    <div id="product-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 modal-blur">
+    <div id="product-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 modal-blur overflow-y-auto">
+        <div class="bg-zinc-950 border border-zinc-900 w-full max-w-5xl rounded-3xl overflow-hidden flex flex-col md:flex-row relative">
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-3xl z-50 text-white/50 hover:text-white">&times;</button>
+            
+            <div class="w-full md:w-1/2 flex flex-col bg-zinc-900">
+                <div class="aspect-[3/4] overflow-hidden flex items-center justify-center">
+                    <img id="modal-img" src="" class="w-full h-full object-cover">
+                </div>
+                <div id="modal-thumbnails" class="flex gap-2 p-4 bg-black overflow-x-auto no-scrollbar"></div>
+            </div>
+
+            <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+                <h2 id="modal-name" class="text-4xl font-black uppercase italic mb-2 tracking-tighter italic"></h2>
+                <div class="flex items-center gap-4 mb-8">
+                    <span id="modal-price" class="text-2xl font-bold"></span>
+                    <span id="modal-discount" class="text-sm text-zinc-600 line-through"></span>
+                </div>
+                
+                <div class="mb-8">
+                    <h3 class="text-[10px] font-black uppercase text-zinc-500 mb-3 tracking-widest italic">Descrição</h3>
+                    <p id="modal-desc" class="text-sm text-zinc-400 leading-relaxed"></p>
+                </div>
+
+                <div class="mb-10">
+                    <h3 class="text-[10px] font-black uppercase text-zinc-500 mb-3 tracking-widest italic">Selecione o Tamanho</h3>
+                    <div id="modal-sizes" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <button id="add-to-cart-btn" class="w-full bg-white text-black py-5 font-black uppercase text-[11px] tracking-[0.2em] hover:bg-zinc-300 transition shadow-2xl">
+                    Adicionar à Bag
+                </button>
+            </div>
         </div>
+    </div>
 
     <script>
-        // CONFIGURAÇÃO DA PÁGINA
-        const categoriaAtual = 'camisetas'; 
-        
+        const categoriaAtual = 'camisetas'; // LEMBRE DE MUDAR ISSO EM CADA PÁGINA
         let db = JSON.parse(localStorage.getItem('mutt_products')) || [];
         let carrinho = JSON.parse(localStorage.getItem('mutt_cart')) || [];
-        let itemSelecionado = null;
+        let selectedSize = "";
 
-        // ... (Restante das funções renderizar, openModal, etc, continuam iguais) ...
         function renderizar() {
             document.getElementById('page-title').innerText = categoriaAtual;
             document.getElementById('cart-count').innerText = carrinho.length;
             const grid = document.getElementById('product-grid');
             const produtosFiltrados = db.filter(p => p.cat === categoriaAtual);
+            
             if(produtosFiltrados.length === 0) {
-                grid.innerHTML = `<p class="col-span-full text-center text-zinc-600 uppercase font-black py-20 tracking-widest text-xs">Nenhum item em ${categoriaAtual} no momento.</p>`;
+                grid.innerHTML = `<p class="col-span-full text-center text-zinc-600 uppercase font-black py-20 tracking-widest text-xs">Aguardando drop em ${categoriaAtual}.</p>`;
                 return;
             }
+
             grid.innerHTML = produtosFiltrados.map(p => `
                 <div class="group cursor-pointer" onclick="openModal(${p.id})">
-                    <div class="relative overflow-hidden aspect-[3/4] mb-4 bg-zinc-900">
+                    <div class="relative aspect-[3/4] bg-zinc-900 mb-4 overflow-hidden border border-zinc-900">
                         <img src="${p.imgs[0]}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
-                        ${p.desconto ? `<span class="absolute top-4 left-4 bg-white text-black text-[9px] font-black px-2 py-1 italic">OFF</span>` : ''}
+                        <div class="absolute bottom-4 left-4 bg-black/80 px-3 py-1 text-[9px] font-black uppercase italic tracking-widest opacity-0 group-hover:opacity-100 transition">Ver Detalhes</div>
                     </div>
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-zinc-300">${p.nome}</h3>
-                    <p class="text-sm font-bold mt-1 italic">R$ ${p.preco.toFixed(2)}</p>
+                    <h3 class="text-[11px] font-black uppercase tracking-widest text-zinc-300 mb-1">${p.nome}</h3>
+                    <p class="text-white text-xs font-bold italic">R$ ${p.preco.toFixed(2)}</p>
                 </div>
             `).join('');
         }
-        // Coloque aqui o restante das suas funções openModal, closeModal e selectSize.
+
+        function openModal(id) {
+            const p = db.find(x => x.id == id);
+            selectedSize = ""; 
+            
+            document.getElementById('modal-img').src = p.imgs[0];
+            
+            const thumbContainer = document.getElementById('modal-thumbnails');
+            thumbContainer.innerHTML = p.imgs.map((img, idx) => `
+                <img src="${img}" class="w-16 h-20 object-cover cursor-pointer opacity-30 hover:opacity-100 transition rounded ${idx === 0 ? 'thumb-active' : ''}" 
+                     onclick="changeImg(this, '${img}')">
+            `).join('');
+
+            document.getElementById('modal-name').innerText = p.nome;
+            document.getElementById('modal-price').innerText = `R$ ${p.preco.toFixed(2)}`;
+            document.getElementById('modal-desc').innerText = p.desc || "Peça exclusiva de alta qualidade.";
+
+            const sizeArea = document.getElementById('modal-sizes');
+            if(p.tamanhos && p.tamanhos.length > 0) {
+                sizeArea.innerHTML = p.tamanhos.map(t => `
+                    <button onclick="selectSize(this, '${t}')" class="size-btn border border-zinc-800 px-6 py-2 text-[10px] font-black uppercase hover:border-white transition">
+                        ${t}
+                    </button>
+                `).join('');
+            } else {
+                sizeArea.innerHTML = "<p class='text-zinc-600 text-[10px] uppercase font-bold'>Tamanho Único</p>";
+                selectedSize = "UN";
+            }
+
+            document.getElementById('add-to-cart-btn').onclick = () => addToCart(p);
+            document.getElementById('product-modal').classList.replace('hidden', 'flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function changeImg(el, src) {
+            document.getElementById('modal-img').src = src;
+            document.querySelectorAll('#modal-thumbnails img').forEach(i => i.classList.remove('thumb-active'));
+            el.classList.add('thumb-active');
+        }
+
+        function selectSize(btn, size) {
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedSize = size;
+        }
+
+        function addToCart(p) {
+            if (!selectedSize) { alert("SELECIONE UM TAMANHO PRIMEIRO."); return; }
+            carrinho.push({ ...p, tamanho: selectedSize, cartId: Date.now() });
+            localStorage.setItem('mutt_cart', JSON.stringify(carrinho));
+            location.href = 'carrinho.html';
+        }
+
+        function closeModal() {
+            document.getElementById('product-modal').classList.replace('flex', 'hidden');
+            document.body.style.overflow = 'auto';
+        }
+
         window.onload = renderizar;
     </script>
 </body>
