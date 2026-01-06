@@ -3,65 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MUTT | Sistema de Gestão de Inventário</title>
+    <title>MUTT | Terminal de Controle</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap');
         
-        :root {
-            --bg-deep: #0a0a0a;
-            --panel-bg: #111111;
-            --accent: #ffffff;
-            --border: rgba(255, 255, 255, 0.1);
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-deep);
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #050505; 
             color: #e4e4e7;
+            overflow-x: hidden;
         }
 
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .glass { 
+            background: rgba(15, 15, 15, 0.8); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+        }
 
-        .glass { background: var(--panel-bg); border: 1px solid var(--border); }
-        
         input, select, textarea {
-            background: #18181b !important;
+            background: #0f0f0f !important;
             border: 1px solid #27272a !important;
             color: white !important;
             transition: all 0.2s ease;
         }
 
         input:focus, textarea:focus {
-            border-color: var(--accent) !important;
-            box-shadow: 0 0 0 1px var(--accent);
+            border-color: #ffffff !important;
             outline: none;
+            box-shadow: 0 0 10px rgba(255,255,255,0.05);
         }
 
         .size-chip {
             border: 1px solid #27272a;
-            padding: 8px 12px;
+            padding: 10px 5px;
             border-radius: 8px;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 11px;
+            font-weight: 800;
+            font-size: 10px;
             text-align: center;
-            transition: 0.2s;
+            transition: 0.3s;
+            background: #0a0a0a;
+            color: #52525b;
         }
 
         .size-chip.active {
             background: white;
             color: black;
             border-color: white;
+            transform: scale(1.05);
         }
+
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
 
         .btn-primary {
             background: white;
             color: black;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.3s;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .btn-primary:hover {
@@ -70,129 +73,133 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen">
 
-    <div id="login-screen" class="fixed inset-0 z-[1000] bg-black flex items-center justify-center p-6">
-        <div class="w-full max-w-sm p-12 glass rounded-[2.5rem] shadow-2xl text-center">
-            <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" class="w-24 mx-auto mb-10 invert">
-            <h2 class="text-xs font-black uppercase tracking-[0.4em] mb-8 italic">Acesso Restrito</h2>
+    <div id="login-screen" class="fixed inset-0 z-[500] bg-black flex items-center justify-center p-6">
+        <div class="w-full max-w-md p-10 glass rounded-[2.5rem] text-center shadow-2xl">
+            <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" class="w-24 mx-auto mb-8 invert opacity-90">
+            <h2 class="text-xs font-black uppercase tracking-[0.4em] mb-10 text-zinc-500 italic">Security Check</h2>
             <div class="space-y-4">
-                <input type="text" id="user" placeholder="USUÁRIO" class="w-full p-4 rounded-xl text-xs font-bold tracking-widest">
-                <input type="password" id="pass" placeholder="SENHA" class="w-full p-4 rounded-xl text-xs font-bold tracking-widest">
-                <button onclick="fazerLogin()" class="w-full btn-primary py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] mt-4">Entrar no Terminal</button>
+                <input type="text" id="user" placeholder="USUÁRIO" class="w-full p-4 rounded-2xl text-xs font-bold text-center tracking-widest">
+                <input type="password" id="pass" placeholder="SENHA" class="w-full p-4 rounded-2xl text-xs font-bold text-center tracking-widest">
+                <button onclick="fazerLogin()" class="w-full btn-primary py-4 rounded-2xl text-[10px] mt-4">Acessar Terminal</button>
             </div>
-            <p id="login-error" class="text-red-500 text-[10px] mt-6 hidden uppercase font-bold tracking-tighter">Erro de autenticação</p>
+            <p id="login-error" class="text-red-500 text-[10px] mt-6 hidden font-bold uppercase">Credenciais Inválidas</p>
         </div>
     </div>
 
-    <div id="admin-panel" class="hidden flex flex-1">
+    <div id="admin-panel" class="hidden flex h-screen overflow-hidden">
         <aside class="w-72 bg-black border-r border-zinc-900 p-10 flex flex-col">
-            <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" class="w-24 mb-16 invert">
+            <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" class="w-20 mb-20 invert">
             <nav class="flex-1 space-y-8">
                 <div class="space-y-4">
-                    <p class="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Catálogo</p>
-                    <a href="#" class="flex items-center text-white font-bold text-xs tracking-widest"><i class="fa-solid fa-layer-group mr-4 opacity-50"></i> PRODUTOS</a>
-                    <a href="#" class="flex items-center text-zinc-500 hover:text-white transition text-xs tracking-widest"><i class="fa-solid fa-truck-fast mr-4 opacity-50"></i> PEDIDOS</a>
-                </div>
-                <div class="space-y-4">
-                    <p class="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Config</p>
-                    <a href="#" class="flex items-center text-zinc-500 hover:text-white transition text-xs tracking-widest"><i class="fa-solid fa-gear mr-4 opacity-50"></i> AJUSTES</a>
+                    <p class="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Navigation</p>
+                    <a href="#" class="flex items-center text-white font-bold text-xs tracking-widest"><i class="fa-solid fa-layer-group mr-4 text-zinc-500"></i> PRODUTOS</a>
+                    <a href="#" class="flex items-center text-zinc-500 hover:text-white transition text-xs tracking-widest"><i class="fa-solid fa-truck-fast mr-4"></i> PEDIDOS</a>
                 </div>
             </nav>
-            <button onclick="location.reload()" class="flex items-center text-red-900 hover:text-red-500 transition text-[10px] font-black uppercase tracking-widest"><i class="fa-solid fa-power-off mr-3"></i> Encerrar Sessão</button>
+            <button onclick="location.reload()" class="text-zinc-700 hover:text-red-500 text-[10px] font-black uppercase tracking-widest text-left">
+                <i class="fa-solid fa-power-off mr-2"></i> Sair do Sistema
+            </button>
         </aside>
 
         <main class="flex-1 p-16 overflow-y-auto custom-scroll">
             <header class="flex justify-between items-end mb-16">
                 <div>
-                    <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-2">Inventário</h1>
-                    <p class="text-zinc-500 text-xs font-medium uppercase tracking-[0.3em]">Gestão de Ativos • 2026</p>
+                    <h1 class="text-5xl font-black uppercase italic tracking-tighter mb-2">Inventário</h1>
+                    <p class="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.4em]">Gestão de Ativos em Tempo Real</p>
                 </div>
-                <button onclick="abrirModal()" class="btn-primary px-10 py-4 rounded-full font-black text-[10px] uppercase tracking-widest">
-                    + Adicionar Produto
+                <button onclick="abrirModal()" class="btn-primary px-10 py-4 rounded-full text-[10px]">
+                    + Novo Produto
                 </button>
             </header>
 
-            <div class="grid grid-cols-1 gap-4" id="lista-produtos-adm">
+            <div id="lista-produtos-adm" class="grid grid-cols-1 gap-6">
                 </div>
         </main>
     </div>
 
-    <div id="modal-produto" class="fixed inset-0 bg-black/95 z-[1100] hidden items-center justify-center p-6 backdrop-blur-xl">
-        <div class="w-full max-w-4xl glass rounded-[3rem] p-12 relative max-h-[90vh] overflow-y-auto custom-scroll">
-            <button onclick="fecharModal()" class="absolute top-10 right-10 text-2xl text-zinc-500 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
+    <div id="modal-produto" class="fixed inset-0 bg-black/95 z-[600] hidden items-center justify-center p-6 backdrop-blur-xl">
+        <div class="w-full max-w-5xl glass rounded-[3rem] p-12 relative max-h-[90vh] overflow-y-auto custom-scroll">
+            <button onclick="fecharModal()" class="absolute top-10 right-10 text-zinc-500 hover:text-white text-2xl"><i class="fa-solid fa-xmark"></i></button>
             
-            <h2 id="modal-title" class="text-3xl font-black uppercase italic mb-10 tracking-tighter">Configuração de Produto</h2>
+            <h2 id="modal-title" class="text-3xl font-black uppercase italic mb-10 tracking-tighter">Configurar Item</h2>
             
-            <form id="form-produto" class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+            <form id="form-produto" class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <input type="hidden" id="edit-id">
                 
                 <div class="space-y-6">
                     <div>
-                        <label class="text-[10px] font-black uppercase text-zinc-500 mb-2 block tracking-widest">Nome do Item</label>
-                        <input type="text" id="p-nome" placeholder="Ex: Jaqueta Puffer V1" class="w-full p-4 rounded-xl text-xs" required>
+                        <label class="text-[9px] font-black uppercase text-zinc-500 mb-2 block tracking-widest">Título do Ativo</label>
+                        <input type="text" id="p-nome" placeholder="Ex: Jaqueta Puffer MUTT-01" class="w-full p-4 rounded-xl text-xs font-bold" required>
                     </div>
-                    
-                    <div>
-                        <label class="text-[10px] font-black uppercase text-zinc-500 mb-2 block tracking-widest">Categoria Comercial</label>
-                        <select id="p-cat" class="w-full p-4 rounded-xl text-xs font-bold">
-                            <option value="camisetas">Camisetas</option>
-                            <option value="jaquetas">Jaquetas</option>
-                            <option value="shorts">Shorts</option>
-                            <option value="acessorios">Acessórios</option>
-                            <option value="calcas">Calças</option>
-                        </select>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[9px] font-black uppercase text-zinc-500 mb-2 block tracking-widest">Categoria</label>
+                            <select id="p-cat" class="w-full p-4 rounded-xl text-xs font-bold uppercase">
+                                <option value="camisetas">Camisetas</option>
+                                <option value="moletons">Moletons</option>
+                                <option value="calças">Calças</option>
+                                <option value="acessórios">Acessórios</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-black uppercase text-zinc-500 mb-2 block tracking-widest">Preço Final (R$)</label>
+                            <input type="number" step="0.01" id="p-preco" placeholder="0.00" class="w-full p-4 rounded-xl text-xs font-bold" required>
+                        </div>
                     </div>
 
                     <div>
-                        <label class="text-[10px] font-black uppercase text-zinc-500 mb-2 block tracking-widest">Preço de Venda (BRL)</label>
-                        <input type="number" step="0.01" id="p-preco" placeholder="000,00" class="w-full p-4 rounded-xl text-xs" required>
-                    </div>
-
-                    <div>
-                        <label class="text-[10px] font-black uppercase text-zinc-500 mb-2 block tracking-widest">Descrição Profissional</label>
-                        <textarea id="p-desc" rows="4" placeholder="Composição técnica, caimento e detalhes..." class="w-full p-4 rounded-xl text-xs"></textarea>
+                        <label class="text-[9px] font-black uppercase text-zinc-500 mb-2 block tracking-widest">Descrição detalhada</label>
+                        <textarea id="p-desc" rows="6" placeholder="Composição técnica e caimento..." class="w-full p-4 rounded-xl text-xs leading-relaxed"></textarea>
                     </div>
                 </div>
 
                 <div class="space-y-6">
                     <div>
-                        <label class="text-[10px] font-black uppercase text-zinc-500 mb-2 block tracking-widest">Galeria de Imagens (URLs)</label>
-                        <div id="container-urls" class="space-y-2 mb-3">
-                            <input type="text" class="p-img-url w-full p-4 rounded-xl text-xs" placeholder="URL da imagem principal" required>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-[9px] font-black uppercase text-zinc-500 tracking-widest">Galeria de Fotos (URLs)</label>
+                            <button type="button" onclick="addUrlField()" class="text-[8px] bg-white/5 px-2 py-1 rounded text-white hover:bg-white hover:text-black transition">+ ADICIONAR FOTO</button>
                         </div>
-                        <button type="button" onclick="addUrlField()" class="text-[9px] font-black uppercase text-zinc-400 hover:text-white transition"><i class="fa-solid fa-plus mr-1"></i> Adicionar Foto Extra</button>
+                        <div id="container-urls" class="space-y-2">
+                            <input type="text" class="p-img-url w-full p-4 rounded-xl text-[10px]" placeholder="URL da foto principal" required>
+                        </div>
                     </div>
 
                     <div>
-                        <label class="text-[10px] font-black uppercase text-zinc-500 mb-2 block tracking-widest">Grade de Tamanhos</label>
-                        <div id="p-tamanhos" class="grid grid-cols-4 gap-2">
+                        <label class="text-[9px] font-black uppercase text-zinc-500 mb-4 block tracking-widest">Grade Disponível</label>
+                        <div id="p-tamanhos" class="grid grid-cols-5 gap-2">
+                            <div class="size-chip" data-size="PP">PP</div>
                             <div class="size-chip" data-size="P">P</div>
                             <div class="size-chip" data-size="M">M</div>
                             <div class="size-chip" data-size="G">G</div>
                             <div class="size-chip" data-size="GG">GG</div>
+                            <div class="size-chip" data-size="G1">G1</div>
+                            <div class="size-chip" data-size="G2">G2</div>
+                            <div class="size-chip" data-size="G3">G3</div>
                             <div class="size-chip" data-size="38">38</div>
                             <div class="size-chip" data-size="40">40</div>
                             <div class="size-chip" data-size="42">42</div>
                             <div class="size-chip" data-size="44">44</div>
-                            <div class="size-chip" data-size="UN">ÚNICO</div>
+                            <div class="size-chip" data-size="UN">UN</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="md:col-span-2 pt-6">
-                    <button type="submit" class="w-full btn-primary py-5 rounded-2xl font-black uppercase text-[11px] tracking-[0.3em]">
-                        Sincronizar com o Website
-                    </button>
+                <div class="lg:col-span-2 pt-6">
+                    <button type="submit" class="w-full btn-primary py-5 rounded-2xl text-[11px]">Sincronizar com o Website</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        // AUTH
+        // LOGIN: admin123 / admin123
         function fazerLogin() {
-            if(document.getElementById('user').value === 'admin123' && document.getElementById('pass').value === 'admin123') {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            if(u === 'admin123' && p === 'admin123') {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('admin-panel').classList.remove('hidden');
                 renderAdmin();
@@ -201,29 +208,31 @@
             }
         }
 
-        // MANAGEMENT
         let db = JSON.parse(localStorage.getItem('mutt_products')) || [];
 
+        // Adicionar campos de URL extra
         function addUrlField(valor = "") {
             const div = document.createElement('div');
-            div.className = "flex gap-2";
+            div.className = "flex gap-2 animate-pulse";
             div.innerHTML = `
-                <input type="text" class="p-img-url w-full p-4 rounded-xl text-xs" placeholder="URL da foto extra" value="${valor}">
-                <button type="button" onclick="this.parentElement.remove()" class="text-zinc-600 hover:text-red-500 transition px-2">✕</button>
+                <input type="text" class="p-img-url w-full p-4 rounded-xl text-[10px]" placeholder="URL da foto adicional" value="${valor}">
+                <button type="button" onclick="this.parentElement.remove()" class="text-zinc-600 hover:text-red-500 px-2 transition">✕</button>
             `;
             document.getElementById('container-urls').appendChild(div);
         }
 
+        // Seleção de tamanhos (Chips)
         document.querySelectorAll('.size-chip').forEach(chip => {
             chip.onclick = () => chip.classList.toggle('active');
         });
 
+        // Listar produtos
         function renderAdmin() {
             const container = document.getElementById('lista-produtos-adm');
             container.innerHTML = db.length === 0 ? 
-                '<div class="py-20 text-center border-2 border-dashed border-zinc-900 rounded-3xl text-zinc-700 font-bold uppercase text-[10px] tracking-widest">Inventário Vazio</div>' : 
+                '<div class="py-24 text-center border-2 border-dashed border-zinc-900 rounded-[3rem] text-zinc-700 font-bold uppercase text-[10px] tracking-widest">Nenhum Ativo Registrado</div>' : 
                 db.map(p => `
-                    <div class="glass p-6 rounded-[2rem] flex items-center justify-between group hover:border-zinc-500 transition-all duration-500">
+                    <div class="glass p-6 rounded-[2.5rem] flex items-center justify-between group hover:border-zinc-500 transition-all">
                         <div class="flex items-center gap-8">
                             <div class="relative">
                                 <img src="${p.imgs[0]}" class="w-20 h-24 object-cover rounded-2xl shadow-2xl">
@@ -231,9 +240,9 @@
                             </div>
                             <div>
                                 <h3 class="font-black text-sm uppercase italic tracking-tight">${p.nome}</h3>
-                                <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-1">${p.cat} • R$ ${p.preco.toFixed(2)}</p>
+                                <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-1">R$ ${p.preco.toFixed(2)} • ${p.cat}</p>
                                 <div class="flex gap-1 mt-3">
-                                    ${p.tamanhos.map(t => `<span class="text-[8px] bg-zinc-800 text-zinc-400 px-2 py-1 rounded-md font-bold">${t}</span>`).join('')}
+                                    ${p.tamanhos.map(t => `<span class="text-[8px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded font-bold">${t}</span>`).join('')}
                                 </div>
                             </div>
                         </div>
@@ -248,18 +257,19 @@
         function abrirModal() {
             document.getElementById('form-produto').reset();
             document.getElementById('edit-id').value = '';
-            document.getElementById('container-urls').innerHTML = '<input type="text" class="p-img-url w-full p-4 rounded-xl text-xs" placeholder="URL da imagem principal" required>';
+            document.getElementById('container-urls').innerHTML = '<input type="text" class="p-img-url w-full p-4 rounded-xl text-[10px]" placeholder="URL da foto principal" required>';
             document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active'));
             document.getElementById('modal-produto').classList.replace('hidden', 'flex');
         }
 
         function fecharModal() { document.getElementById('modal-produto').classList.replace('flex', 'hidden'); }
 
+        // SALVAR DADOS
         document.getElementById('form-produto').onsubmit = function(e) {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
             const urls = Array.from(document.querySelectorAll('.p-img-url')).map(i => i.value).filter(v => v !== "");
-            const sizes = Array.from(document.querySelectorAll('.size-chip.active')).map(c => c.dataset.size);
+            const selectedSizes = Array.from(document.querySelectorAll('.size-chip.active')).map(c => c.dataset.size);
 
             const prod = {
                 id: id ? parseInt(id) : Date.now(),
@@ -268,7 +278,7 @@
                 preco: parseFloat(document.getElementById('p-preco').value),
                 imgs: urls,
                 desc: document.getElementById('p-desc').value,
-                tamanhos: sizes
+                tamanhos: selectedSizes
             };
 
             if(id) {
@@ -304,7 +314,7 @@
             p.imgs.forEach((url, i) => {
                 if(i === 0) {
                     const inp = document.createElement('input');
-                    inp.className = "p-img-url w-full p-4 rounded-xl text-xs";
+                    inp.className = "p-img-url w-full p-4 rounded-xl text-[10px]";
                     inp.value = url;
                     container.appendChild(inp);
                 } else {
