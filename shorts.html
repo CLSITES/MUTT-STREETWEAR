@@ -110,25 +110,45 @@
             document.getElementById('cart-count').innerText = carrinho.length;
         }
 
-        function openModal(id) {
-            const prod = db.find(p => p.id === id);
-            document.getElementById('modal-img').src = prod.img;
-            document.getElementById('modal-name').innerText = prod.nome;
-            document.getElementById('modal-price').innerText = `R$ ${prod.preco.toFixed(2)}`;
-            
-            document.getElementById('add-to-cart-btn').onclick = function() {
-                addAoCarrinho(prod.id);
-                closeModal();
-            };
+       function carregarProdutos() {
+    const grid = document.getElementById('destaques-grid'); // ou o ID da sua grid
+    // Filtramos pela categoria se não for a index
+    const categoriaPagina = window.location.pathname.split('/').pop().replace('.html', '');
+    const produtos = (categoriaPagina === 'index' || categoriaPagina === '') ? db : db.filter(p => p.cat === categoriaPagina);
 
-            document.getElementById('product-modal').classList.replace('hidden', 'flex');
-            document.body.style.overflow = 'hidden';
-        }
+    grid.innerHTML = produtos.map(p => `
+        <div class="group cursor-pointer" onclick="openModal(${p.id})">
+            <div class="relative overflow-hidden aspect-[3/4] mb-4">
+                <img src="${p.imgs[0]}" class="w-full h-full object-cover">
+            </div>
+            <h3 class="text-[11px] font-black uppercase italic">${p.nome}</h3>
+            <p class="text-xs font-bold text-zinc-400">R$ ${p.preco.toFixed(2)}</p>
+        </div>
+    `).join('');
+}
 
-        function closeModal() {
-            document.getElementById('product-modal').classList.replace('flex', 'hidden');
-            document.body.style.overflow = 'auto';
-        }
+function openModal(id) {
+    const prod = db.find(p => p.id === id);
+    
+    // FOTO PRINCIPAL
+    document.getElementById('modal-img').src = prod.imgs[0];
+    
+    // CRIAR MINIATURAS (Se quiser mostrar as outras fotos abaixo da principal)
+    // Se tiver uma div id="modal-thumbnails" no seu HTML:
+    // const thumbContainer = document.getElementById('modal-thumbnails');
+    // thumbContainer.innerHTML = prod.imgs.map(img => `<img src="${img}" class="w-12 h-12 object-cover" onclick="document.getElementById('modal-img').src='${img}'">`).join('');
+
+    document.getElementById('modal-name').innerText = prod.nome;
+    document.getElementById('modal-price').innerText = `R$ ${prod.preco.toFixed(2)}`;
+    document.getElementById('modal-desc').innerText = prod.desc || "Peça exclusiva Mutt Streetwear.";
+
+    // MOSTRAR SÓ OS TAMANHOS SELECIONADOS
+    // Se tiver uma div id="modal-sizes" no seu HTML:
+    // const sizeArea = document.getElementById('modal-sizes');
+    // sizeArea.innerHTML = prod.tamanhos.map(t => `<button class="border border-white p-2 text-xs">${t}</button>`).join('');
+
+    document.getElementById('product-modal').classList.replace('hidden', 'flex');
+}
 
         function addAoCarrinho(id) {
             const prod = db.find(p => p.id === id);
