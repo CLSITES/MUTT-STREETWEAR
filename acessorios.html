@@ -7,140 +7,131 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
-        .cart-sidebar { transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
-        .product-img { aspect-ratio: 1/1; object-fit: cover; border: 1px solid #1a1a1a; }
-        .badge-new { position: absolute; top: 10px; right: 10px; background: white; color: black; font-size: 9px; font-weight: 900; padding: 2px 8px; text-transform: uppercase; z-index: 10; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; overflow-x: hidden; }
+        .nav-link { transition: all 0.3s ease; }
+        .nav-link:hover { color: #fff; opacity: 0.7; }
+        .active-link { border-bottom: 2px solid white; padding-bottom: 2px; }
+        .modal-blur { backdrop-filter: blur(12px); background: rgba(0,0,0,0.9); }
+        .product-img-container { aspect-ratio: 1/1; }
     </style>
 </head>
 <body>
 
-    <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-zinc-900 px-6 py-4 flex justify-between items-center">
-        <a href="index.html" class="w-20"><img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" alt="Logo"></a>
-        <nav class="hidden md:flex space-x-8 font-bold uppercase text-[10px] tracking-widest">
-            <a href="camisetas.html" class="text-zinc-500 hover:text-white transition">Camisetas</a>
-            <a href="jaquetas.html" class="text-zinc-500 hover:text-white transition">Jaquetas</a>
-            <a href="shorts.html" class="text-zinc-500 hover:text-white transition">Shorts</a>
-            <a href="acessorios.html" class="text-white border-b-2 border-white pb-1">Acessórios</a>
-            <a href="calcas.html" class="text-zinc-500 hover:text-white transition">Calças</a>
-        </nav>
-        <div class="flex items-center space-x-5">
-            <button onclick="toggleCart()" class="relative hover:scale-110 transition">
-                <i class="fa-solid fa-bag-shopping text-xl"></i>
-                <span id="cart-count" class="absolute -bottom-1 -right-2 bg-white text-black text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-black">0</span>
-            </button>
+    <header class="sticky top-0 z-50 bg-black border-b border-zinc-900">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="w-24 hover:scale-105 transition">
+                <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" alt="MUTT Home" class="w-full">
+            </a>
+
+            <nav class="hidden md:flex space-x-8 font-bold uppercase text-[11px] tracking-widest">
+                <a href="camisetas.html" class="nav-link">Camisetas</a>
+                <a href="jaquetas.html" class="nav-link">Jaquetas</a>
+                <a href="shorts.html" class="nav-link">Shorts</a>
+                <a href="acessorios.html" class="nav-link active-link">Acessórios</a>
+                <a href="calcas.html" class="nav-link">Calças</a>
+            </nav>
+
+            <div class="flex items-center">
+                <button onclick="toggleCart()" class="relative p-2">
+                    <i class="fa-solid fa-bag-shopping text-xl"></i>
+                    <span id="cart-count" class="absolute top-0 right-0 bg-white text-black text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-black">0</span>
+                </button>
+            </div>
         </div>
     </header>
 
     <main class="container mx-auto px-6 py-12">
-        <div class="mb-12 text-center">
-            <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-2">Acessórios</h1>
-            <div class="h-1 w-20 bg-white mx-auto"></div>
+        <div class="mb-12">
+            <h1 class="text-5xl font-black italic uppercase tracking-tighter">Acessórios</h1>
+            <p class="text-zinc-500 text-sm mt-2 font-medium uppercase tracking-widest">Final touches for the fit</p>
         </div>
 
-        <div id="product-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-4 gap-8">
             </div>
     </main>
 
-    <div id="cart-sidebar" class="fixed top-0 right-0 w-full md:w-[400px] h-full bg-zinc-950 z-[100] translate-x-full cart-sidebar border-l border-zinc-800 shadow-2xl">
-        <div class="p-8 h-full flex flex-col">
-            <div class="flex justify-between items-center mb-10">
-                <h2 class="text-2xl font-black uppercase italic">Bag</h2>
-                <button onclick="toggleCart()" class="text-4xl font-light hover:rotate-90 transition duration-300">&times;</button>
+    <div id="product-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 modal-blur">
+        <div class="bg-zinc-950 border border-zinc-800 w-full max-w-4xl rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-2xl relative">
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-3xl z-10 hover:text-white transition">&times;</button>
+            
+            <div class="w-full md:w-1/2 bg-zinc-900">
+                <img id="modal-img" src="" class="w-full h-full object-cover aspect-square">
             </div>
             
-            <div id="cart-items" class="flex-1 overflow-y-auto space-y-6 scrollbar-hide">
+            <div class="w-full md:w-1/2 p-10 flex flex-col justify-center">
+                <span class="text-white bg-zinc-800 px-3 py-1 text-[9px] font-black uppercase tracking-widest w-fit mb-4">Limited Edition</span>
+                <h2 id="modal-name" class="text-4xl font-black uppercase italic mb-2 tracking-tighter"></h2>
+                <p id="modal-price" class="text-2xl font-bold text-white mb-8"></p>
+                
+                <div class="mb-8 border-t border-zinc-900 pt-6">
+                    <h3 class="text-xs font-black uppercase text-zinc-500 mb-3 tracking-widest">Detalhes do Produto</h3>
+                    <p id="modal-desc" class="text-sm text-zinc-400 leading-relaxed italic">
+                        Desenvolvido com materiais de alta durabilidade. Nossos acessórios são pensados para complementar o look streetwear com funcionalidade e exclusividade. Design minimalista com assinatura MUTT.
+                    </p>
                 </div>
 
-            <div class="border-t border-zinc-800 pt-8 mt-4">
-                <div class="flex justify-between font-bold mb-6 text-2xl tracking-tighter">
-                    <span>TOTAL</span>
-                    <span id="cart-total">R$ 0,00</span>
-                </div>
-                <button class="w-full bg-white text-black py-5 font-black uppercase text-xs tracking-widest hover:bg-zinc-300 transition-all active:scale-95">
-                    Finalizar Compra
+                <button id="add-to-cart-btn" class="w-full bg-white text-black py-5 font-black uppercase text-xs tracking-[0.2em] hover:invert transition-all duration-300">
+                    ADICIONAR À BAG
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Dados Iniciais de Acessórios
-        const acessoriosPadrao = [
-            { id: 301, nome: "Boné Mutt "Five Panel" Black", preco: 89.90, img: "https://images.unsplash.com/photo-1588850567047-380d94658bb7?q=80&w=1964", cat: "acessorios" },
-            { id: 302, nome: "Shoulder Bag Techwear", preco: 119.00, img: "https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?q=80&w=1886", cat: "acessorios" },
-            { id: 303, nome: "Corrente Mutt Cuban Link", preco: 75.00, img: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=1888", cat: "acessorios" }
-        ];
-
-        let db = JSON.parse(localStorage.getItem('mutt_products')) || acessoriosPadrao;
+        let db = JSON.parse(localStorage.getItem('mutt_products')) || [];
         let carrinho = JSON.parse(localStorage.getItem('mutt_cart')) || [];
 
-        function renderizar() {
+        function renderizarProdutos() {
             const grid = document.getElementById('product-grid');
+            // Filtra pela categoria 'acessorios'
             const itens = db.filter(p => p.cat === 'acessorios');
             
-            grid.innerHTML = itens.map(p => `
-                <div class="group relative">
-                    <div class="relative overflow-hidden mb-4">
-                        <span class="badge-new">Drop 01</span>
-                        <img src="${p.img}" class="product-img w-full transition duration-700 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <button onclick="addAoCarrinho(${p.id})" class="bg-white text-black px-6 py-3 font-black text-[10px] uppercase tracking-tighter transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                                Adicionar +
-                            </button>
+            if(itens.length === 0) {
+                grid.innerHTML = '<p class="text-zinc-600 col-span-full uppercase font-black py-20 text-center tracking-widest">Aguardando novo drop de acessórios.</p>';
+            } else {
+                grid.innerHTML = itens.map(p => `
+                    <div class="group cursor-pointer" onclick="openModal(${p.id})">
+                        <div class="relative overflow-hidden bg-zinc-900 product-img-container mb-4 border border-zinc-800">
+                            <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
                         </div>
+                        <h3 class="text-[11px] font-black uppercase tracking-widest mb-1 text-zinc-300">${p.nome}</h3>
+                        <p class="text-white text-xs font-bold tracking-tighter">R$ ${p.preco.toFixed(2)}</p>
                     </div>
-                    <div class="text-center">
-                        <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] mb-1 text-zinc-300">${p.nome}</h3>
-                        <p class="text-white font-black text-sm uppercase italic">R$ ${p.preco.toFixed(2)}</p>
-                    </div>
-                </div>
-            `).join('');
-            atualizarCarrinhoVisual();
+                `).join('');
+            }
+            document.getElementById('cart-count').innerText = carrinho.length;
         }
 
-        function toggleCart() {
-            document.getElementById('cart-sidebar').classList.toggle('translate-x-full');
+        function openModal(id) {
+            const prod = db.find(p => p.id === id);
+            document.getElementById('modal-img').src = prod.img;
+            document.getElementById('modal-name').innerText = prod.nome;
+            document.getElementById('modal-price').innerText = `R$ ${prod.preco.toFixed(2)}`;
+            
+            document.getElementById('add-to-cart-btn').onclick = function() {
+                addAoCarrinho(prod.id);
+                closeModal();
+            };
+
+            document.getElementById('product-modal').classList.replace('hidden', 'flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('product-modal').classList.replace('flex', 'hidden');
+            document.body.style.overflow = 'auto';
         }
 
         function addAoCarrinho(id) {
             const prod = db.find(p => p.id === id);
             carrinho.push(prod);
             localStorage.setItem('mutt_cart', JSON.stringify(carrinho));
-            atualizarCarrinhoVisual();
-            toggleCart();
-        }
-
-        function atualizarCarrinhoVisual() {
             document.getElementById('cart-count').innerText = carrinho.length;
-            const itensDiv = document.getElementById('cart-items');
-            
-            itensDiv.innerHTML = carrinho.length === 0 
-                ? '<p class="text-zinc-700 text-center py-20 font-bold uppercase text-[10px] tracking-[0.3em]">Vazio</p>'
-                : carrinho.map((item, index) => `
-                    <div class="flex gap-5 items-center group/item">
-                        <div class="w-20 h-20 bg-zinc-900 border border-zinc-800">
-                            <img src="${item.img}" class="w-full h-full object-cover">
-                        </div>
-                        <div class="flex-1">
-                            <p class="font-black uppercase text-[10px] tracking-tighter leading-none mb-2">${item.nome}</p>
-                            <p class="text-zinc-500 text-[11px]">R$ ${item.preco.toFixed(2)}</p>
-                        </div>
-                        <button onclick="remover(${index})" class="text-zinc-800 hover:text-white transition"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
-                `).join('');
-            
-            const total = carrinho.reduce((sum, item) => sum + item.preco, 0);
-            document.getElementById('cart-total').innerText = `R$ ${total.toFixed(2)}`;
+            alert("Acessório adicionado!");
         }
 
-        function remover(index) {
-            carrinho.splice(index, 1);
-            localStorage.setItem('mutt_cart', JSON.stringify(carrinho));
-            atualizarCarrinhoVisual();
-        }
-
-        renderizar();
+        window.onload = renderizarProdutos;
     </script>
 </body>
 </html>
