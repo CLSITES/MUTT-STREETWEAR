@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shorts | MUTT STREETWEAR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
+        .cart-sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-img { aspect-ratio: 3/4; object-fit: cover; }
+    </style>
+</head>
+<body>
+
+    <header class="sticky top-0 z-50 bg-black border-b border-zinc-800 px-6 py-4 flex justify-between items-center">
+        <a href="index.html" class="w-24"><img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" alt="Logo"></a>
+        <nav class="hidden md:flex space-x-6 font-bold uppercase text-xs">
+            <a href="camisetas.html" class="text-zinc-500 hover:text-white">Camisetas</a>
+            <a href="jaquetas.html" class="text-zinc-500 hover:text-white">Jaquetas</a>
+            <a href="shorts.html" class="text-white border-b border-white">Shorts</a>
+            <a href="#" class="text-zinc-500 hover:text-white">Calças</a>
+        </nav>
+        <div class="flex items-center space-x-4">
+            <button onclick="toggleCart()" class="relative">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-white text-black text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">0</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="p-8">
+        <div class="mb-10">
+            <h1 class="text-4xl font-black italic uppercase italic">Shorts</h1>
+            <p class="text-zinc-500 text-sm tracking-widest">MESH & NYLON COLLECTION</p>
+        </div>
+
+        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            </div>
+    </main>
+
+    <div id="cart-sidebar" class="fixed top-0 right-0 w-full md:w-96 h-full bg-zinc-950 z-[100] translate-x-full cart-sidebar border-l border-zinc-800 shadow-2xl">
+        <div class="p-6 h-full flex flex-col">
+            <div class="flex justify-between items-center mb-8 border-b border-zinc-800 pb-4">
+                <h2 class="text-xl font-black uppercase">Carrinho</h2>
+                <button onclick="toggleCart()" class="text-3xl hover:text-zinc-500 transition">&times;</button>
+            </div>
+            
+            <div id="cart-items" class="flex-1 overflow-y-auto space-y-6">
+                </div>
+
+            <div class="border-t border-zinc-800 pt-6 mt-4">
+                <div class="flex justify-between font-bold mb-6 text-xl">
+                    <span>Subtotal</span>
+                    <span id="cart-total">R$ 0,00</span>
+                </div>
+                <button class="w-full bg-white text-black py-5 font-black uppercase text-sm tracking-tighter hover:invert transition duration-300">
+                    Finalizar Pedido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados Iniciais de Shorts
+        const shortsPadrao = [
+            { id: 201, nome: "Mesh Shorts Basketball Black", preco: 129.90, img: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?q=80&w=2070", cat: "shorts" },
+            { id: 202, nome: "Nylon Cargo Shorts Khaki", preco: 159.00, img: "https://images.unsplash.com/photo-1617114919297-3c8ddb01f599?q=80&w=1887", cat: "shorts" }
+        ];
+
+        // Sincronização com o Sistema Global do Site
+        let db = JSON.parse(localStorage.getItem('mutt_products')) || shortsPadrao;
+        let carrinho = JSON.parse(localStorage.getItem('mutt_cart')) || [];
+
+        function renderizar() {
+            const grid = document.getElementById('product-grid');
+            // Filtra apenas o que for 'shorts' no banco de dados
+            const shorts = db.filter(p => p.cat === 'shorts');
+            
+            grid.innerHTML = shorts.map(p => `
+                <div class="group">
+                    <div class="relative overflow-hidden bg-zinc-900 mb-4">
+                        <img src="${p.img}" class="product-img w-full grayscale group-hover:grayscale-0 transition duration-700 group-hover:scale-105">
+                        <button onclick="addAoCarrinho(${p.id})" class="absolute bottom-0 w-full bg-white text-black py-4 font-black text-xs opacity-0 group-hover:opacity-100 transition-all transform translate-y-4 group-hover:translate-y-0">ADICIONAR AO CARRINHO</button>
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-[11px] font-bold uppercase tracking-widest max-w-[70%]">${p.nome}</h3>
+                        <p class="text-zinc-400 text-xs">R$ ${p.preco.toFixed(2)}</p>
+                    </div>
+                </div>
+            `).join('');
+            atualizarCarrinhoVisual();
+        }
+
+        function toggleCart() {
+            document.getElementById('cart-sidebar').classList.toggle('translate-x-full');
+        }
+
+        function addAoCarrinho(id) {
+            const prod = db.find(p => p.id === id);
+            carrinho.push(prod);
+            localStorage.setItem('mutt_cart', JSON.stringify(carrinho));
+            atualizarCarrinhoVisual();
+            toggleCart();
+        }
+
+        function atualizarCarrinhoVisual() {
+            document.getElementById('cart-count').innerText = carrinho.length;
+            const itensDiv = document.getElementById('cart-items');
+            
+            if(carrinho.length === 0) {
+                itensDiv.innerHTML = '<p class="text-zinc-600 text-center mt-10 uppercase text-xs font-bold">Seu carrinho está vazio</p>';
+            } else {
+                itensDiv.innerHTML = carrinho.map((item, index) => `
+                    <div class="flex gap-4 items-center animate-fade-in">
+                        <img src="${item.img}" class="w-20 h-24 object-cover">
+                        <div class="flex-1">
+                            <p class="font-black uppercase text-[10px] leading-tight mb-1">${item.nome}</p>
+                            <p class="text-zinc-400 text-xs italic">R$ ${item.preco.toFixed(2)}</p>
+                        </div>
+                        <button onclick="remover(${index})" class="text-zinc-700 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                `).join('');
+            }
+            
+            const total = carrinho.reduce((sum, item) => sum + item.preco, 0);
+            document.getElementById('cart-total').innerText = `R$ ${total.toFixed(2)}`;
+        }
+
+        function remover(index) {
+            carrinho.splice(index, 1);
+            localStorage.setItem('mutt_cart', JSON.stringify(carrinho));
+            atualizarCarrinhoVisual();
+        }
+
+        renderizar();
+    </script>
+</body>
+</html>
