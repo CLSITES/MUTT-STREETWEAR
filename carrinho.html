@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAG | MUTT STREETWEAR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
+        .glass { background: #0a0a0a; border: 1px solid #1a1a1a; }
+        input { background: #111 !important; border: 1px solid #222 !important; color: white !important; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <header class="border-b border-zinc-900 bg-black sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="w-20"><img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" class="invert"></a>
+            <h1 class="text-[10px] font-black uppercase tracking-[0.4em]">Sua Sacola</h1>
+            <a href="index.html" class="text-xs font-bold uppercase hover:text-zinc-400">Voltar</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            
+            <div class="lg:col-span-2 space-y-6">
+                <div id="itens-carrinho" class="space-y-4">
+                    </div>
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="glass p-8 rounded-3xl sticky top-24">
+                    <h2 class="text-xl font-black uppercase italic mb-6">Resumo</h2>
+                    
+                    <div class="space-y-4 mb-8 text-sm border-b border-zinc-900 pb-6">
+                        <div class="flex justify-between">
+                            <span class="text-zinc-500 font-bold uppercase text-[10px]">Subtotal</span>
+                            <span id="subtotal">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-zinc-500 font-bold uppercase text-[10px]">Frete</span>
+                            <span id="frete" class="text-green-500 font-bold uppercase text-[10px]">Grátis</span>
+                        </div>
+                        <div class="flex justify-between text-lg font-black italic">
+                            <span>TOTAL</span>
+                            <span id="total">R$ 0,00</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 mb-8">
+                        <h3 class="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Endereço de Entrega</h3>
+                        <input type="text" id="nome-cliente" placeholder="NOME COMPLETO" class="w-full p-4 rounded-xl text-[10px] font-bold">
+                        <input type="text" id="endereco" placeholder="RUA, NÚMERO, BAIRRO" class="w-full p-4 rounded-xl text-[10px] font-bold">
+                        <input type="text" id="cidade" placeholder="CIDADE/UF" class="w-full p-4 rounded-xl text-[10px] font-bold">
+                    </div>
+
+                    <button onclick="finalizarPedido()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-zinc-200 transition">
+                        Finalizar via WhatsApp
+                    </button>
+                    <p class="text-[9px] text-zinc-600 text-center mt-4 font-bold uppercase">Pagamento via PIX tratado no chat</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let carrinho = JSON.parse(localStorage.getItem('mutt_cart')) || [];
+
+        function renderCarrinho() {
+            const container = document.getElementById('itens-carrinho');
+            if (carrinho.length === 0) {
+                container.innerHTML = `
+                    <div class="py-20 text-center border-2 border-dashed border-zinc-900 rounded-3xl">
+                        <p class="text-zinc-500 font-black uppercase text-xs tracking-widest">Sua bag está vazia</p>
+                        <a href="index.html" class="inline-block mt-4 text-[10px] font-black border-b border-white pb-1">VOLTAR PARA A LOJA</a>
+                    </div>`;
+                atualizarPrecos();
+                return;
+            }
+
+            container.innerHTML = carrinho.map((item, index) => `
+                <div class="glass p-6 rounded-[2rem] flex items-center justify-between">
+                    <div class="flex items-center gap-6">
+                        <img src="${item.imgs[0]}" class="w-20 h-24 object-cover rounded-xl shadow-2xl">
+                        <div>
+                            <h3 class="font-black text-sm uppercase italic tracking-tighter">${item.nome}</h3>
+                            <p class="text-[10px] text-zinc-500 font-bold uppercase mt-1">TAMANHO: ${item.tamanho || 'UN'}</p>
+                            <p class="text-xs font-bold mt-2">R$ ${item.preco.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <button onclick="removerItem(${index})" class="text-zinc-700 hover:text-red-500 transition px-4">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            `).join('');
+            
+            atualizarPrecos();
+        }
+
+        function atualizarPrecos() {
+            const sub = carrinho.reduce((acc, item) => acc + item.preco, 0);
+            document.getElementById('subtotal').innerText = `R$ ${sub.toFixed(2)}`;
+            document.getElementById('total').innerText = `R$ ${sub.toFixed(2)}`;
+        }
+
+        function removerItem(index) {
+            carrinho.splice(index, 1);
+            localStorage.setItem('mutt_cart', JSON.stringify(carrinho));
+            renderCarrinho();
+        }
+
+        function finalizarPedido() {
+            const nome = document.getElementById('nome-cliente').value;
+            const endereco = document.getElementById('endereco').value;
+            const cidade = document.getElementById('cidade').value;
+
+            if(!nome || !endereco || !cidade || carrinho.length === 0) {
+                alert("Preencha todos os dados e adicione itens na bag!");
+                return;
+            }
+
+            // FORMATAÇÃO DA MENSAGEM WHATSAPP
+            let numeroWhats = "5511999999999"; // COLOQUE SEU NÚMERO AQUI (DDD + NÚMERO)
+            let texto = `*NOVO PEDIDO - MUTT STREETWEAR*%0A%0A`;
+            texto += `*Cliente:* ${nome}%0A`;
+            texto += `*Endereço:* ${endereco}, ${cidade}%0A%0A`;
+            texto += `*PRODUTOS:*%0A`;
+            
+            carrinho.forEach(item => {
+                texto += `- ${item.nome} (Tam: ${item.tamanho}) - R$ ${item.preco.toFixed(2)}%0A`;
+            });
+
+            const total = carrinho.reduce((acc, item) => acc + item.preco, 0);
+            texto += `%0A*TOTAL: R$ ${total.toFixed(2)}*`;
+
+            window.open(`https://wa.me/${numeroWhats}?text=${texto}`, '_blank');
+        }
+
+        window.onload = renderCarrinho;
+    </script>
+</body>
+</html>
