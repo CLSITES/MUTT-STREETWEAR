@@ -9,44 +9,33 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; overflow-x: hidden; }
-        
-        .modal-blur { backdrop-filter: blur(20px); background: rgba(0,0,0,0.95); }
+        .modal-blur { backdrop-filter: blur(15px); background: rgba(0,0,0,0.95); }
         .size-btn.active { background: white; color: black; border-color: white; }
+        .thumb-active { border: 2px solid white; opacity: 1 !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        .snap-x { scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-        .snap-center { scroll-snap-align: center; }
-
-        #mobile-menu { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .menu-open { opacity: 1 !important; visibility: visible !important; transform: translateX(0) !important; }
-
-        /* Ajuste do título para não dominar a tela no celular */
-        .hero-title {
-            font-size: clamp(2rem, 8vw, 7rem);
-            line-height: 1;
-            letter-spacing: -0.05em;
-        }
-
-        /* Formato retangular das janelas de produtos mobile */
-        .product-card-img {
-            aspect-ratio: 3/4;
-            object-fit: cover;
-        }
+        /* Menu Mobile Animado */
+        #mobile-menu { transition: transform 0.3s ease-in-out; }
+        .menu-open { transform: translateX(0); }
+        .menu-closed { transform: translateX(-100%); }
     </style>
 </head>
 <body>
 
+    
+
     <header class="sticky top-0 z-[60] bg-black border-b border-zinc-900">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <button onclick="toggleMenu()" class="md:hidden text-white text-lg">
+        <div class="container mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
+            
+            <button onclick="toggleMenu()" class="md:hidden text-white text-xl w-10">
                 <i class="fa-solid fa-bars-staggered"></i>
             </button>
 
-            <a href="index.html" class="w-14 md:w-20">
-                <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" alt="MUTT" class="w-full">
+            <a href="index.html" class="w-20 md:w-24 flex justify-center">
+                <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" alt="MUTT Logo" class="w-full">
             </a>
 
-            <nav class="hidden md:flex space-x-8 font-bold uppercase text-[10px] tracking-[0.3em] text-zinc-400">
+            <nav class="hidden md:flex space-x-8 font-bold uppercase text-[11px] tracking-widest text-zinc-400">
                 <a href="camisetas.html" class="hover:text-white transition">Camisetas</a>
                 <a href="jaquetas.html" class="hover:text-white transition">Jaquetas</a>
                 <a href="shorts.html" class="hover:text-white transition">Shorts</a>
@@ -54,8 +43,8 @@
                 <a href="calcas.html" class="hover:text-white transition">Calças</a>
             </nav>
 
-            <div class="flex items-center justify-end">
-                <a href="carrinho.html" class="relative">
+            <div class="flex items-center space-x-5 w-10 md:w-auto justify-end">
+                <a href="carrinho.html" class="relative cursor-pointer">
                     <i class="fa-solid fa-bag-shopping text-xl"></i>
                     <span id="cart-count" class="absolute -top-2 -right-2 bg-white text-black text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-black">0</span>
                 </a>
@@ -63,69 +52,80 @@
         </div>
     </header>
 
-    <div id="mobile-menu" class="fixed inset-0 z-[70] bg-black opacity-0 visibility-hidden -translateX-full md:hidden px-8 py-20 transition-all">
-        <button onclick="toggleMenu()" class="absolute top-6 left-6 text-xl font-bold uppercase tracking-widest">&times; fechar</button>
-        <nav class="flex flex-col space-y-6 text-3xl font-black uppercase italic italic tracking-tighter">
-            <a href="index.html">Início</a>
-            <a href="camisetas.html" class="text-zinc-600">Camisetas</a>
-            <a href="jaquetas.html" class="text-zinc-600">Jaquetas</a>
-            <a href="shorts.html" class="text-zinc-600">Shorts</a>
-            <a href="acessorios.html" class="text-zinc-600">Acessórios</a>
-            <a href="calcas.html" class="text-zinc-600">Calças</a>
-        </nav>
+    <div id="mobile-menu" class="fixed inset-0 z-[70] bg-black menu-closed md:hidden">
+        <div class="p-6 flex flex-col h-full">
+            <button onclick="toggleMenu()" class="self-end text-3xl mb-12">&times;</button>
+            <nav class="flex flex-col space-y-8 text-2xl font-black uppercase italic tracking-tighter">
+                <a href="camisetas.html" onclick="toggleMenu()">Camisetas</a>
+                <a href="jaquetas.html" onclick="toggleMenu()">Jaquetas</a>
+                <a href="shorts.html" onclick="toggleMenu()">Shorts</a>
+                <a href="acessorios.html" onclick="toggleMenu()">Acessórios</a>
+                <a href="calcas.html" onclick="toggleMenu()">Calças</a>
+            </nav>
+        </div>
     </div>
 
-    <section class="relative h-[60vh] md:h-[80vh] flex items-center justify-center bg-zinc-950 overflow-hidden">
-        <img src="https://i.postimg.cc/vH261T71/Gemini-Generated-Image-fvu3o9fvu3o9fvu3.png" class="absolute inset-0 w-full h-full object-cover opacity-30">
-        <div class="relative text-center px-6">
-            <p class="text-white text-[7px] font-black tracking-[0.6em] mb-2 uppercase opacity-50">Estilo Streetwear</p>
-            <h1 class="hero-title font-black italic uppercase italic">MUTT STREETWEAR</h1>
-            <a href="#lancamentos" class="mt-6 border border-white text-white px-6 py-2 text-[9px] font-bold uppercase tracking-widest hover:bg-white hover:text-black transition inline-block">Ver Drop</a>
+    <section class="relative h-[70vh] md:h-[85vh] flex items-center justify-center bg-zinc-900 overflow-hidden">
+        <img src="https://i.postimg.cc/vH261T71/Gemini-Generated-Image-fvu3o9fvu3o9fvu3.png" class="absolute inset-0 w-full h-full object-cover opacity-50">
+        <div class="relative text-center px-4">
+            <p class="text-white text-[9px] md:text-[10px] font-black tracking-[0.4em] mb-4 uppercase opacity-70">NOVA ERA STREETWEAR</p>
+            <h1 class="text-6xl md:text-9xl font-black italic tracking-tighter mb-8 leading-none">MUTT STREETWEAR</h1>
+            <a href="#lancamentos" class="bg-white text-black px-10 py-4 font-black uppercase text-[10px] tracking-widest hover:bg-zinc-200 transition inline-block">Ver Produtos</a>
         </div>
     </section>
 
-    <main id="lancamentos" class="container mx-auto px-4 py-10">
-        <div class="flex justify-between items-center mb-8 border-b border-zinc-900 pb-4">
-            <h2 class="text-xl font-black italic uppercase tracking-tighter italic">Lançamentos</h2>
-            <span class="text-zinc-700 text-[8px] font-black uppercase tracking-widest">2026 ©</span>
+    <main id="lancamentos" class="container mx-auto px-4 md:px-6 py-12 md:py-20">
+        <div class="flex justify-between items-end mb-10 border-b border-zinc-900 pb-6">
+            <h2 class="text-3xl md:text-4xl font-black italic uppercase tracking-tighter">LOJA</h2>
+            <p class="text-zinc-500 text-[9px] font-bold uppercase tracking-widest hidden md:block">2026</p>
         </div>
         
-        <div id="destaques-grid" class="grid grid-cols-2 md:grid-cols-4 gap-x-2 md:gap-x-6 gap-y-8"></div>
+        <div id="destaques-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-10">
+            </div>
     </main>
 
-    <div id="product-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-0 md:p-4 modal-blur overflow-y-auto">
-        <div class="bg-black border-zinc-900 w-full max-w-5xl md:rounded-2xl overflow-hidden relative min-h-screen md:min-h-0">
-            <button onclick="closeModal()" class="fixed top-4 right-4 text-2xl z-[110] bg-white/10 w-10 h-10 rounded-full flex items-center justify-center">&times;</button>
+    <div id="product-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-2 md:p-4 modal-blur overflow-y-auto">
+        <div class="bg-zinc-950 border border-zinc-900 w-full max-w-5xl rounded-2xl md:rounded-3xl overflow-hidden flex flex-col md:row relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-3xl z-50 text-white/50 hover:text-white">&times;</button>
             
             <div class="flex flex-col md:flex-row w-full">
-                <div class="w-full md:w-1/2 relative bg-zinc-900">
-                    <div id="modal-slider" class="flex overflow-x-auto snap-x no-scrollbar aspect-[3/4]"></div>
-                    <p class="absolute bottom-4 w-full text-center text-[7px] uppercase tracking-widest opacity-40 md:hidden italic">Deslize para o lado</p>
+                <div class="w-full md:w-1/2 bg-zinc-900">
+                    <div class="aspect-[3/4] overflow-hidden">
+                        <img id="modal-img" src="" class="w-full h-full object-cover">
+                    </div>
+                    <div id="modal-thumbnails" class="flex gap-2 p-4 bg-black overflow-x-auto no-scrollbar"></div>
                 </div>
 
                 <div class="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center">
-                    <h2 id="modal-name" class="text-3xl md:text-4xl font-black uppercase italic tracking-tighter leading-none mb-2 italic"></h2>
-                    <div class="flex items-center gap-3 mb-6">
-                        <span id="modal-price" class="text-xl font-bold"></span>
-                        <span id="modal-discount" class="text-xs text-zinc-700 line-through"></span>
+                    <h2 id="modal-name" class="text-3xl md:text-4xl font-black uppercase italic mb-2 tracking-tighter"></h2>
+                    <div class="flex items-center gap-4 mb-6">
+                        <span id="modal-price" class="text-xl md:text-2xl font-bold"></span>
+                        <span id="modal-discount" class="text-sm text-zinc-600 line-through"></span>
                     </div>
                     
                     <div class="mb-6">
-                        <h3 class="text-[8px] font-black uppercase text-zinc-600 mb-3 tracking-widest">Tamanhos Disponíveis</h3>
+                        <h3 class="text-[10px] font-black uppercase text-zinc-500 mb-2 tracking-widest italic">Descrição</h3>
+                        <p id="modal-desc" class="text-sm text-zinc-400 leading-relaxed"></p>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-[10px] font-black uppercase text-zinc-500 mb-3 tracking-widest italic">Tamanho</h3>
                         <div id="modal-sizes" class="flex flex-wrap gap-2"></div>
                     </div>
 
-                    <button id="add-to-cart-btn" class="w-full bg-white text-black py-4 font-black uppercase text-[10px] tracking-widest hover:bg-zinc-200 transition">
-                        Comprar agora
+                    <button id="add-to-cart-btn" class="w-full bg-white text-black py-4 md:py-5 font-black uppercase text-[11px] tracking-[0.2em] hover:bg-zinc-300 transition shadow-2xl">
+                        Adicionar ao Carrinho
                     </button>
-                    <p id="modal-desc" class="text-[10px] text-zinc-500 mt-6 leading-relaxed border-t border-zinc-900 pt-4 uppercase tracking-tighter"></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer class="bg-black border-t border-zinc-900 py-10 text-center">
-        <p class="text-zinc-800 text-[8px] uppercase tracking-[0.4em]">Mutt Streetwear — Todos os direitos reservados.</p>
+    <footer class="bg-black border-t border-zinc-900 py-12 md:py-16">
+        <div class="container mx-auto px-6 text-center">
+            <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" class="w-16 mx-auto mb-6 opacity-20 grayscale invert">
+            <p class="text-zinc-600 text-[9px] md:text-[10px] uppercase tracking-[0.4em]">&copy; 2026 MUTT STREETWEAR.</p>
+        </div>
     </footer>
 
     <script type="module">
@@ -149,53 +149,62 @@
         let selectedSize = "";
         let carrinho = JSON.parse(localStorage.getItem('mutt_cart')) || [];
 
+        // Menu Mobile Toggle
         window.toggleMenu = () => {
             const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('menu-closed');
             menu.classList.toggle('menu-open');
         };
 
+        // Buscar Produtos
         onValue(ref(db, 'produtos'), (snapshot) => {
             const data = snapshot.val();
             const grid = document.getElementById('destaques-grid');
             document.getElementById('cart-count').innerText = carrinho.length;
 
-            if (!data) return;
+            if (!data) {
+                grid.innerHTML = "<p class='col-span-full text-center text-zinc-800 py-20 uppercase font-black text-xs'>Em breve.</p>";
+                return;
+            }
 
             globalProducts = Object.values(data);
             grid.innerHTML = globalProducts.map(p => `
-                <div class="cursor-pointer group bg-zinc-950 p-1" onclick="openProductModal('${p.id}')">
-                    <div class="overflow-hidden bg-zinc-900 mb-2">
-                        <img src="${p.imgs[0]}" class="product-card-img w-full group-hover:scale-105 transition duration-500">
+                <div class="group cursor-pointer" onclick="openProductModal('${p.id}')">
+                    <div class="relative aspect-[3/4] bg-zinc-900 mb-3 overflow-hidden border border-zinc-900">
+                        <img src="${p.imgs[0]}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                        ${p.precoAntigo ? `<span class="absolute top-2 left-2 bg-white text-black text-[8px] font-black px-1.5 py-0.5 uppercase">Sale</span>` : ''}
                     </div>
-                    <h3 class="text-[9px] font-black uppercase tracking-tight text-white truncate px-1">${p.nome}</h3>
-                    <p class="text-zinc-400 text-[10px] px-1 italic">R$ ${p.preco.toFixed(2)}</p>
+                    <h3 class="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-zinc-300 mb-1 truncate">${p.nome}</h3>
+                    <div class="flex gap-2 items-center">
+                        <span class="text-white text-xs font-bold">R$ ${p.preco.toFixed(2)}</span>
+                    </div>
                 </div>
             `).join('');
         });
 
+        // Funções Modal
         window.openProductModal = (id) => {
             const p = globalProducts.find(x => x.id == id);
             if(!p) return;
             selectedSize = "";
-
-            const slider = document.getElementById('modal-slider');
-            slider.innerHTML = p.imgs.map((img, idx) => `
-                <img src="${img}" id="slide-${idx}" class="w-full h-full object-cover flex-shrink-0 snap-center">
-            `).join('');
-            slider.scrollLeft = 0;
-
+            document.getElementById('modal-img').src = p.imgs[0];
             document.getElementById('modal-name').innerText = p.nome;
             document.getElementById('modal-price').innerText = `R$ ${p.preco.toFixed(2)}`;
             document.getElementById('modal-discount').innerText = p.precoAntigo ? `R$ ${p.precoAntigo.toFixed(2)}` : '';
-            document.getElementById('modal-desc').innerText = p.desc || "Produto exclusivo MUTT.";
+            document.getElementById('modal-desc').innerText = p.desc || "Peça exclusiva Mutt.";
             
+            const thumbContainer = document.getElementById('modal-thumbnails');
+            thumbContainer.innerHTML = p.imgs.map((img, idx) => `
+                <img src="${img}" class="w-12 h-16 object-cover cursor-pointer opacity-30 transition ${idx === 0 ? 'thumb-active' : ''}" onclick="changeModalImg(this, '${img}')">
+            `).join('');
+
             const sizeArea = document.getElementById('modal-sizes');
             sizeArea.innerHTML = (p.tamanhos || []).map(t => `
-                <button onclick="selectModalSize(this, '${t}')" class="size-btn border border-zinc-900 flex-1 min-w-[45px] py-2 text-[10px] font-bold transition uppercase">${t}</button>
+                <button onclick="selectModalSize(this, '${t}')" class="size-btn border border-zinc-800 px-4 py-2 text-[10px] font-black uppercase hover:border-white transition">${t}</button>
             `).join('');
 
             document.getElementById('add-to-cart-btn').onclick = () => {
-                if (!selectedSize && p.tamanhos?.length > 0) { alert("SELECIONE O TAMANHO"); return; }
+                if (!selectedSize && p.tamanhos?.length > 0) { alert("ESCOLHA O TAMANHO"); return; }
                 carrinho.push({ ...p, tamanho: selectedSize || 'UN', cartId: Date.now() });
                 localStorage.setItem('mutt_cart', JSON.stringify(carrinho));
                 location.href = 'carrinho.html';
@@ -203,6 +212,12 @@
 
             document.getElementById('product-modal').classList.replace('hidden', 'flex');
             document.body.style.overflow = 'hidden';
+        };
+
+        window.changeModalImg = (el, src) => {
+            document.getElementById('modal-img').src = src;
+            document.querySelectorAll('#modal-thumbnails img').forEach(i => i.classList.remove('thumb-active'));
+            el.classList.add('thumb-active');
         };
 
         window.selectModalSize = (btn, size) => {
