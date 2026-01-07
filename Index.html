@@ -12,7 +12,6 @@
         .modal-blur { backdrop-filter: blur(15px); background: rgba(0,0,0,0.95); }
         .size-btn.active { background: white; color: black; border-color: white; }
         .thumb-active { border: 2px solid white; opacity: 1 !important; }
-        /* Esconde barra de rolagem mas mantém funcionalidade */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -61,8 +60,7 @@
             <p class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Season 2026</p>
         </div>
         
-        <div id="destaques-grid" class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12">
-            </div>
+        <div id="destaques-grid" class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12"></div>
     </main>
 
     <div id="product-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 modal-blur overflow-y-auto">
@@ -73,8 +71,7 @@
                 <div class="aspect-[3/4] overflow-hidden flex items-center justify-center">
                     <img id="modal-img" src="" class="w-full h-full object-cover">
                 </div>
-                <div id="modal-thumbnails" class="flex gap-2 p-4 bg-black overflow-x-auto no-scrollbar">
-                    </div>
+                <div id="modal-thumbnails" class="flex gap-2 p-4 bg-black overflow-x-auto no-scrollbar"></div>
             </div>
 
             <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
@@ -91,8 +88,7 @@
 
                 <div class="mb-10">
                     <h3 class="text-[10px] font-black uppercase text-zinc-500 mb-3 tracking-widest italic">Selecione o Tamanho</h3>
-                    <div id="modal-sizes" class="flex flex-wrap gap-2">
-                        </div>
+                    <div id="modal-sizes" class="flex flex-wrap gap-2"></div>
                 </div>
 
                 <button id="add-to-cart-btn" class="w-full bg-white text-black py-5 font-black uppercase text-[11px] tracking-[0.2em] hover:bg-zinc-300 transition shadow-2xl">
@@ -109,54 +105,79 @@
         </div>
     </footer>
 
-    <script>
-        let db = JSON.parse(localStorage.getItem('mutt_products')) || [];
-        let carrinho = JSON.parse(localStorage.getItem('mutt_cart')) || [];
-        let selectedSize = "";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        function renderLoja() {
-            document.getElementById('cart-count').innerText = carrinho.length;
+        const firebaseConfig = {
+            apiKey: "AIzaSyDr-W03cp72jHiyALGWlI4vBfxH2xrC-6w",
+            authDomain: "mutt-streetwear.firebaseapp.com",
+            databaseURL: "https://mutt-streetwear-default-rtdb.firebaseio.com",
+            projectId: "mutt-streetwear",
+            storageBucket: "mutt-streetwear.firebasestorage.app",
+            messagingSenderId: "65929911570",
+            appId: "1:65929911570:web:86299846ef5401b5c0a7cb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let globalProducts = [];
+        let selectedSize = "";
+        let carrinho = JSON.parse(localStorage.getItem('mutt_cart')) || [];
+
+        // BUSCAR PRODUTOS (Todos para a Home)
+        onValue(ref(db, 'produtos'), (snapshot) => {
+            const data = snapshot.val();
             const grid = document.getElementById('destaques-grid');
-            
-            if (db.length === 0) {
+            document.getElementById('cart-count').innerText = carrinho.length;
+
+            if (!data) {
                 grid.innerHTML = "<p class='col-span-full text-center text-zinc-800 py-20 uppercase font-black text-xs'>Reposição de estoque em breve.</p>";
                 return;
             }
 
-            grid.innerHTML = db.map(p => `
-                <div class="group cursor-pointer" onclick="openModal(${p.id})">
+            globalProducts = Object.values(data);
+            
+            // Renderiza todos os produtos na Home (ou você pode usar .slice(0,8) para limitar)
+            grid.innerHTML = globalProducts.map(p => `
+                <div class="group cursor-pointer" onclick="openProductModal('${p.id}')">
                     <div class="relative aspect-[3/4] bg-zinc-900 mb-4 overflow-hidden border border-zinc-900">
                         <img src="${p.imgs[0]}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                        ${p.precoAntigo ? `<span class="absolute top-4 left-4 bg-white text-black text-[9px] font-black px-2 py-1 uppercase italic">Sale</span>` : ''}
                         <div class="absolute bottom-4 left-4 bg-black/80 px-3 py-1 text-[9px] font-black uppercase italic tracking-widest opacity-0 group-hover:opacity-100 transition">Ver Detalhes</div>
                     </div>
                     <h3 class="text-[11px] font-black uppercase tracking-widest text-zinc-300 mb-1">${p.nome}</h3>
-                    <p class="text-white text-xs font-bold italic">R$ ${p.preco.toFixed(2)}</p>
+                    <div class="flex gap-3 items-center">
+                        <span class="text-white text-xs font-bold italic">R$ ${p.preco.toFixed(2)}</span>
+                        ${p.precoAntigo ? `<span class="text-[10px] text-zinc-600 line-through font-bold italic">R$ ${p.precoAntigo.toFixed(2)}</span>` : ''}
+                    </div>
                 </div>
             `).join('');
-        }
+        });
 
-        function openModal(id) {
-            const p = db.find(x => x.id == id);
-            selectedSize = ""; 
+        // FUNÇÕES DO MODAL (Globais para funcionarem no onclick)
+        window.openProductModal = (id) => {
+            const p = globalProducts.find(x => x.id == id);
+            if(!p) return;
             
+            selectedSize = "";
             document.getElementById('modal-img').src = p.imgs[0];
-            
-            // Gerar Galeria lateral/inferior
+            document.getElementById('modal-name').innerText = p.nome;
+            document.getElementById('modal-price').innerText = `R$ ${p.preco.toFixed(2)}`;
+            document.getElementById('modal-discount').innerText = p.precoAntigo ? `R$ ${p.precoAntigo.toFixed(2)}` : '';
+            document.getElementById('modal-desc').innerText = p.desc || "Peça exclusiva Mutt Streetwear.";
+
             const thumbContainer = document.getElementById('modal-thumbnails');
             thumbContainer.innerHTML = p.imgs.map((img, idx) => `
                 <img src="${img}" class="w-16 h-20 object-cover cursor-pointer opacity-30 hover:opacity-100 transition rounded ${idx === 0 ? 'thumb-active' : ''}" 
-                     onclick="changeImg(this, '${img}')">
+                     onclick="changeModalImg(this, '${img}')">
             `).join('');
 
-            document.getElementById('modal-name').innerText = p.nome;
-            document.getElementById('modal-price').innerText = `R$ ${p.preco.toFixed(2)}`;
-            document.getElementById('modal-desc').innerText = p.desc || "Peça exclusiva de alta qualidade.";
-
-            // Gerar Grade de Tamanhos
             const sizeArea = document.getElementById('modal-sizes');
             if(p.tamanhos && p.tamanhos.length > 0) {
                 sizeArea.innerHTML = p.tamanhos.map(t => `
-                    <button onclick="selectSize(this, '${t}')" class="size-btn border border-zinc-800 px-6 py-2 text-[10px] font-black uppercase hover:border-white transition">
+                    <button onclick="selectModalSize(this, '${t}')" class="size-btn border border-zinc-800 px-6 py-2 text-[10px] font-black uppercase hover:border-white transition">
                         ${t}
                     </button>
                 `).join('');
@@ -165,36 +186,34 @@
                 selectedSize = "UN";
             }
 
-            document.getElementById('add-to-cart-btn').onclick = () => addToCart(p);
+            document.getElementById('add-to-cart-btn').onclick = () => addToBag(p);
             document.getElementById('product-modal').classList.replace('hidden', 'flex');
             document.body.style.overflow = 'hidden';
-        }
+        };
 
-        function changeImg(el, src) {
+        window.changeModalImg = (el, src) => {
             document.getElementById('modal-img').src = src;
             document.querySelectorAll('#modal-thumbnails img').forEach(i => i.classList.remove('thumb-active'));
             el.classList.add('thumb-active');
-        }
+        };
 
-        function selectSize(btn, size) {
+        window.selectModalSize = (btn, size) => {
             document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             selectedSize = size;
-        }
+        };
 
-        function addToCart(p) {
-            if (!selectedSize) { alert("SELECIONE UM TAMANHO PRIMEIRO."); return; }
+        window.addToBag = (p) => {
+            if (!selectedSize) { alert("POR FAVOR, SELECIONE O TAMANHO."); return; }
             carrinho.push({ ...p, tamanho: selectedSize, cartId: Date.now() });
             localStorage.setItem('mutt_cart', JSON.stringify(carrinho));
             location.href = 'carrinho.html';
-        }
+        };
 
-        function closeModal() {
+        window.closeModal = () => {
             document.getElementById('product-modal').classList.replace('flex', 'hidden');
             document.body.style.overflow = 'auto';
-        }
-
-        window.onload = renderLoja;
+        };
     </script>
 </body>
 </html>
