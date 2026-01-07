@@ -126,7 +126,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, remove, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -153,19 +153,16 @@
         let valorFreteAtual = 0;
         let currentUser = null;
 
-        // --- MONITORAR LOGIN E CARREGAR DADOS DO FIREBASE ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
                 const cartRef = ref(db, `usuarios/${user.uid}/carrinho`);
-                
                 onValue(cartRef, (snapshot) => {
                     const data = snapshot.val();
                     carrinhoGlobal = data ? Object.values(data) : [];
                     renderCarrinho();
                 });
             } else {
-                alert("Sessão expirada. Faça login novamente.");
                 window.location.href = 'login.html';
             }
         });
@@ -173,13 +170,11 @@
         window.renderCarrinho = () => {
             const container = document.getElementById('cart-items-container');
             let subtotal = 0;
-
             if(carrinhoGlobal.length === 0) {
                 container.innerHTML = `<div class="py-20 text-center border border-zinc-900 uppercase text-[10px] font-black tracking-widest text-zinc-500">Bag Vazia</div>`;
                 atualizarResumo(0);
                 return;
             }
-
             container.innerHTML = carrinhoGlobal.map((item) => {
                 subtotal += item.preco;
                 return `
@@ -198,27 +193,19 @@
                     </div>
                 `;
             }).join('');
-
             atualizarResumo(subtotal);
         };
 
         window.removerItem = async (cartId) => {
             if (currentUser) {
-                const itemRef = ref(db, `usuarios/${currentUser.uid}/carrinho/${cartId}`);
-                await remove(itemRef);
-                // O onValue lá em cima atualizará a tela sozinho
+                await remove(ref(db, `usuarios/${currentUser.uid}/carrinho/${cartId}`));
             }
         };
 
         window.calcularFrete = () => {
             const uf = document.getElementById('estado').value.toUpperCase().trim();
             document.getElementById('uf-display').innerText = uf || "--";
-            
-            if (uf.length === 2) {
-                valorFreteAtual = TABELA_FRETE[uf] || TABELA_FRETE["OUTROS"];
-            } else {
-                valorFreteAtual = 0;
-            }
+            valorFreteAtual = uf.length === 2 ? (TABELA_FRETE[uf] || TABELA_FRETE["OUTROS"]) : 0;
             recalcularTudo();
         };
 
@@ -231,10 +218,9 @@
             const radioPix = document.querySelector('input[name="pay"]:checked');
             const metodo = radioPix ? radioPix.value : 'pix';
             const descRow = document.getElementById('desc-pix-row');
+            let desconto = (metodo === 'pix' && subtotal > 0) ? subtotal * 0.05 : 0;
             
-            let desconto = 0;
-            if (metodo === 'pix' && subtotal > 0) {
-                desconto = subtotal * 0.05;
+            if (desconto > 0) {
                 descRow.classList.remove('hidden');
                 document.getElementById('pix-discount').innerText = `- R$ ${desconto.toFixed(2)}`;
             } else {
@@ -242,19 +228,48 @@
             }
 
             const totalFinal = (subtotal + valorFreteAtual) - desconto;
-
             document.getElementById('subtotal').innerText = `R$ ${subtotal.toFixed(2)}`;
             document.getElementById('frete-valor').innerText = `R$ ${valorFreteAtual.toFixed(2)}`;
             document.getElementById('total').innerText = `R$ ${totalFinal.toFixed(2)}`;
         };
 
-        window.finalizarPedido = () => {
+        // FUNÇÃO FINALIZAR ATUALIZADA - SALVANDO NO HISTÓRICO
+        window.finalizarPedido = async () => {
             if(carrinhoGlobal.length === 0) return alert("BAG VAZIA");
-            if(!document.getElementById('estado').value) return alert("INFORME O ESTADO PARA O FRETE");
+            const estado = document.getElementById('estado').value.toUpperCase().trim();
+            if(estado.length < 2) return alert("INFORME O ESTADO PARA O FRETE");
+            if(!document.getElementById('rua').value || !document.getElementById('numero').value) return alert("PREENCHA O ENDEREÇO");
 
+            let subtotal = carrinhoGlobal.reduce((acc, item) => acc + item.preco, 0);
             const metodo = document.querySelector('input[name="pay"]:checked').value;
-            // Aqui você pode redirecionar para sua página de pagamento ou WhatsApp
-            window.location.href = metodo === 'pix' ? "pagamento-pix.html" : "pagamento-cartao.html";
+            let desconto = metodo === 'pix' ? subtotal * 0.05 : 0;
+            let totalFinal = (subtotal + valorFreteAtual) - desconto;
+
+            const pedidoObj = {
+                data: new Date().toLocaleDateString('pt-BR'),
+                status: "Pendente",
+                metodoPagamento: metodo,
+                total: totalFinal,
+                itens: carrinhoGlobal,
+                endereco: {
+                    rua: document.getElementById('rua').value,
+                    numero: document.getElementById('numero').value,
+                    cidade: document.getElementById('cidade').value,
+                    estado: estado
+                }
+            };
+
+            try {
+                // Salva no histórico do usuário
+                await push(ref(db, `usuarios/${currentUser.uid}/pedidos`), pedidoObj);
+                // Limpa o carrinho
+                await remove(ref(db, `usuarios/${currentUser.uid}/carrinho`));
+                
+                alert("PEDIDO PROCESSADO COM SUCESSO");
+                window.location.href = metodo === 'pix' ? "pagamento-pix.html" : "pagamento-cartao.html";
+            } catch (e) {
+                alert("ERRO AO SALVAR PEDIDO");
+            }
         };
 
     </script>
