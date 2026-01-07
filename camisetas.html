@@ -180,5 +180,61 @@
 
         window.onload = renderizar;
     </script>
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // Suas credenciais (as mesmas do ADM)
+    const firebaseConfig = {
+        apiKey: "AIzaSyDr-W03cp72jHiyALGWlI4vBfxH2xrC-6w",
+        authDomain: "mutt-streetwear.firebaseapp.com",
+        databaseURL: "https://mutt-streetwear-default-rtdb.firebaseio.com",
+        projectId: "mutt-streetwear",
+        storageBucket: "mutt-streetwear.firebasestorage.app",
+        messagingSenderId: "65929911570",
+        appId: "1:65929911570:web:86299846ef5401b5c0a7cb"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Função para renderizar as camisetas
+    onValue(ref(db, 'produtos'), (snapshot) => {
+        const data = snapshot.val();
+        const container = document.getElementById('grid-produtos'); // Verifique se o ID do seu container é este
+        
+        if (!container) return;
+        container.innerHTML = "";
+
+        if (data) {
+            Object.keys(data).forEach(id => {
+                const p = data[id];
+                
+                // FILTRO: Só mostra se a categoria for 'camisetas'
+                if (p.cat === 'camisetas') {
+                    container.innerHTML += `
+                        <div class="product-card group">
+                            <div class="relative overflow-hidden bg-[#0a0a0a] aspect-[3/4]">
+                                <img src="${p.imgs[0]}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                                ${p.precoAntigo ? `<span class="absolute top-4 left-4 bg-white text-black text-[10px] font-black px-2 py-1 uppercase">Sale</span>` : ''}
+                            </div>
+                            <div class="mt-6 space-y-2">
+                                <h3 class="text-[11px] font-black uppercase tracking-widest italic">${p.nome}</h3>
+                                <div class="flex gap-3 items-center">
+                                    <span class="text-[13px] font-bold">R$ ${p.preco.toFixed(2)}</span>
+                                    ${p.precoAntigo ? `<span class="text-[11px] text-zinc-600 line-through font-bold">R$ ${p.precoAntigo.toFixed(2)}</span>` : ''}
+                                </div>
+                            </div>
+                            <a href="produto.html?id=${p.id}" class="block mt-4 text-[10px] font-black uppercase border-b border-white w-fit pb-1 hover:text-zinc-400 hover:border-zinc-400 transition">Ver Detalhes</a>
+                        </div>
+                    `;
+                }
+            });
+        } else {
+            container.innerHTML = "<p class='text-zinc-500 uppercase text-[10px] font-black'>Nenhum produto encontrado.</p>";
+        }
+    });
+</script>
 </body>
 </html>
