@@ -8,71 +8,169 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
-        .input-mutt { background: #0a0a0a; border: 1px solid #1a1a1a; color: white; padding: 14px; border-radius: 4px; width: 100%; font-size: 13px; transition: all 0.2s; }
-        .input-mutt:focus { border-color: #444; outline: none; background: #0f0f0f; }
-        .size-chip { border: 1px solid #1a1a1a; padding: 10px; cursor: pointer; text-align: center; font-weight: 900; text-transform: uppercase; font-size: 10px; transition: 0.2s; background: #0a0a0a; }
-        .size-chip.active { background: #fff; color: #000; border-color: #fff; }
-        .glass-panel { background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px); border: 1px solid #1a1a1a; }
+        
+        :root {
+            --mutt-bg: #000000;
+            --mutt-card: #0a0a0a;
+            --mutt-border: #1a1a1a;
+            --mutt-accent: #ffffff;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--mutt-bg); 
+            color: #fff; 
+            overflow-x: hidden;
+        }
+
+        /* Animações */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.5s ease forwards; }
+
+        .input-mutt { 
+            background: #0a0a0a; 
+            border: 1px solid #1a1a1a; 
+            color: white; 
+            padding: 14px; 
+            border-radius: 4px; 
+            width: 100%; 
+            font-size: 13px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .input-mutt:focus { border-color: #fff; outline: none; background: #111; box-shadow: 0 0 15px rgba(255,255,255,0.05); }
+
+        .size-chip { 
+            border: 1px solid #1a1a1a; 
+            padding: 10px; 
+            cursor: pointer; 
+            text-align: center; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            font-size: 10px; 
+            transition: 0.3s; 
+            background: #0a0a0a; 
+        }
+        .size-chip:hover { border-color: #444; }
+        .size-chip.active { background: #fff; color: #000; border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+
+        .glass-panel { 
+            background: rgba(10, 10, 10, 0.8); 
+            backdrop-filter: blur(25px); 
+            border: 1px solid #1a1a1a; 
+            transition: all 0.3s;
+        }
+        .glass-panel:hover { border-color: #333; }
+
+        .btn-postimage {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #007bff;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0, 123, 255, 0.3);
+            transition: all 0.3s;
+        }
+        .btn-postimage:hover { transform: scale(1.05); filter: brightness(1.1); }
+
+        .status-off { opacity: 0.4; filter: grayscale(1); }
+        .status-badge { font-size: 8px; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; }
+
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #222; }
+        ::-webkit-scrollbar-thumb { background: #333; }
     </style>
 </head>
 <body class="bg-black">
 
-    <div id="login-screen" class="fixed inset-0 z-[1000] bg-black flex items-center justify-center p-6">
-        <div class="w-full max-w-md">
+    <a href="https://postimages.org/" target="_blank" class="btn-postimage">
+        <i class="fa-solid fa-image"></i> Upload de Fotos
+    </a>
+
+    <div id="login-screen" class="fixed inset-0 z-[1000] bg-black flex items-center justify-center p-6 transition-all duration-700">
+        <div class="w-full max-w-md animate-fade">
             <div class="text-center mb-10">
-                <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" class="w-24 mx-auto mb-4 invert">
-                <h2 class="text-[10px] font-black tracking-[0.5em] text-zinc-500 uppercase">Acesso Restrito ao Sistema</h2>
+                <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-24 mx-auto mb-6 invert brightness-200">
+                <h2 class="text-[10px] font-black tracking-[0.6em] text-zinc-500 uppercase">System Authentication</h2>
+                <div class="h-[1px] w-12 bg-zinc-800 mx-auto mt-4"></div>
             </div>
             <div class="space-y-4">
-                <input type="text" id="user" placeholder="USUÁRIO" class="input-mutt text-center tracking-widest">
-                <input type="password" id="pass" placeholder="SENHA" class="input-mutt text-center tracking-widest">
-                <button id="btn-login-trigger" class="w-full bg-white text-black py-4 font-black uppercase text-[11px] tracking-widest hover:bg-zinc-200 transition duration-500">Autenticar</button>
+                <div class="relative">
+                    <input type="text" id="user" placeholder="USUÁRIO" class="input-mutt text-center tracking-[0.3em] uppercase">
+                </div>
+                <div class="relative">
+                    <input type="password" id="pass" placeholder="SENHA" class="input-mutt text-center tracking-[0.3em]">
+                </div>
+                <button id="btn-login-trigger" class="w-full bg-white text-black py-4 font-black uppercase text-[11px] tracking-[0.3em] hover:tracking-[0.5em] transition-all duration-500 active:scale-95">Acessar Terminal</button>
             </div>
         </div>
     </div>
 
     <div id="admin-panel" class="hidden min-h-screen">
-        <nav class="border-b border-zinc-900 p-6 flex justify-between items-center bg-black/50 sticky top-0 backdrop-blur-md z-50">
-            <div class="flex items-center gap-4">
-                <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" class="w-16 invert">
-                <span class="h-4 w-[1px] bg-zinc-800"></span>
-                <h1 class="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Inventory Manager</h1>
-            </div>
+        <nav class="border-b border-zinc-900 p-6 flex justify-between items-center bg-black/80 sticky top-0 backdrop-blur-xl z-50">
             <div class="flex items-center gap-6">
-                <a href="index.html" class="text-[10px] font-black uppercase tracking-widest hover:text-zinc-400">Ver Loja</a>
-                <button onclick="abrirModal()" class="bg-white text-black px-6 py-2.5 font-black uppercase text-[10px] tracking-tighter">Novo Produto</button>
+                <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-16 invert">
+                <span class="h-6 w-[1px] bg-zinc-800"></span>
+                <div class="hidden md:block">
+                    <h1 class="text-[10px] font-black uppercase tracking-widest text-white italic">MUTT TERMINAL</h1>
+                    <p class="text-[8px] text-zinc-500 font-bold">CORE ENGINE V.2026</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 md:gap-8">
+                <a href="https://postimages.org/" target="_blank" class="text-[9px] font-black uppercase text-blue-500 hover:text-blue-400 transition hidden md:block"><i class="fa-solid fa-link mr-2"></i>PostImages</a>
+                <a href="index.html" class="text-[9px] font-black uppercase tracking-widest text-zinc-400 hover:text-white transition">Preview Loja</a>
+                <button onclick="abrirModal()" class="bg-white text-black px-6 py-3 font-black uppercase text-[10px] tracking-tighter hover:bg-zinc-200 transition-all">Novo Produto</button>
             </div>
         </nav>
 
         <main class="container mx-auto px-6 py-12">
-            <div class="mb-10 flex justify-between items-end">
-                <h2 class="text-4xl font-black uppercase italic tracking-tighter">Produtos Ativos</h2>
-                <button id="btn-reset-banco" class="text-red-500 text-[10px] font-black uppercase tracking-widest opacity-50 hover:opacity-100 transition">Resetar Banco</button>
+            <div class="mb-12 flex flex-col md:flex-row justify-between items-center gap-6 border-b border-zinc-900 pb-8">
+                <div>
+                    <h2 class="text-5xl font-black uppercase italic tracking-tighter animate-fade">Inventário</h2>
+                    <p id="total-count" class="text-[10px] text-zinc-500 font-black uppercase tracking-[0.3em] mt-2">Carregando banco de dados...</p>
+                </div>
+                <button id="btn-reset-banco" class="group flex items-center gap-3 text-red-900 text-[10px] font-black uppercase tracking-widest hover:text-red-500 transition duration-500">
+                    <span class="opacity-0 group-hover:opacity-100 transition">Hard Reset</span>
+                    <i class="fa-solid fa-skull text-lg"></i>
+                </button>
             </div>
-            <div id="lista-produtos-adm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+            <div id="lista-produtos-adm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade"></div>
         </main>
     </div>
 
-    <div id="modal-produto" class="fixed inset-0 bg-black/98 z-[600] hidden overflow-y-auto">
+    <div id="modal-produto" class="fixed inset-0 bg-black/95 z-[600] hidden overflow-y-auto backdrop-blur-sm animate-fade">
         <div class="min-h-screen flex items-center justify-center p-4">
-            <div class="w-full max-w-5xl glass-panel p-8 md:p-12 relative rounded-sm">
-                <button onclick="fecharModal()" class="absolute top-8 right-8 text-2xl text-zinc-500 hover:text-white transition">&times;</button>
-                <h2 id="modal-title" class="text-3xl font-black uppercase italic mb-10 tracking-tighter">Configurar Produto</h2>
+            <div class="w-full max-w-5xl glass-panel p-8 md:p-12 relative rounded-lg border-zinc-800">
+                <button onclick="fecharModal()" class="absolute top-8 right-8 w-10 h-10 flex items-center justify-center rounded-full bg-zinc-900 text-white hover:bg-white hover:text-black transition-all">&times;</button>
+                
+                <div class="flex items-center gap-4 mb-10">
+                    <div class="w-2 h-8 bg-white"></div>
+                    <h2 id="modal-title" class="text-3xl font-black uppercase italic tracking-tighter">Configurar Produto</h2>
+                </div>
+
                 <form id="form-produto" class="grid grid-cols-1 md:grid-cols-2 gap-12">
                     <input type="hidden" id="edit-id">
+                    
                     <div class="space-y-6">
                         <div>
                             <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Nome do Produto</label>
                             <input type="text" id="p-nome" class="input-mutt" placeholder="Ex: OVERSIZED TEE 'HELL'" required>
                         </div>
+                        
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Categoria</label>
-                                <select id="p-cat" class="input-mutt">
+                                <select id="p-cat" class="input-mutt appearance-none">
                                     <option value="camisetas">Camisetas</option>
                                     <option value="jaquetas">Jaquetas</option>
                                     <option value="shorts">Shorts</option>
@@ -81,20 +179,32 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Preço Atual</label>
-                                <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="R$ 0.00" required>
+                                <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Status</label>
+                                <select id="p-status" class="input-mutt appearance-none border-blue-900">
+                                    <option value="ativo">Disponível na Loja</option>
+                                    <option value="inativo">Desativado / Oculto</option>
+                                </select>
                             </div>
                         </div>
-                        <div>
-                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Preço Antigo (Opcional)</label>
-                            <input type="number" step="0.01" id="p-preco-antigo" class="input-mutt" placeholder="R$ 0.00">
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Preço Atual</label>
+                                <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="0.00" required>
+                            </div>
+                            <div>
+                                <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Preço Antigo</label>
+                                <input type="number" step="0.01" id="p-preco-antigo" class="input-mutt" placeholder="0.00">
+                            </div>
                         </div>
+
                         <div>
-                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Descrição</label>
-                            <textarea id="p-desc" rows="4" class="input-mutt" placeholder="Detalhes técnicos..."></textarea>
+                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Descrição Técnica</label>
+                            <textarea id="p-desc" rows="4" class="input-mutt resize-none" placeholder="Algodão 30.1, Silk Screen, etc..."></textarea>
                         </div>
+
                         <div>
-                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Grade de Tamanhos</label>
+                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Grade de Tamanhos Disponíveis</label>
                             <div id="grade-tamanhos" class="grid grid-cols-4 gap-2">
                                 <div class="size-chip" data-size="P">P</div><div class="size-chip" data-size="M">M</div>
                                 <div class="size-chip" data-size="G">G</div><div class="size-chip" data-size="GG">GG</div>
@@ -103,12 +213,19 @@
                             </div>
                         </div>
                     </div>
-                    <div class="space-y-6">
-                        <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Links das Fotos (URLs)</label>
-                        <div id="container-fotos" class="space-y-3"></div>
-                        <button type="button" onclick="adicionarCampoFoto()" class="w-full border border-dashed border-zinc-800 py-3 text-[10px] font-black uppercase">+ Adicionar Foto</button>
-                        <div class="pt-10">
-                            <button type="submit" class="w-full bg-white text-black py-5 font-black uppercase text-[11px] tracking-[0.3em]">Salvar Alterações</button>
+
+                    <div class="space-y-6 flex flex-col">
+                        <div class="flex-1">
+                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-4 flex justify-between tracking-widest">
+                                Galeria de Imagens (URLs)
+                                <a href="https://postimages.org/" target="_blank" class="text-blue-500 hover:underline">Pegar Links</a>
+                            </label>
+                            <div id="container-fotos" class="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scroll"></div>
+                            <button type="button" onclick="adicionarCampoFoto()" class="w-full border border-dashed border-zinc-800 py-4 mt-4 text-[10px] font-black uppercase text-zinc-500 hover:text-white hover:border-zinc-500 transition-all">+ Link de Foto</button>
+                        </div>
+
+                        <div class="pt-8 mt-auto border-t border-zinc-900">
+                            <button type="submit" class="w-full bg-white text-black py-5 font-black uppercase text-[12px] tracking-[0.4em] hover:bg-zinc-200 transition-all shadow-2xl active:scale-95">Finalizar Configuração</button>
                         </div>
                     </div>
                 </form>
@@ -118,9 +235,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // SUA CONFIGURAÇÃO QUE VOCÊ ME PASSOU
         const firebaseConfig = {
             apiKey: "AIzaSyDr-W03cp72jHiyALGWlI4vBfxH2xrC-6w",
             authDomain: "mutt-streetwear.firebaseapp.com",
@@ -134,52 +250,81 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // LOGIN
+        // LOGIN (MANTER IGUAL CONFORME PEDIDO)
         window.fazerLogin = () => {
             if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === 'mutt2026') {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('admin-panel').classList.remove('hidden');
-            } else { alert("Acesso Negado"); }
+                document.getElementById('login-screen').classList.add('opacity-0');
+                setTimeout(() => {
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('admin-panel').classList.remove('hidden');
+                }, 500);
+            } else { alert("Acesso Negado: Credenciais Inválidas"); }
         };
         document.getElementById('btn-login-trigger').onclick = window.fazerLogin;
 
-        // SISTEMA DE FOTOS
+        // SISTEMA DE FOTOS (MANTER IGUAL CONFORME PEDIDO)
         window.adicionarCampoFoto = (valor = '') => {
             const container = document.getElementById('container-fotos');
             const div = document.createElement('div');
-            div.className = "flex gap-2";
-            div.innerHTML = `<input type="text" class="input-mutt foto-url" value="${valor}" placeholder="https://link.jpg"><button type="button" onclick="this.parentElement.remove()" class="bg-zinc-900 px-4 text-red-500">-</button>`;
+            div.className = "flex gap-2 animate-fade";
+            div.innerHTML = `
+                <input type="text" class="input-mutt foto-url" value="${valor}" placeholder="https://link.jpg">
+                <button type="button" onclick="this.parentElement.remove()" class="bg-zinc-900 px-4 text-red-500 hover:bg-red-500 hover:text-white transition-all">-</button>
+            `;
             container.appendChild(div);
         }
 
-        // TAMANHOS
+        // TAMANHOS (MANTER IGUAL CONFORME PEDIDO)
         document.querySelectorAll('.size-chip').forEach(c => c.onclick = () => c.classList.toggle('active'));
 
-        // ESCUTAR BANCO DE DADOS (TEMPO REAL)
+        // ESCUTAR BANCO DE DADOS (COM NOVA FUNÇÃO DE STATUS)
         onValue(ref(db, 'produtos'), (snapshot) => {
             const data = snapshot.val();
             const container = document.getElementById('lista-produtos-adm');
+            const countLabel = document.getElementById('total-count');
             container.innerHTML = "";
+            
             if(data) {
+                const total = Object.keys(data).length;
+                countLabel.innerText = `${total} Produtos Registrados no Banco`;
+                
                 Object.keys(data).forEach(id => {
                     const p = data[id];
+                    const isOff = p.status === 'inativo';
+                    
                     container.innerHTML += `
-                        <div class="glass-panel p-4 flex gap-4 items-center">
-                            <img src="${p.imgs[0]}" class="w-20 h-24 object-cover">
+                        <div class="glass-panel p-5 flex gap-5 items-center ${isOff ? 'status-off' : ''} group relative overflow-hidden">
+                            <div class="absolute top-2 right-2 flex gap-1">
+                                ${isOff ? '<span class="status-badge bg-zinc-800 text-white">Oculto</span>' : '<span class="status-badge bg-white text-black font-black">Ativo</span>'}
+                            </div>
+                            <img src="${p.imgs[0]}" class="w-24 h-28 object-cover rounded-sm border border-zinc-900 group-hover:scale-105 transition-transform duration-500">
                             <div class="flex-1">
-                                <h3 class="text-[11px] font-black uppercase italic">${p.nome}</h3>
-                                <p class="text-[10px] text-zinc-500 font-bold mb-3 italic">R$ ${p.preco.toFixed(2)}</p>
+                                <h3 class="text-[12px] font-black uppercase italic tracking-tighter text-white mb-1">${p.nome}</h3>
+                                <p class="text-[10px] text-zinc-500 font-bold mb-4 italic">R$ ${p.preco.toFixed(2)}</p>
                                 <div class="flex gap-2">
-                                    <button onclick="editarProduto('${id}')" class="text-[9px] font-black uppercase bg-zinc-900 px-3 py-1">Editar</button>
-                                    <button onclick="remover('${id}')" class="text-[9px] font-black text-red-800">Excluir</button>
+                                    <button onclick="editarProduto('${id}')" class="text-[9px] font-black uppercase bg-white text-black px-4 py-2 hover:bg-zinc-300 transition-all">Editar</button>
+                                    <button onclick="toggleStatus('${id}', '${p.status || 'ativo'}')" class="text-[9px] font-black uppercase bg-zinc-900 px-3 py-2 border border-zinc-800 hover:border-zinc-500 transition-all">
+                                        ${isOff ? 'Ativar' : 'Pausar'}
+                                    </button>
+                                    <button onclick="remover('${id}')" class="ml-auto text-zinc-700 hover:text-red-500 transition-colors">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>`;
                 });
+            } else {
+                countLabel.innerText = "0 Produtos Encontrados";
             }
         });
 
-        // SALVAR NO FIREBASE
+        // NOVA FUNÇÃO: ALTERNAR STATUS (SEM DELETAR)
+        window.toggleStatus = async (id, currentStatus) => {
+            const newStatus = currentStatus === 'ativo' ? 'inativo' : 'ativo';
+            await update(ref(db, 'produtos/' + id), { status: newStatus });
+        };
+
+        // SALVAR NO FIREBASE (MELHORADO COM CAMPO STATUS)
         document.getElementById('form-produto').onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit-id').value || Date.now().toString();
@@ -190,6 +335,7 @@
                 id: id,
                 nome: document.getElementById('p-nome').value,
                 cat: document.getElementById('p-cat').value,
+                status: document.getElementById('p-status').value, // Novo campo
                 preco: parseFloat(document.getElementById('p-preco').value),
                 precoAntigo: parseFloat(document.getElementById('p-preco-antigo').value) || null,
                 desconto: !!document.getElementById('p-preco-antigo').value,
@@ -202,7 +348,7 @@
             fecharModal();
         };
 
-        // FUNÇÕES GLOBAIS
+        // FUNÇÕES GLOBAIS (MANTER E MELHORAR UI)
         window.abrirModal = () => {
             document.getElementById('form-produto').reset();
             document.getElementById('edit-id').value = '';
@@ -221,6 +367,7 @@
                 document.getElementById('edit-id').value = id;
                 document.getElementById('p-nome').value = p.nome;
                 document.getElementById('p-cat').value = p.cat;
+                document.getElementById('p-status').value = p.status || 'ativo'; // Novo
                 document.getElementById('p-preco').value = p.preco;
                 document.getElementById('p-preco-antigo').value = p.precoAntigo || '';
                 document.getElementById('p-desc').value = p.desc;
@@ -233,11 +380,11 @@
         };
 
         window.remover = (id) => {
-            if(confirm("Deseja deletar da nuvem?")) remove(ref(db, 'produtos/' + id));
+            if(confirm("Deseja deletar PERMANENTEMENTE da nuvem?")) remove(ref(db, 'produtos/' + id));
         };
 
         document.getElementById('btn-reset-banco').onclick = () => {
-            if(confirm("Isso apagará TUDO na nuvem. Tem certeza?")) remove(ref(db, 'produtos'));
+            if(confirm("ALERTA CRÍTICO: Isso apagará TODOS os produtos da sua loja. Tem certeza?")) remove(ref(db, 'produtos'));
         };
 
     </script>
