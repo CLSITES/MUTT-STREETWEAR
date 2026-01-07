@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MUTT | ACESSO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #000; color: #fff; }
+        .input-mutt { background: #0a0a0a; border: 1px solid #1a1a1a; color: white; padding: 15px; width: 100%; border-radius: 4px; outline: none; transition: 0.3s; }
+        .input-mutt:focus { border-color: #fff; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6">
+    <div class="w-full max-w-sm">
+        <div class="text-center mb-8">
+            <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-20 mx-auto mb-4 invert">
+            <h2 id="titulo" class="text-[11px] font-black uppercase tracking-[0.3em]">Entrar na Conta</h2>
+        </div>
+
+        <form id="auth-form" class="space-y-4">
+            <input type="email" id="email" placeholder="E-MAIL" class="input-mutt" required>
+            <input type="password" id="pass" placeholder="SENHA" class="input-mutt" required>
+            <button type="submit" id="btn-auth" class="w-full bg-white text-black py-4 font-black uppercase text-[10px] tracking-widest">Acessar</button>
+        </form>
+
+        <div class="mt-6 flex flex-col gap-4 text-center">
+            <button onclick="mudarModo()" id="btn-trocar" class="text-[9px] font-black uppercase opacity-50 hover:opacity-100">Não tenho conta? Cadastrar</button>
+            <button onclick="recuperarSenha()" class="text-[9px] font-black uppercase text-blue-500">Esqueci minha senha</button>
+        </div>
+        <p id="feedback" class="mt-4 text-center text-[10px] uppercase font-bold text-zinc-500"></p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // SUA CONFIGURAÇÃO (A mesma do Admin)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDr-W03cp72jHiyALGWlI4vBfxH2xrC-6w",
+            authDomain: "mutt-streetwear.firebaseapp.com",
+            databaseURL: "https://mutt-streetwear-default-rtdb.firebaseio.com",
+            projectId: "mutt-streetwear",
+            storageBucket: "mutt-streetwear.firebasestorage.app",
+            messagingSenderId: "65929911570",
+            appId: "1:65929911570:web:86299846ef5401b5c0a7cb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        let modoLogin = true;
+
+        window.mudarModo = () => {
+            modoLogin = !modoLogin;
+            document.getElementById('titulo').innerText = modoLogin ? 'Entrar na Conta' : 'Criar Nova Conta';
+            document.getElementById('btn-auth').innerText = modoLogin ? 'Acessar' : 'Cadastrar';
+            document.getElementById('btn-trocar').innerText = modoLogin ? 'Não tenho conta? Cadastrar' : 'Já tenho conta? Entrar';
+        };
+
+        document.getElementById('auth-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            const f = document.getElementById('feedback');
+
+            try {
+                if(modoLogin) {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                    f.innerText = "Logado! Redirecionando...";
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, pass);
+                    f.innerText = "Conta criada!";
+                }
+                setTimeout(() => location.href = 'index.html', 1000);
+            } catch (err) { f.innerText = "Erro: " + err.message; }
+        };
+
+        window.recuperarSenha = async () => {
+            const email = document.getElementById('email').value;
+            if(!email) return alert("Digite o e-mail");
+            await sendPasswordResetEmail(auth, email);
+            alert("E-mail de recuperação enviado!");
+        };
+    </script>
+</body>
+</html>
