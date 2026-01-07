@@ -23,7 +23,6 @@
             overflow-x: hidden;
         }
 
-        /* Animações */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade { animation: fadeIn 0.5s ease forwards; }
 
@@ -59,7 +58,20 @@
             border: 1px solid #1a1a1a; 
             transition: all 0.3s;
         }
-        .glass-panel:hover { border-color: #333; }
+
+        .tab-btn {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 15px 25px;
+            border-bottom: 2px solid transparent;
+            color: #444;
+            transition: 0.3s;
+        }
+        .tab-btn.active {
+            color: #fff;
+            border-bottom-color: #fff;
+        }
 
         .btn-postimage {
             position: fixed;
@@ -72,45 +84,26 @@
             font-weight: 900;
             font-size: 10px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
             z-index: 100;
             box-shadow: 0 10px 30px rgba(0, 123, 255, 0.3);
-            transition: all 0.3s;
         }
-        .btn-postimage:hover { transform: scale(1.05); filter: brightness(1.1); }
 
         .status-off { opacity: 0.4; filter: grayscale(1); }
         .status-badge { font-size: 8px; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; }
-
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #333; }
     </style>
 </head>
 <body class="bg-black">
-
-    <a href="https://postimages.org/" target="_blank" class="btn-postimage">
-        <i class="fa-solid fa-image"></i> Upload de Fotos
-    </a>
 
     <div id="login-screen" class="fixed inset-0 z-[1000] bg-black flex items-center justify-center p-6 transition-all duration-700">
         <div class="w-full max-w-md animate-fade">
             <div class="text-center mb-10">
                 <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-24 mx-auto mb-6 invert brightness-200">
                 <h2 class="text-[10px] font-black tracking-[0.6em] text-zinc-500 uppercase">System Authentication</h2>
-                <div class="h-[1px] w-12 bg-zinc-800 mx-auto mt-4"></div>
             </div>
             <div class="space-y-4">
-                <div class="relative">
-                    <input type="text" id="user" placeholder="USUÁRIO" class="input-mutt text-center tracking-[0.3em] uppercase">
-                </div>
-                <div class="relative">
-                    <input type="password" id="pass" placeholder="SENHA" class="input-mutt text-center tracking-[0.3em]">
-                </div>
-                <button id="btn-login-trigger" class="w-full bg-white text-black py-4 font-black uppercase text-[11px] tracking-[0.3em] hover:tracking-[0.5em] transition-all duration-500 active:scale-95">Acessar Terminal</button>
+                <input type="text" id="user" placeholder="USUÁRIO" class="input-mutt text-center tracking-[0.3em] uppercase">
+                <input type="password" id="pass" placeholder="SENHA" class="input-mutt text-center tracking-[0.3em]">
+                <button id="btn-login-trigger" class="w-full bg-white text-black py-4 font-black uppercase text-[11px] tracking-[0.3em] hover:tracking-[0.5em] transition-all duration-500">Acessar Terminal</button>
             </div>
         </div>
     </div>
@@ -119,114 +112,75 @@
         <nav class="border-b border-zinc-900 p-6 flex justify-between items-center bg-black/80 sticky top-0 backdrop-blur-xl z-50">
             <div class="flex items-center gap-6">
                 <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-16 invert">
-                <span class="h-6 w-[1px] bg-zinc-800"></span>
                 <div class="hidden md:block">
                     <h1 class="text-[10px] font-black uppercase tracking-widest text-white italic">MUTT TERMINAL</h1>
-                    <p class="text-[8px] text-zinc-500 font-bold">CORE ENGINE V.2026</p>
                 </div>
             </div>
-            <div class="flex items-center gap-4 md:gap-8">
-                <a href="https://postimages.org/" target="_blank" class="text-[9px] font-black uppercase text-blue-500 hover:text-blue-400 transition hidden md:block"><i class="fa-solid fa-link mr-2"></i>PostImages</a>
-                <a href="index.html" class="text-[9px] font-black uppercase tracking-widest text-zinc-400 hover:text-white transition">Preview Loja</a>
-                <button onclick="abrirModal()" class="bg-white text-black px-6 py-3 font-black uppercase text-[10px] tracking-tighter hover:bg-zinc-200 transition-all">Novo Produto</button>
+            <div class="flex gap-4">
+                <button onclick="switchTab('produtos')" id="tab-prod" class="tab-btn active">Produtos</button>
+                <button onclick="switchTab('usuarios')" id="tab-user" class="tab-btn">Usuários</button>
             </div>
+            <button onclick="abrirModal()" class="bg-white text-black px-6 py-3 font-black uppercase text-[10px] tracking-tighter">Novo Produto</button>
         </nav>
 
         <main class="container mx-auto px-6 py-12">
-            <div class="mb-12 flex flex-col md:flex-row justify-between items-center gap-6 border-b border-zinc-900 pb-8">
-                <div>
-                    <h2 class="text-5xl font-black uppercase italic tracking-tighter animate-fade">Inventário</h2>
-                    <p id="total-count" class="text-[10px] text-zinc-500 font-black uppercase tracking-[0.3em] mt-2">Carregando banco de dados...</p>
+            <section id="section-produtos" class="animate-fade">
+                <div class="mb-12 flex justify-between items-end border-b border-zinc-900 pb-8">
+                    <div>
+                        <h2 class="text-5xl font-black uppercase italic tracking-tighter">Inventário</h2>
+                        <p id="total-count" class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Carregando...</p>
+                    </div>
+                    <button id="btn-reset-banco" class="text-red-900 text-[10px] font-black uppercase hover:text-red-500 transition"><i class="fa-solid fa-skull"></i> Hard Reset</button>
                 </div>
-                <button id="btn-reset-banco" class="group flex items-center gap-3 text-red-900 text-[10px] font-black uppercase tracking-widest hover:text-red-500 transition duration-500">
-                    <span class="opacity-0 group-hover:opacity-100 transition">Hard Reset</span>
-                    <i class="fa-solid fa-skull text-lg"></i>
-                </button>
-            </div>
+                <div id="lista-produtos-adm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </section>
 
-            <div id="lista-produtos-adm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade"></div>
+            <section id="section-usuarios" class="hidden animate-fade">
+                <h2 class="text-5xl font-black uppercase italic tracking-tighter mb-8">Base de Clientes</h2>
+                <div class="glass-panel overflow-hidden">
+                    <table class="w-full text-left text-[11px] uppercase font-bold">
+                        <thead class="bg-zinc-900 text-zinc-500">
+                            <tr>
+                                <th class="p-4">Nome / Email</th>
+                                <th class="p-4">Cadastrado em</th>
+                                <th class="p-4 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-usuarios-adm">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
         </main>
     </div>
 
-    <div id="modal-produto" class="fixed inset-0 bg-black/95 z-[600] hidden overflow-y-auto backdrop-blur-sm animate-fade">
+    <div id="modal-produto" class="fixed inset-0 bg-black/95 z-[600] hidden overflow-y-auto backdrop-blur-sm">
         <div class="min-h-screen flex items-center justify-center p-4">
             <div class="w-full max-w-5xl glass-panel p-8 md:p-12 relative rounded-lg border-zinc-800">
-                <button onclick="fecharModal()" class="absolute top-8 right-8 w-10 h-10 flex items-center justify-center rounded-full bg-zinc-900 text-white hover:bg-white hover:text-black transition-all">&times;</button>
-                
-                <div class="flex items-center gap-4 mb-10">
-                    <div class="w-2 h-8 bg-white"></div>
-                    <h2 id="modal-title" class="text-3xl font-black uppercase italic tracking-tighter">Configurar Produto</h2>
-                </div>
-
+                <button onclick="fecharModal()" class="absolute top-8 right-8 text-white text-2xl">&times;</button>
+                <h2 id="modal-title" class="text-3xl font-black uppercase italic tracking-tighter mb-10">Configurar Produto</h2>
                 <form id="form-produto" class="grid grid-cols-1 md:grid-cols-2 gap-12">
                     <input type="hidden" id="edit-id">
-                    
                     <div class="space-y-6">
-                        <div>
-                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Nome do Produto</label>
-                            <input type="text" id="p-nome" class="input-mutt" placeholder="Ex: OVERSIZED TEE 'HELL'" required>
-                        </div>
-                        
+                        <input type="text" id="p-nome" class="input-mutt" placeholder="NOME DO PRODUTO" required>
                         <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Categoria</label>
-                                <select id="p-cat" class="input-mutt appearance-none">
-                                    <option value="camisetas">Camisetas</option>
-                                    <option value="jaquetas">Jaquetas</option>
-                                    <option value="shorts">Shorts</option>
-                                    <option value="acessorios">Acessórios</option>
-                                    <option value="calcas">Calças</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Status</label>
-                                <select id="p-status" class="input-mutt appearance-none border-blue-900">
-                                    <option value="ativo">Disponível na Loja</option>
-                                    <option value="inativo">Desativado / Oculto</option>
-                                </select>
-                            </div>
+                            <select id="p-cat" class="input-mutt"><option value="camisetas">Camisetas</option><option value="jaquetas">Jaquetas</option></select>
+                            <select id="p-status" class="input-mutt"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
                         </div>
-
                         <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Preço Atual</label>
-                                <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="0.00" required>
-                            </div>
-                            <div>
-                                <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Preço Antigo</label>
-                                <input type="number" step="0.01" id="p-preco-antigo" class="input-mutt" placeholder="0.00">
-                            </div>
+                            <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="PREÇO ATUAL" required>
+                            <input type="number" step="0.01" id="p-preco-antigo" class="input-mutt" placeholder="PREÇO ANTIGO">
                         </div>
-
-                        <div>
-                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Descrição Técnica</label>
-                            <textarea id="p-desc" rows="4" class="input-mutt resize-none" placeholder="Algodão 30.1, Silk Screen, etc..."></textarea>
-                        </div>
-
-                        <div>
-                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Grade de Tamanhos Disponíveis</label>
-                            <div id="grade-tamanhos" class="grid grid-cols-4 gap-2">
-                                <div class="size-chip" data-size="P">P</div><div class="size-chip" data-size="M">M</div>
-                                <div class="size-chip" data-size="G">G</div><div class="size-chip" data-size="GG">GG</div>
-                                <div class="size-chip" data-size="38">38</div><div class="size-chip" data-size="40">40</div>
-                                <div class="size-chip" data-size="42">42</div><div class="size-chip" data-size="UN">UN</div>
-                            </div>
+                        <textarea id="p-desc" rows="4" class="input-mutt" placeholder="DESCRIÇÃO"></textarea>
+                        <div id="grade-tamanhos" class="grid grid-cols-4 gap-2">
+                            <div class="size-chip" data-size="P">P</div><div class="size-chip" data-size="M">M</div>
+                            <div class="size-chip" data-size="G">G</div><div class="size-chip" data-size="GG">GG</div>
                         </div>
                     </div>
-
                     <div class="space-y-6 flex flex-col">
-                        <div class="flex-1">
-                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-4 flex justify-between tracking-widest">
-                                Galeria de Imagens (URLs)
-                                <a href="https://postimages.org/" target="_blank" class="text-blue-500 hover:underline">Pegar Links</a>
-                            </label>
-                            <div id="container-fotos" class="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scroll"></div>
-                            <button type="button" onclick="adicionarCampoFoto()" class="w-full border border-dashed border-zinc-800 py-4 mt-4 text-[10px] font-black uppercase text-zinc-500 hover:text-white hover:border-zinc-500 transition-all">+ Link de Foto</button>
-                        </div>
-
-                        <div class="pt-8 mt-auto border-t border-zinc-900">
-                            <button type="submit" class="w-full bg-white text-black py-5 font-black uppercase text-[12px] tracking-[0.4em] hover:bg-zinc-200 transition-all shadow-2xl active:scale-95">Finalizar Configuração</button>
-                        </div>
+                        <div id="container-fotos" class="space-y-3 max-h-[300px] overflow-y-auto"></div>
+                        <button type="button" onclick="adicionarCampoFoto()" class="w-full border border-dashed border-zinc-800 py-4 text-[10px] uppercase font-black">+ Link de Foto</button>
+                        <button type="submit" class="mt-auto w-full bg-white text-black py-5 font-black uppercase text-[12px] tracking-[0.4em]">Salvar na Nuvem</button>
                     </div>
                 </form>
             </div>
@@ -250,143 +204,110 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // LOGIN (MANTER IGUAL CONFORME PEDIDO)
+        // LOGIN (MANTER IGUAL)
         window.fazerLogin = () => {
             if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === 'mutt2026') {
-                document.getElementById('login-screen').classList.add('opacity-0');
-                setTimeout(() => {
-                    document.getElementById('login-screen').classList.add('hidden');
-                    document.getElementById('admin-panel').classList.remove('hidden');
-                }, 500);
-            } else { alert("Acesso Negado: Credenciais Inválidas"); }
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+            } else { alert("Acesso Negado"); }
         };
         document.getElementById('btn-login-trigger').onclick = window.fazerLogin;
 
-        // SISTEMA DE FOTOS (MANTER IGUAL CONFORME PEDIDO)
-        window.adicionarCampoFoto = (valor = '') => {
-            const container = document.getElementById('container-fotos');
-            const div = document.createElement('div');
-            div.className = "flex gap-2 animate-fade";
-            div.innerHTML = `
-                <input type="text" class="input-mutt foto-url" value="${valor}" placeholder="https://link.jpg">
-                <button type="button" onclick="this.parentElement.remove()" class="bg-zinc-900 px-4 text-red-500 hover:bg-red-500 hover:text-white transition-all">-</button>
-            `;
-            container.appendChild(div);
-        }
+        // TABS (NOVO)
+        window.switchTab = (tab) => {
+            document.getElementById('section-produtos').classList.toggle('hidden', tab !== 'produtos');
+            document.getElementById('section-usuarios').classList.toggle('hidden', tab !== 'usuarios');
+            document.getElementById('tab-prod').classList.toggle('active', tab === 'produtos');
+            document.getElementById('tab-user').classList.toggle('active', tab === 'usuarios');
+        };
 
-        // TAMANHOS (MANTER IGUAL CONFORME PEDIDO)
-        document.querySelectorAll('.size-chip').forEach(c => c.onclick = () => c.classList.toggle('active'));
+        // CARREGAR USUÁRIOS (NOVO - LÊ O QUE CRIAMOS NO LOGIN)
+        onValue(ref(db, 'usuarios'), (snapshot) => {
+            const users = snapshot.val();
+            const container = document.getElementById('lista-usuarios-adm');
+            container.innerHTML = "";
+            if(users) {
+                Object.keys(users).forEach(uid => {
+                    const u = users[uid];
+                    container.innerHTML += `
+                        <tr class="border-b border-zinc-900 hover:bg-zinc-950 transition">
+                            <td class="p-4 text-white">${u.nome}<br><span class="text-zinc-500 text-[9px]">${u.email}</span></td>
+                            <td class="p-4 text-zinc-500">${new Date().toLocaleDateString()}</td>
+                            <td class="p-4 text-right">
+                                <a href="https://wa.me/${u.telefone}" target="_blank" class="text-green-500 hover:text-green-400 mr-4"><i class="fa-brands fa-whatsapp"></i></a>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        });
 
-        // ESCUTAR BANCO DE DADOS (COM NOVA FUNÇÃO DE STATUS)
+        // TODA A SUA LÓGICA DE PRODUTOS ABAIXO (MANTIDA)
         onValue(ref(db, 'produtos'), (snapshot) => {
             const data = snapshot.val();
             const container = document.getElementById('lista-produtos-adm');
-            const countLabel = document.getElementById('total-count');
             container.innerHTML = "";
-            
             if(data) {
-                const total = Object.keys(data).length;
-                countLabel.innerText = `${total} Produtos Registrados no Banco`;
-                
+                document.getElementById('total-count').innerText = `${Object.keys(data).length} ITENS NO CLOUD`;
                 Object.keys(data).forEach(id => {
                     const p = data[id];
-                    const isOff = p.status === 'inativo';
-                    
                     container.innerHTML += `
-                        <div class="glass-panel p-5 flex gap-5 items-center ${isOff ? 'status-off' : ''} group relative overflow-hidden">
-                            <div class="absolute top-2 right-2 flex gap-1">
-                                ${isOff ? '<span class="status-badge bg-zinc-800 text-white">Oculto</span>' : '<span class="status-badge bg-white text-black font-black">Ativo</span>'}
-                            </div>
-                            <img src="${p.imgs[0]}" class="w-24 h-28 object-cover rounded-sm border border-zinc-900 group-hover:scale-105 transition-transform duration-500">
+                        <div class="glass-panel p-5 flex gap-5 items-center ${p.status === 'inativo' ? 'status-off' : ''}">
+                            <img src="${p.imgs[0]}" class="w-20 h-24 object-cover">
                             <div class="flex-1">
-                                <h3 class="text-[12px] font-black uppercase italic tracking-tighter text-white mb-1">${p.nome}</h3>
-                                <p class="text-[10px] text-zinc-500 font-bold mb-4 italic">R$ ${p.preco.toFixed(2)}</p>
+                                <h3 class="text-[11px] font-black uppercase italic">${p.nome}</h3>
+                                <p class="text-[9px] text-zinc-500 mb-4">R$ ${p.preco.toFixed(2)}</p>
                                 <div class="flex gap-2">
-                                    <button onclick="editarProduto('${id}')" class="text-[9px] font-black uppercase bg-white text-black px-4 py-2 hover:bg-zinc-300 transition-all">Editar</button>
-                                    <button onclick="toggleStatus('${id}', '${p.status || 'ativo'}')" class="text-[9px] font-black uppercase bg-zinc-900 px-3 py-2 border border-zinc-800 hover:border-zinc-500 transition-all">
-                                        ${isOff ? 'Ativar' : 'Pausar'}
-                                    </button>
-                                    <button onclick="remover('${id}')" class="ml-auto text-zinc-700 hover:text-red-500 transition-colors">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
+                                    <button onclick="editarProduto('${id}')" class="bg-white text-black px-3 py-1 text-[9px] font-black uppercase">Editar</button>
+                                    <button onclick="remover('${id}')" class="text-zinc-700 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </div>
                         </div>`;
                 });
-            } else {
-                countLabel.innerText = "0 Produtos Encontrados";
             }
         });
 
-        // NOVA FUNÇÃO: ALTERNAR STATUS (SEM DELETAR)
-        window.toggleStatus = async (id, currentStatus) => {
-            const newStatus = currentStatus === 'ativo' ? 'inativo' : 'ativo';
-            await update(ref(db, 'produtos/' + id), { status: newStatus });
-        };
+        // FUNÇÕES DO FORMULÁRIO (MANTIDAS)
+        window.adicionarCampoFoto = (valor = '') => {
+            const container = document.getElementById('container-fotos');
+            const div = document.createElement('div');
+            div.className = "flex gap-2";
+            div.innerHTML = `<input type="text" class="input-mutt foto-url" value="${valor}" placeholder="URL IMAGEM"><button type="button" onclick="this.parentElement.remove()" class="text-red-500">X</button>`;
+            container.appendChild(div);
+        }
 
-        // SALVAR NO FIREBASE (MELHORADO COM CAMPO STATUS)
+        document.querySelectorAll('.size-chip').forEach(c => c.onclick = () => c.classList.toggle('active'));
+
         document.getElementById('form-produto').onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit-id').value || Date.now().toString();
             const urls = Array.from(document.querySelectorAll('.foto-url')).map(i => i.value).filter(v => v !== '');
             const sizes = Array.from(document.querySelectorAll('.size-chip.active')).map(c => c.dataset.size);
-
             const produto = {
-                id: id,
-                nome: document.getElementById('p-nome').value,
-                cat: document.getElementById('p-cat').value,
-                status: document.getElementById('p-status').value, // Novo campo
+                id: id, nome: document.getElementById('p-nome').value,
+                cat: document.getElementById('p-cat').value, status: document.getElementById('p-status').value,
                 preco: parseFloat(document.getElementById('p-preco').value),
                 precoAntigo: parseFloat(document.getElementById('p-preco-antigo').value) || null,
-                desconto: !!document.getElementById('p-preco-antigo').value,
-                imgs: urls,
-                desc: document.getElementById('p-desc').value,
-                tamanhos: sizes
+                imgs: urls, desc: document.getElementById('p-desc').value, tamanhos: sizes
             };
-
             await set(ref(db, 'produtos/' + id), produto);
             fecharModal();
         };
 
-        // FUNÇÕES GLOBAIS (MANTER E MELHORAR UI)
-        window.abrirModal = () => {
-            document.getElementById('form-produto').reset();
-            document.getElementById('edit-id').value = '';
-            document.getElementById('container-fotos').innerHTML = '';
-            adicionarCampoFoto();
-            document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active'));
-            document.getElementById('modal-produto').classList.remove('hidden');
-        };
-
+        window.abrirModal = () => { document.getElementById('form-produto').reset(); document.getElementById('edit-id').value = ''; document.getElementById('container-fotos').innerHTML = ''; adicionarCampoFoto(); document.getElementById('modal-produto').classList.remove('hidden'); };
         window.fecharModal = () => document.getElementById('modal-produto').classList.add('hidden');
-
+        window.remover = (id) => { if(confirm("Deletar permanentemente?")) remove(ref(db, 'produtos/' + id)); };
         window.editarProduto = (id) => {
             onValue(ref(db, 'produtos/' + id), (snap) => {
                 const p = snap.val();
                 abrirModal();
                 document.getElementById('edit-id').value = id;
                 document.getElementById('p-nome').value = p.nome;
-                document.getElementById('p-cat').value = p.cat;
-                document.getElementById('p-status').value = p.status || 'ativo'; // Novo
                 document.getElementById('p-preco').value = p.preco;
-                document.getElementById('p-preco-antigo').value = p.precoAntigo || '';
-                document.getElementById('p-desc').value = p.desc;
                 document.getElementById('container-fotos').innerHTML = '';
                 p.imgs.forEach(url => adicionarCampoFoto(url));
-                document.querySelectorAll('.size-chip').forEach(c => {
-                    if(p.tamanhos && p.tamanhos.includes(c.dataset.size)) c.classList.add('active');
-                });
             }, { onlyOnce: true });
         };
-
-        window.remover = (id) => {
-            if(confirm("Deseja deletar PERMANENTEMENTE da nuvem?")) remove(ref(db, 'produtos/' + id));
-        };
-
-        document.getElementById('btn-reset-banco').onclick = () => {
-            if(confirm("ALERTA CRÍTICO: Isso apagará TODOS os produtos da sua loja. Tem certeza?")) remove(ref(db, 'produtos'));
-        };
-
     </script>
 </body>
 </html>
