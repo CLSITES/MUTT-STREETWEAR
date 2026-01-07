@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MUTT STREETWEAR | Official Store</title>
+    <title>MUTT STREETWEAR | LOJA OFICIAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -20,13 +20,19 @@
         #mobile-menu { transition: transform 0.3s ease-in-out; }
         .menu-open { transform: translateX(0); }
         .menu-closed { transform: translateX(-100%); }
+
+        /* Estilos do Slider */
+        .snap-x { scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+        .snap-center { scroll-snap-align: center; }
     </style>
 </head>
 <body>
 
     <header class="sticky top-0 z-[60] bg-black border-b border-zinc-900">
         <div class="container mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
-            
+            <a href="https://wa.me/551194984188337" target="_blank" class="fixed bottom-6 right-6 z-[50] bg-[#25d366] w-14 h-14 rounded-full flex items-center justify-center text-white text-2xl shadow-2xl hover:scale-110 transition-transform md:bottom-10 md:right-10">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
             <div class="flex items-center gap-4 w-24">
                 <button onclick="toggleMenu()" class="md:hidden text-white text-xl">
                     <i class="fa-solid fa-bars-staggered"></i>
@@ -77,7 +83,7 @@
     <main class="container mx-auto px-4 md:px-6 py-12 md:py-16">
         <div class="mb-12 border-l-4 border-white pl-6">
             <h1 id="page-title" class="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-none">Categoria</h1>
-            <p class="text-zinc-500 text-[9px] md:text-[10px] font-black uppercase tracking-[0.5em] mt-3">Mutt Streetwear / 2026 Edition</p>
+            <p class="text-zinc-500 text-[9px] md:text-[10px] font-black uppercase tracking-[0.5em] mt-3">Mutt Streetwear / 2026 ESTILO</p>
         </div>
 
         <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-12"></div>
@@ -94,10 +100,17 @@
             <button onclick="closeModal()" class="absolute top-4 right-4 text-3xl z-50 text-white/50 hover:text-white">&times;</button>
             
             <div class="flex flex-col md:flex-row w-full">
-                <div class="w-full md:w-1/2 bg-zinc-900">
-                    <div class="aspect-[3/4] overflow-hidden">
-                        <img id="modal-img" src="" class="w-full h-full object-cover">
-                    </div>
+                <div class="w-full md:w-1/2 bg-zinc-900 relative group">
+                    <button onclick="scrollSlider(-1)" class="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-white hover:text-black w-10 h-10 rounded-full items-center justify-center transition-all opacity-0 group-hover:opacity-100">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+                    <button onclick="scrollSlider(1)" class="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-white hover:text-black w-10 h-10 rounded-full items-center justify-center transition-all opacity-0 group-hover:opacity-100">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+
+                    <div id="modal-slider" class="flex overflow-x-auto snap-x no-scrollbar aspect-[3/4] bg-black scroll-smooth">
+                        </div>
+
                     <div id="modal-thumbnails" class="flex gap-2 p-4 bg-black overflow-x-auto no-scrollbar"></div>
                 </div>
 
@@ -119,7 +132,7 @@
                     </div>
 
                     <button id="add-to-cart-btn" class="w-full bg-white text-black py-4 md:py-5 font-black uppercase text-[11px] tracking-[0.2em] hover:bg-zinc-300 transition shadow-2xl">
-                        Adicionar à Bag
+                        Adicionar ao carrinho
                     </button>
                 </div>
             </div>
@@ -143,8 +156,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // CONFIGURAÇÃO DA CATEGORIA (Mudar conforme a página)
-        const categoriaAtual = shorts'; 
+        const categoriaAtual = 'shorts'; 
         
         let globalProducts = [];
         let selectedSize = "";
@@ -154,6 +166,12 @@
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('menu-closed');
             menu.classList.toggle('menu-open');
+        };
+
+        // FUNÇÃO DAS SETAS DO PC
+        window.scrollSlider = (direction) => {
+            const slider = document.getElementById('modal-slider');
+            slider.scrollBy({ left: direction * slider.clientWidth, behavior: 'smooth' });
         };
 
         onValue(ref(db, 'produtos'), (snapshot) => {
@@ -188,7 +206,14 @@
             const p = globalProducts.find(x => x.id == id);
             if(!p) return;
             selectedSize = "";
-            document.getElementById('modal-img').src = p.imgs[0];
+
+            // Gerar o slider de imagens
+            const slider = document.getElementById('modal-slider');
+            slider.innerHTML = p.imgs.map((img, idx) => `
+                <img src="${img}" class="w-full h-full object-cover flex-shrink-0 snap-center">
+            `).join('');
+            slider.scrollLeft = 0;
+
             document.getElementById('modal-name').innerText = p.nome;
             document.getElementById('modal-price').innerText = `R$ ${p.preco.toFixed(2)}`;
             document.getElementById('modal-discount').innerText = p.precoAntigo ? `R$ ${p.precoAntigo.toFixed(2)}` : '';
@@ -196,7 +221,7 @@
 
             const thumbContainer = document.getElementById('modal-thumbnails');
             thumbContainer.innerHTML = p.imgs.map((img, idx) => `
-                <img src="${img}" class="w-12 h-16 object-cover cursor-pointer opacity-30 transition ${idx === 0 ? 'thumb-active' : ''}" onclick="changeModalImg(this, '${img}')">
+                <img src="${img}" class="w-12 h-16 object-cover cursor-pointer opacity-30 transition ${idx === 0 ? 'thumb-active' : ''}" onclick="changeModalImg(this, ${idx})">
             `).join('');
 
             const sizeArea = document.getElementById('modal-sizes');
@@ -215,8 +240,9 @@
             document.body.style.overflow = 'hidden';
         };
 
-        window.changeModalImg = (el, src) => {
-            document.getElementById('modal-img').src = src;
+        window.changeModalImg = (el, idx) => {
+            const slider = document.getElementById('modal-slider');
+            slider.scrollTo({ left: idx * slider.clientWidth, behavior: 'smooth' });
             document.querySelectorAll('#modal-thumbnails img').forEach(i => i.classList.remove('thumb-active'));
             el.classList.add('thumb-active');
         };
