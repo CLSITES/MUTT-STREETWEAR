@@ -10,19 +10,34 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; overflow-x: hidden; }
         .nav-link { transition: all 0.3s ease; opacity: 0.6; }
-        .nav-link:hover, .active-link { opacity: 1; border-bottom: 1px solid white; }
+        .nav-link:hover { opacity: 1; }
         .modal-blur { backdrop-filter: blur(15px); background: rgba(0,0,0,0.95); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .size-btn.active { background: white; color: black; border-color: white; }
         .thumb-active { border: 2px solid white; opacity: 1 !important; }
+        
+        /* Menu Mobile */
+        #mobile-menu { transition: transform 0.3s ease-in-out; }
+        .menu-open { transform: translateX(0); }
+        .menu-closed { transform: translateX(-100%); }
     </style>
 </head>
 <body>
 
-    <header class="sticky top-0 z-50 bg-black border-b border-zinc-900">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="index.html" class="w-20 hover:scale-110 transition-transform">
-                <img src="https://image2url.com/r2/bucket1/images/1767740170915-55b841e3-1465-4bb9-8927-b83b3bd8824d.jpg" alt="MUTT" class="w-full invert">
+    <header class="sticky top-0 z-[60] bg-black border-b border-zinc-900">
+        <div class="container mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
+            
+            <div class="flex items-center gap-4 w-24">
+                <button onclick="toggleMenu()" class="md:hidden text-white text-xl">
+                    <i class="fa-solid fa-bars-staggered"></i>
+                </button>
+                <a href="index.html" class="text-white hover:text-zinc-400 transition text-xl hidden md:block" title="Ir para o Início">
+                    <i class="fa-solid fa-house"></i>
+                </a>
+            </div>
+
+            <a href="index.html" class="w-20 md:w-24">
+                <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" alt="MUTT" class="w-full">
             </a>
 
             <nav class="hidden md:flex space-x-8 font-black uppercase text-[10px] tracking-[0.2em]">
@@ -33,7 +48,10 @@
                 <a href="calcas.html" class="nav-link">Calças</a>
             </nav>
 
-            <div class="flex items-center space-x-5">
+            <div class="flex items-center space-x-5 w-24 justify-end">
+                <a href="index.html" class="md:hidden text-white text-lg">
+                    <i class="fa-solid fa-house"></i>
+                </a>
                 <a href="carrinho.html" class="relative">
                     <i class="fa-solid fa-bag-shopping text-xl"></i>
                     <span id="cart-count" class="absolute -top-2 -right-2 bg-white text-black text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-black">0</span>
@@ -42,13 +60,27 @@
         </div>
     </header>
 
-    <main class="container mx-auto px-6 py-16">
-        <div class="mb-16">
-            <h1 id="page-title" class="text-6xl font-black italic uppercase tracking-tighter">Categoria</h1>
-            <p class="text-zinc-500 text-[10px] font-black uppercase tracking-[0.5em] mt-2">Mutt Streetwear / 2026 Edition</p>
+    <div id="mobile-menu" class="fixed inset-0 z-[70] bg-black menu-closed md:hidden">
+        <div class="p-6 flex flex-col h-full">
+            <button onclick="toggleMenu()" class="self-end text-3xl mb-12">&times;</button>
+            <nav class="flex flex-col space-y-8 text-2xl font-black uppercase italic tracking-tighter">
+                <a href="index.html">Início</a>
+                <a href="camisetas.html">Camisetas</a>
+                <a href="jaquetas.html">Jaquetas</a>
+                <a href="shorts.html">Shorts</a>
+                <a href="acessorios.html">Acessórios</a>
+                <a href="calcas.html">Calças</a>
+            </nav>
+        </div>
+    </div>
+
+    <main class="container mx-auto px-4 md:px-6 py-12 md:py-16">
+        <div class="mb-12 border-l-4 border-white pl-6">
+            <h1 id="page-title" class="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-none">Categoria</h1>
+            <p class="text-zinc-500 text-[9px] md:text-[10px] font-black uppercase tracking-[0.5em] mt-3">Mutt Streetwear / 2026 Edition</p>
         </div>
 
-        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12"></div>
+        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-12"></div>
 
         <div class="mt-20 border-t border-zinc-900 pt-10 text-center">
             <a href="index.html" class="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition">
@@ -57,37 +89,39 @@
         </div>
     </main>
 
-    <div id="product-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 modal-blur overflow-y-auto">
-        <div class="bg-zinc-950 border border-zinc-900 w-full max-w-5xl rounded-3xl overflow-hidden flex flex-col md:flex-row relative">
-            <button onclick="closeModal()" class="absolute top-6 right-6 text-3xl z-50 text-white/50 hover:text-white">&times;</button>
+    <div id="product-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-2 md:p-4 modal-blur overflow-y-auto">
+        <div class="bg-zinc-950 border border-zinc-900 w-full max-w-5xl rounded-2xl md:rounded-3xl overflow-hidden flex flex-col relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-3xl z-50 text-white/50 hover:text-white">&times;</button>
             
-            <div class="w-full md:w-1/2 flex flex-col bg-zinc-900">
-                <div class="aspect-[3/4] overflow-hidden flex items-center justify-center">
-                    <img id="modal-img" src="" class="w-full h-full object-cover">
-                </div>
-                <div id="modal-thumbnails" class="flex gap-2 p-4 bg-black overflow-x-auto no-scrollbar"></div>
-            </div>
-
-            <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-                <h2 id="modal-name" class="text-4xl font-black uppercase italic mb-2 tracking-tighter"></h2>
-                <div class="flex items-center gap-4 mb-8">
-                    <span id="modal-price" class="text-2xl font-bold"></span>
-                    <span id="modal-discount" class="text-sm text-zinc-600 line-through"></span>
-                </div>
-                
-                <div class="mb-8">
-                    <h3 class="text-[10px] font-black uppercase text-zinc-500 mb-3 tracking-widest italic">Descrição</h3>
-                    <p id="modal-desc" class="text-sm text-zinc-400 leading-relaxed"></p>
+            <div class="flex flex-col md:flex-row w-full">
+                <div class="w-full md:w-1/2 bg-zinc-900">
+                    <div class="aspect-[3/4] overflow-hidden">
+                        <img id="modal-img" src="" class="w-full h-full object-cover">
+                    </div>
+                    <div id="modal-thumbnails" class="flex gap-2 p-4 bg-black overflow-x-auto no-scrollbar"></div>
                 </div>
 
-                <div class="mb-10">
-                    <h3 class="text-[10px] font-black uppercase text-zinc-500 mb-3 tracking-widest italic">Selecione o Tamanho</h3>
-                    <div id="modal-sizes" class="flex flex-wrap gap-2"></div>
-                </div>
+                <div class="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center">
+                    <h2 id="modal-name" class="text-3xl md:text-4xl font-black uppercase italic mb-2 tracking-tighter"></h2>
+                    <div class="flex items-center gap-4 mb-6">
+                        <span id="modal-price" class="text-xl md:text-2xl font-bold"></span>
+                        <span id="modal-discount" class="text-sm text-zinc-600 line-through"></span>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-[10px] font-black uppercase text-zinc-500 mb-2 tracking-widest italic">Descrição</h3>
+                        <p id="modal-desc" class="text-sm text-zinc-400 leading-relaxed"></p>
+                    </div>
 
-                <button id="add-to-cart-btn" class="w-full bg-white text-black py-5 font-black uppercase text-[11px] tracking-[0.2em] hover:bg-zinc-300 transition shadow-2xl">
-                    Adicionar à Bag
-                </button>
+                    <div class="mb-8">
+                        <h3 class="text-[10px] font-black uppercase text-zinc-500 mb-3 tracking-widest italic">Tamanho</h3>
+                        <div id="modal-sizes" class="flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <button id="add-to-cart-btn" class="w-full bg-white text-black py-4 md:py-5 font-black uppercase text-[11px] tracking-[0.2em] hover:bg-zinc-300 transition shadow-2xl">
+                        Adicionar à Bag
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -96,7 +130,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDr-W03cp72jHiyALGWlI4vBfxH2xrC-6w",
             authDomain: "mutt-streetwear.firebaseapp.com",
@@ -110,14 +143,19 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // CONFIGURAÇÃO DA PÁGINA (MUDE AQUI EM CADA ARQUIVO)
+        // CONFIGURAÇÃO DA CATEGORIA (Mudar conforme a página)
         const categoriaAtual = 'camisetas'; 
         
         let globalProducts = [];
         let selectedSize = "";
         let carrinho = JSON.parse(localStorage.getItem('mutt_cart')) || [];
 
-        // BUSCAR DADOS DO FIREBASE
+        window.toggleMenu = () => {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('menu-closed');
+            menu.classList.toggle('menu-open');
+        };
+
         onValue(ref(db, 'produtos'), (snapshot) => {
             const data = snapshot.val();
             const grid = document.getElementById('product-grid');
@@ -125,63 +163,54 @@
             document.getElementById('cart-count').innerText = carrinho.length;
 
             if (!data) {
-                grid.innerHTML = `<p class="col-span-full text-center text-zinc-600 uppercase font-black py-20 tracking-widest text-xs">Aguardando drop em ${categoriaAtual}.</p>`;
+                grid.innerHTML = `<p class="col-span-full text-center text-zinc-600 py-20 uppercase font-black text-xs">Em breve.</p>`;
                 return;
             }
 
-            // Transformar objeto em array e filtrar por categoria
             globalProducts = Object.values(data);
             const filtrados = globalProducts.filter(p => p.cat === categoriaAtual);
 
             grid.innerHTML = filtrados.map(p => `
                 <div class="group cursor-pointer" onclick="openProductModal('${p.id}')">
-                    <div class="relative aspect-[3/4] bg-zinc-900 mb-4 overflow-hidden border border-zinc-900">
+                    <div class="relative aspect-[3/4] bg-zinc-900 mb-3 overflow-hidden border border-zinc-900">
                         <img src="${p.imgs[0]}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
-                        ${p.precoAntigo ? `<span class="absolute top-4 left-4 bg-white text-black text-[9px] font-black px-2 py-1 uppercase italic">Sale</span>` : ''}
-                        <div class="absolute bottom-4 left-4 bg-black/80 px-3 py-1 text-[9px] font-black uppercase italic tracking-widest opacity-0 group-hover:opacity-100 transition">Ver Detalhes</div>
+                        ${p.precoAntigo ? `<span class="absolute top-2 left-2 bg-white text-black text-[8px] font-black px-1.5 py-0.5 uppercase">Sale</span>` : ''}
                     </div>
-                    <h3 class="text-[11px] font-black uppercase tracking-widest text-zinc-300 mb-1">${p.nome}</h3>
-                    <div class="flex gap-3 items-center">
-                        <span class="text-white text-xs font-bold italic">R$ ${p.preco.toFixed(2)}</span>
-                        ${p.precoAntigo ? `<span class="text-[10px] text-zinc-600 line-through font-bold italic">R$ ${p.precoAntigo.toFixed(2)}</span>` : ''}
+                    <h3 class="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-zinc-300 mb-1 truncate">${p.nome}</h3>
+                    <div class="flex gap-2 items-center">
+                        <span class="text-white text-xs font-bold">R$ ${p.preco.toFixed(2)}</span>
                     </div>
                 </div>
             `).join('');
         });
 
-        // FUNÇÕES DO MODAL
         window.openProductModal = (id) => {
             const p = globalProducts.find(x => x.id == id);
             if(!p) return;
-            
             selectedSize = "";
             document.getElementById('modal-img').src = p.imgs[0];
             document.getElementById('modal-name').innerText = p.nome;
             document.getElementById('modal-price').innerText = `R$ ${p.preco.toFixed(2)}`;
             document.getElementById('modal-discount').innerText = p.precoAntigo ? `R$ ${p.precoAntigo.toFixed(2)}` : '';
-            document.getElementById('modal-desc').innerText = p.desc || "Peça exclusiva Mutt Streetwear.";
+            document.getElementById('modal-desc').innerText = p.desc || "Peça exclusiva Mutt.";
 
-            // Thumbnails
             const thumbContainer = document.getElementById('modal-thumbnails');
             thumbContainer.innerHTML = p.imgs.map((img, idx) => `
-                <img src="${img}" class="w-16 h-20 object-cover cursor-pointer opacity-30 hover:opacity-100 transition rounded ${idx === 0 ? 'thumb-active' : ''}" 
-                     onclick="changeModalImg(this, '${img}')">
+                <img src="${img}" class="w-12 h-16 object-cover cursor-pointer opacity-30 transition ${idx === 0 ? 'thumb-active' : ''}" onclick="changeModalImg(this, '${img}')">
             `).join('');
 
-            // Tamanhos
             const sizeArea = document.getElementById('modal-sizes');
-            if(p.tamanhos && p.tamanhos.length > 0) {
-                sizeArea.innerHTML = p.tamanhos.map(t => `
-                    <button onclick="selectModalSize(this, '${t}')" class="size-btn border border-zinc-800 px-6 py-2 text-[10px] font-black uppercase hover:border-white transition">
-                        ${t}
-                    </button>
-                `).join('');
-            } else {
-                sizeArea.innerHTML = "<p class='text-zinc-600 text-[10px] uppercase font-bold'>Tamanho Único</p>";
-                selectedSize = "UN";
-            }
+            sizeArea.innerHTML = (p.tamanhos || []).map(t => `
+                <button onclick="selectModalSize(this, '${t}')" class="size-btn border border-zinc-800 px-4 py-2 text-[10px] font-black uppercase hover:border-white transition">${t}</button>
+            `).join('');
 
-            document.getElementById('add-to-cart-btn').onclick = () => addToCart(p);
+            document.getElementById('add-to-cart-btn').onclick = () => {
+                if (!selectedSize && p.tamanhos?.length > 0) { alert("ESCOLHA O TAMANHO"); return; }
+                carrinho.push({ ...p, tamanho: selectedSize || 'UN', cartId: Date.now() });
+                localStorage.setItem('mutt_cart', JSON.stringify(carrinho));
+                location.href = 'carrinho.html';
+            };
+
             document.getElementById('product-modal').classList.replace('hidden', 'flex');
             document.body.style.overflow = 'hidden';
         };
@@ -196,13 +225,6 @@
             document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             selectedSize = size;
-        };
-
-        window.addToCart = (p) => {
-            if (!selectedSize) { alert("SELECIONE UM TAMANHO PRIMEIRO."); return; }
-            carrinho.push({ ...p, tamanho: selectedSize, cartId: Date.now() });
-            localStorage.setItem('mutt_cart', JSON.stringify(carrinho));
-            location.href = 'carrinho.html';
         };
 
         window.closeModal = () => {
