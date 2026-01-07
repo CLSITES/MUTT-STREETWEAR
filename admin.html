@@ -3,56 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MUTT | SYSTEM TERMINAL</title>
+    <title>MUTT | TERMINAL DE CONTROLE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
-        
-        .input-mutt { 
-            background: #0a0a0a; 
-            border: 1px solid #1a1a1a; 
-            color: white; 
-            padding: 14px; 
-            border-radius: 4px; 
-            width: 100%; 
-            font-size: 13px;
-            transition: all 0.2s;
-        }
+        .input-mutt { background: #0a0a0a; border: 1px solid #1a1a1a; color: white; padding: 14px; border-radius: 4px; width: 100%; font-size: 13px; transition: 0.2s; }
         .input-mutt:focus { border-color: #444; outline: none; background: #0f0f0f; }
-        
-        .size-chip { 
-            border: 1px solid #1a1a1a; 
-            padding: 10px; 
-            cursor: pointer; 
-            text-align: center; 
-            font-[900] uppercase text-[10px]; 
-            transition: 0.2s;
-            background: #0a0a0a;
-        }
+        .size-chip { border: 1px solid #1a1a1a; padding: 10px; cursor: pointer; text-align: center; font-weight: 900; text-transform: uppercase; font-size: 10px; background: #0a0a0a; transition: 0.2s; }
         .size-chip.active { background: #fff; color: #000; border-color: #fff; }
-        
         .glass-panel { background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px); border: 1px solid #1a1a1a; }
-        
-        /* Custom Scroll */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #222; }
     </style>
 </head>
 <body class="bg-black">
 
     <div id="login-screen" class="fixed inset-0 z-[1000] bg-black flex items-center justify-center p-6">
-        <div class="w-full max-w-md">
-            <div class="text-center mb-10">
-                <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" class="w-24 mx-auto mb-4 invert">
-                <h2 class="text-[10px] font-black tracking-[0.5em] text-zinc-500 uppercase">Acesso Restrito ao Sistema</h2>
-            </div>
+        <div class="w-full max-w-md text-center">
+            <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" class="w-24 mx-auto mb-10 invert">
             <div class="space-y-4">
-                <input type="text" id="user" placeholder="USUÁRIO" class="input-mutt text-center tracking-widest">
+                <input type="text" id="user" placeholder="USUÁRIO" class="input-mutt text-center uppercase tracking-widest">
                 <input type="password" id="pass" placeholder="SENHA" class="input-mutt text-center tracking-widest">
-                <button onclick="fazerLogin()" class="w-full bg-white text-black py-4 font-black uppercase text-[11px] tracking-widest hover:bg-zinc-200 transition duration-500">Autenticar</button>
+                <button id="btn-login" class="w-full bg-white text-black py-4 font-black uppercase text-[11px] tracking-widest">Entrar no Sistema</button>
             </div>
         </div>
     </div>
@@ -61,223 +33,161 @@
         <nav class="border-b border-zinc-900 p-6 flex justify-between items-center bg-black/50 sticky top-0 backdrop-blur-md z-50">
             <div class="flex items-center gap-4">
                 <img src="https://i.ibb.co/Vp8pXQk/logo-mutt.png" class="w-16 invert">
-                <span class="h-4 w-[1px] bg-zinc-800"></span>
-                <h1 class="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Inventory Manager</h1>
+                <h1 class="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Inventory Cloud</h1>
             </div>
-            <div class="flex items-center gap-6">
-                <a href="index.html" class="text-[10px] font-black uppercase tracking-widest hover:text-zinc-400">Ver Loja</a>
-                <button onclick="abrirModal()" class="bg-white text-black px-6 py-2.5 font-black uppercase text-[10px] tracking-tighter">Novo Produto</button>
-            </div>
+            <button onclick="abrirModal()" class="bg-white text-black px-6 py-2.5 font-black uppercase text-[10px]">Novo Produto</button>
         </nav>
 
         <main class="container mx-auto px-6 py-12">
-            <div class="mb-10 flex justify-between items-end">
-                <h2 class="text-4xl font-black uppercase italic tracking-tighter">Produtos Ativos</h2>
-                <button onclick="limparBanco()" class="text-red-500 text-[10px] font-black uppercase tracking-widest opacity-50 hover:opacity-100 transition">Resetar Banco</button>
-            </div>
-
-            <div id="lista-produtos-adm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                </div>
+            <h2 class="text-4xl font-black uppercase italic tracking-tighter mb-10">Produtos na Nuvem</h2>
+            <div id="lista-produtos-adm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </main>
     </div>
 
-    <div id="modal-produto" class="fixed inset-0 bg-black/98 z-[600] hidden overflow-y-auto">
-        <div class="min-h-screen flex items-center justify-center p-4">
-            <div class="w-full max-w-5xl glass-panel p-8 md:p-12 relative rounded-sm">
-                <button onclick="fecharModal()" class="absolute top-8 right-8 text-2xl text-zinc-500 hover:text-white transition">&times;</button>
-                
-                <h2 id="modal-title" class="text-3xl font-black uppercase italic mb-10 tracking-tighter italic">Configurar Produto</h2>
-                
-                <form id="form-produto" class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <input type="hidden" id="edit-id">
-                    
-                    <div class="space-y-6">
-                        <div>
-                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Nome do Produto</label>
-                            <input type="text" id="p-nome" class="input-mutt" placeholder="Ex: OVERSIZED TEE 'HELL'" required>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Categoria</label>
-                                <select id="p-cat" class="input-mutt">
-                                    <option value="camisetas">Camisetas</option>
-                                    <option value="jaquetas">Jaquetas</option>
-                                    <option value="shorts">Shorts</option>
-                                    <option value="acessorios">Acessórios</option>
-                                    <option value="calcas">Calças</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Preço Atual</label>
-                                <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="R$ 0.00" required>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Preço Antigo (Para desconto)</label>
-                            <input type="number" step="0.01" id="p-preco-antigo" class="input-mutt" placeholder="R$ 0.00 (Opcional)">
-                        </div>
-
-                        <div>
-                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Descrição</label>
-                            <textarea id="p-desc" rows="4" class="input-mutt" placeholder="Detalhes técnicos da peça..."></textarea>
-                        </div>
-
-                        <div>
-                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Grade de Tamanhos</label>
-                            <div id="grade-tamanhos" class="grid grid-cols-4 gap-2">
-                                <div class="size-chip" data-size="P">P</div>
-                                <div class="size-chip" data-size="M">M</div>
-                                <div class="size-chip" data-size="G">G</div>
-                                <div class="size-chip" data-size="GG">GG</div>
-                                <div class="size-chip" data-size="38">38</div>
-                                <div class="size-chip" data-size="40">40</div>
-                                <div class="size-chip" data-size="42">42</div>
-                                <div class="size-chip" data-size="UN">UN</div>
-                            </div>
-                        </div>
+    <div id="modal-produto" class="fixed inset-0 bg-black/98 z-[600] hidden overflow-y-auto p-4">
+        <div class="w-full max-w-5xl glass-panel p-8 md:p-12 mx-auto rounded-sm relative mt-10">
+            <button onclick="fecharModal()" class="absolute top-8 right-8 text-2xl text-zinc-500 hover:text-white">&times;</button>
+            <form id="form-produto" class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <input type="hidden" id="edit-id">
+                <div class="space-y-6">
+                    <input type="text" id="p-nome" class="input-mutt" placeholder="NOME DO PRODUTO" required>
+                    <select id="p-cat" class="input-mutt">
+                        <option value="camisetas">Camisetas</option>
+                        <option value="jaquetas">Jaquetas</option>
+                        <option value="shorts">Shorts</option>
+                        <option value="acessorios">Acessórios</option>
+                        <option value="calcas">Calças</option>
+                    </select>
+                    <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="PREÇO (R$)" required>
+                    <textarea id="p-desc" rows="4" class="input-mutt" placeholder="DESCRIÇÃO DA PEÇA"></textarea>
+                    <div id="grade-tamanhos" class="grid grid-cols-4 gap-2">
+                        <div class="size-chip" data-size="P">P</div><div class="size-chip" data-size="M">M</div>
+                        <div class="size-chip" data-size="G">G</div><div class="size-chip" data-size="GG">GG</div>
+                        <div class="size-chip" data-size="UN">UN</div>
                     </div>
-
-                    <div class="space-y-6">
-                        <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block tracking-widest">Gerenciar Fotos (URLs)</label>
-                        <div id="container-fotos" class="space-y-3">
-                            </div>
-                        <button type="button" onclick="adicionarCampoFoto()" class="w-full border border-dashed border-zinc-800 py-3 text-[10px] font-black uppercase tracking-widest hover:border-zinc-500 transition">+ Adicionar Mais uma Foto</button>
-
-                        <div class="pt-10">
-                            <button type="submit" class="w-full bg-white text-black py-5 font-black uppercase text-[11px] tracking-[0.3em] hover:bg-zinc-200 transition">Salvar Alterações</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="space-y-6">
+                    <div id="container-fotos" class="space-y-3"></div>
+                    <button type="button" onclick="adicionarCampoFoto()" class="w-full border border-dashed border-zinc-800 py-3 text-[10px] font-black uppercase">+ Adicionar Foto</button>
+                    <button type="submit" class="w-full bg-white text-black py-5 font-black uppercase tracking-widest">Salvar na Nuvem</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <script>
-        let db = JSON.parse(localStorage.getItem('mutt_products')) || [];
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        function fazerLogin() {
-            if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === 'mutt2026') {
+        const firebaseConfig = {
+            apiKey: "AIzaSyDr-W03cp72jHiyALGWlI4vBfxH2xrC-6w",
+            authDomain: "mutt-streetwear.firebaseapp.com",
+            databaseURL: "https://mutt-streetwear-default-rtdb.firebaseio.com",
+            projectId: "mutt-streetwear",
+            storageBucket: "mutt-streetwear.firebasestorage.app",
+            messagingSenderId: "65929911570",
+            appId: "1:65929911570:web:86299846ef5401b5c0a7cb",
+            measurementId: "G-6F8J2GR4BK"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // LOGIN
+        document.getElementById('btn-login').onclick = () => {
+            if(document.getElementById('user').value.toLowerCase() === 'admin' && document.getElementById('pass').value === 'mutt2026') {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('admin-panel').classList.remove('hidden');
-                renderAdmin();
+            } else { alert("Usuário ou senha incorretos."); }
+        };
+
+        // LISTAR PRODUTOS (EM TEMPO REAL)
+        onValue(ref(db, 'produtos'), (snapshot) => {
+            const data = snapshot.val();
+            const container = document.getElementById('lista-produtos-adm');
+            container.innerHTML = "";
+            if(data) {
+                Object.keys(data).forEach(id => {
+                    const p = data[id];
+                    container.innerHTML += `
+                        <div class="glass-panel p-4 flex gap-4 items-center">
+                            <img src="${p.imgs[0]}" class="w-20 h-24 object-cover">
+                            <div class="flex-1">
+                                <h3 class="text-[11px] font-black uppercase italic">${p.nome}</h3>
+                                <p class="text-zinc-500 text-xs">R$ ${p.preco.toFixed(2)}</p>
+                                <div class="flex gap-2 mt-4">
+                                    <button onclick="editarProduto('${id}')" class="text-[9px] font-black bg-zinc-900 px-3 py-1">Editar</button>
+                                    <button onclick="removerProduto('${id}')" class="text-[9px] font-black text-red-500">Excluir</button>
+                                </div>
+                            </div>
+                        </div>`;
+                });
             }
-        }
-
-        // Sistema Dinâmico de Fotos
-        function adicionarCampoFoto(valor = '') {
-            const container = document.getElementById('container-fotos');
-            const div = document.createElement('div');
-            div.className = "flex gap-2";
-            div.innerHTML = `
-                <input type="text" class="input-mutt foto-url" value="${valor}" placeholder="https://link-da-imagem.jpg">
-                <button type="button" onclick="this.parentElement.remove()" class="bg-zinc-900 px-4 text-red-500">-</button>
-            `;
-            container.appendChild(div);
-        }
-
-        document.querySelectorAll('.size-chip').forEach(c => {
-            c.onclick = () => c.classList.toggle('active');
         });
 
-        function renderAdmin() {
-            const container = document.getElementById('lista-produtos-adm');
-            container.innerHTML = db.map(p => `
-                <div class="glass-panel p-4 flex gap-4 items-center">
-                    <img src="${p.imgs[0]}" class="w-20 h-24 object-cover">
-                    <div class="flex-1">
-                        <h3 class="text-[11px] font-black uppercase italic tracking-tighter">${p.nome}</h3>
-                        <p class="text-[10px] text-zinc-500 font-bold mb-3 italic">R$ ${p.preco.toFixed(2)}</p>
-                        <div class="flex gap-2">
-                            <button onclick="editarProduto(${p.id})" class="text-[9px] font-black uppercase tracking-widest bg-zinc-900 px-3 py-1 hover:bg-white hover:text-black transition">Editar</button>
-                            <button onclick="remover(${p.id})" class="text-[9px] font-black uppercase tracking-widest text-red-800 hover:text-red-500 transition">Excluir</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function abrirModal() {
-            document.getElementById('form-produto').reset();
-            document.getElementById('edit-id').value = '';
-            document.getElementById('container-fotos').innerHTML = '';
-            document.getElementById('modal-title').innerText = "Novo Produto";
-            adicionarCampoFoto(); // Inicia com um campo
-            document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active'));
-            document.getElementById('modal-produto').classList.remove('hidden');
-        }
-
-        function editarProduto(id) {
-            const p = db.find(x => x.id == id);
-            abrirModal();
-            document.getElementById('modal-title').innerText = "Editar Produto";
-            document.getElementById('edit-id').value = p.id;
-            document.getElementById('p-nome').value = p.nome;
-            document.getElementById('p-cat').value = p.cat;
-            document.getElementById('p-preco').value = p.preco;
-            document.getElementById('p-preco-antigo').value = p.precoAntigo || '';
-            document.getElementById('p-desc').value = p.desc;
-            
-            // Carregar Fotos
-            document.getElementById('container-fotos').innerHTML = '';
-            p.imgs.forEach(url => adicionarCampoFoto(url));
-
-            // Carregar Tamanhos
-            document.querySelectorAll('.size-chip').forEach(chip => {
-                if(p.tamanhos.includes(chip.dataset.size)) chip.classList.add('active');
-            });
-        }
-
-        function fecharModal() { 
-            document.getElementById('modal-produto').classList.add('hidden'); 
-        }
-
-        document.getElementById('form-produto').onsubmit = function(e) {
+        // SALVAR
+        document.getElementById('form-produto').onsubmit = async (e) => {
             e.preventDefault();
-            
+            const id = document.getElementById('edit-id').value || Date.now();
             const urls = Array.from(document.querySelectorAll('.foto-url')).map(i => i.value).filter(v => v !== '');
             const sizes = Array.from(document.querySelectorAll('.size-chip.active')).map(c => c.dataset.size);
-            const id = document.getElementById('edit-id').value;
 
-            const novoProduto = {
-                id: id ? parseInt(id) : Date.now(),
+            const produto = {
+                id: id,
                 nome: document.getElementById('p-nome').value,
                 cat: document.getElementById('p-cat').value,
                 preco: parseFloat(document.getElementById('p-preco').value),
-                precoAntigo: parseFloat(document.getElementById('p-preco-antigo').value) || null,
-                desconto: !!document.getElementById('p-preco-antigo').value,
                 imgs: urls,
                 desc: document.getElementById('p-desc').value,
                 tamanhos: sizes
             };
 
-            if(id) {
-                db = db.map(x => x.id == id ? novoProduto : x);
-            } else {
-                db.push(novoProduto);
-            }
-
-            localStorage.setItem('mutt_products', JSON.stringify(db));
+            await set(ref(db, 'produtos/' + id), produto);
             fecharModal();
-            renderAdmin();
+            alert("Produto salvo com sucesso!");
         };
 
-        function remover(id) {
-            if(confirm("Deseja deletar permanentemente?")) {
-                db = db.filter(x => x.id !== id);
-                localStorage.setItem('mutt_products', JSON.stringify(db));
-                renderAdmin();
-            }
-        }
+        // EXCLUIR
+        window.removerProduto = (id) => {
+            if(confirm("Deseja apagar este produto da nuvem?")) remove(ref(db, 'produtos/' + id));
+        };
 
-        function limparBanco() {
-            if(confirm("Isso apagará TUDO. Tem certeza?")) {
-                localStorage.removeItem('mutt_products');
-                db = [];
-                renderAdmin();
-            }
-        }
+        // EDITAR
+        window.editarProduto = (id) => {
+            onValue(ref(db, 'produtos/' + id), (snapshot) => {
+                const p = snapshot.val();
+                if(!p) return;
+                abrirModal();
+                document.getElementById('edit-id').value = id;
+                document.getElementById('p-nome').value = p.nome;
+                document.getElementById('p-cat').value = p.cat;
+                document.getElementById('p-preco').value = p.preco;
+                document.getElementById('p-desc').value = p.desc;
+                document.getElementById('container-fotos').innerHTML = '';
+                p.imgs.forEach(url => adicionarCampoFoto(url));
+                document.querySelectorAll('.size-chip').forEach(chip => {
+                    if(p.tamanhos && p.tamanhos.includes(chip.dataset.size)) chip.classList.add('active');
+                });
+            }, { onlyOnce: true });
+        };
+
+        // UI
+        window.abrirModal = () => {
+            document.getElementById('form-produto').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('container-fotos').innerHTML = '';
+            document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active'));
+            adicionarCampoFoto();
+            document.getElementById('modal-produto').classList.remove('hidden');
+        };
+        window.fecharModal = () => document.getElementById('modal-produto').classList.add('hidden');
+        window.adicionarCampoFoto = (val = '') => {
+            const div = document.createElement('div');
+            div.className = "flex gap-2";
+            div.innerHTML = `<input type="text" class="foto-url input-mutt" value="${val}" placeholder="URL da Foto"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 px-2">-</button>`;
+            document.getElementById('container-fotos').appendChild(div);
+        };
+        document.querySelectorAll('.size-chip').forEach(c => c.onclick = () => c.classList.toggle('active'));
     </script>
 </body>
 </html>
