@@ -56,6 +56,18 @@
                 <a href="shorts.html" class="hover:text-white transition">Shorts</a>
                 <a href="acessorios.html" class="hover:text-white transition">Acessórios</a>
                 <a href="calcas.html" class="hover:text-white transition">Calças</a>
+
+                <div id="user-menu" class="bg-zinc-950 border-b border-zinc-900 px-6 py-2 flex justify-end items-center gap-4 text-[10px] font-black uppercase tracking-widest">
+    <div id="user-logged-out" class="flex gap-4">
+        <a href="login.html" class="hover:text-zinc-400 transition">Entrar</a>
+        <span class="text-zinc-800">|</span>
+        <a href="login.html" class="hover:text-zinc-400 transition text-blue-500">Criar Conta</a>
+    </div>
+    <div id="user-logged-in" class="hidden flex gap-4 items-center">
+        <span id="user-email" class="text-zinc-500 italic">carregando...</span>
+        <button onclick="fazerLogout()" class="text-red-900 hover:text-red-500 transition">Sair</button>
+    </div>
+</div>
             </nav>
             <div class="flex items-center w-10 md:w-auto justify-end">
                 <a href="carrinho.html" class="relative">
