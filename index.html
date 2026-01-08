@@ -18,7 +18,7 @@
         /* Fundo Animado */
         .bg-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: #000; }
         .blob { position: absolute; width: 500px; height: 500px; background: rgba(255,255,255,0.03); filter: blur(80px); border-radius: 50%; animation: move 20s infinite alternate; }
-        @keyframes move { from { transform: translate(-10%, -10%); } to { transform: translate(20% , 20%); } }
+        @keyframes move { from { transform: translate(-10%, -10%); } to { transform: translate(20%, 20%); } }
 
         .snap-x { scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
         .snap-center { scroll-snap-align: center; }
@@ -31,13 +31,6 @@
 
         #fullscreen-view { display: none; fixed: inset-0; background: black; z-index: 200; align-items: center; justify-content: center; }
         #fullscreen-view.active { display: flex; position: fixed; inset: 0; }
-
-        /* AJUSTE PARA O MODAL ESTILO OLX/LOJA PROFISSIONAL */
-        #product-modal { 
-            align-items: flex-start; /* Garante que comece no topo */
-            display: none; 
-        }
-        #product-modal.flex { display: flex; }
     </style>
 </head>
 <body>
@@ -118,43 +111,34 @@
         <div id="destaques-grid" class="grid grid-cols-2 md:grid-cols-4 gap-x-3 md:gap-x-6 gap-y-10"></div>
     </main>
 
-    <div id="product-modal" class="fixed inset-0 z-[100] hidden flex-col modal-blur overflow-y-auto">
-        <div class="bg-black md:bg-zinc-950 border-zinc-900 w-full max-w-5xl md:rounded-3xl overflow-hidden relative md:my-10 md:mx-auto">
+    <div id="product-modal" class="fixed inset-0 z-[100] hidden items-start justify-center p-0 md:p-4 modal-blur overflow-y-auto">
+        <div class="bg-black md:bg-zinc-950 border-zinc-900 w-full max-w-5xl md:rounded-3xl overflow-hidden relative min-h-screen md:min-h-0 md:my-8">
+            <button onclick="closeModal()" class="fixed top-5 right-5 text-2xl z-[110] bg-white/10 w-10 h-10 rounded-full flex items-center justify-center md:absolute md:top-6 md:right-6">&times;</button>
             
-            <button onclick="closeModal()" class="fixed top-5 right-5 text-2xl z-[120] bg-black/60 backdrop-blur-md text-white w-10 h-10 rounded-full flex items-center justify-center border border-white/10 md:absolute md:top-6 md:right-6">
-                &times;
-            </button>
-            
-            <div class="flex flex-col md:flex-row w-full">
-                <div class="w-full md:w-1/2 relative bg-zinc-900 group">
-                    <div id="modal-slider" class="flex overflow-x-auto snap-x no-scrollbar aspect-[3/4] bg-black scroll-smooth"></div>
-                    
-                    <button onclick="scrollSlider(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-10 h-10 rounded-full flex items-center justify-center md:opacity-0 md:group-hover:opacity-100 transition">
+            <div class="flex flex-col md:flex-row w-full h-full">
+                <div class="w-full md:w-1/2 relative bg-zinc-900 group h-fit">
+                    <button onclick="scrollSlider(-1)" class="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-white hover:text-black w-10 h-10 rounded-full items-center justify-center transition-all opacity-0 group-hover:opacity-100">
                         <i class="fa-solid fa-chevron-left"></i>
                     </button>
-                    <button onclick="scrollSlider(1)" class="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-10 h-10 rounded-full flex items-center justify-center md:opacity-0 md:group-hover:opacity-100 transition">
+                    <button onclick="scrollSlider(1)" class="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-white hover:text-black w-10 h-10 rounded-full items-center justify-center transition-all opacity-0 group-hover:opacity-100">
                         <i class="fa-solid fa-chevron-right"></i>
                     </button>
+                    <div id="modal-slider" class="flex overflow-x-auto snap-x no-scrollbar aspect-[3/4] bg-black scroll-smooth"></div>
+                    <div id="modal-thumbnails" class="hidden md:flex gap-2 p-4 bg-black overflow-x-auto no-scrollbar"></div>
                 </div>
 
-                <div class="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-start bg-black">
+                <div class="w-full md:w-1/2 p-8 md:p-16 flex flex-col">
                     <h2 id="modal-name" class="text-4xl font-black uppercase italic mb-4 tracking-tighter leading-none"></h2>
                     <div class="flex items-baseline gap-3 mb-8">
                         <span id="modal-price" class="text-2xl font-bold"></span>
                         <span id="modal-discount" class="text-xs text-zinc-600 line-through"></span>
                     </div>
-                    
                     <div class="mb-8">
                         <h3 class="text-[9px] font-black uppercase text-zinc-500 mb-4 tracking-[0.2em]">Selecione o Tamanho</h3>
                         <div id="modal-sizes" class="flex flex-wrap gap-2"></div>
                     </div>
-
                     <button id="add-to-cart-btn" class="w-full bg-white text-black py-5 font-black uppercase text-[10px] tracking-[0.3em] hover:bg-zinc-200 transition">🛒 Adicionar ao Carrinho</button>
-                    
-                    <div class="mt-10 border-t border-zinc-900 pt-8">
-                        <h4 class="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4">Descrição do Produto</h4>
-                        <p id="modal-desc" class="text-sm text-zinc-500 leading-relaxed italic"></p>
-                    </div>
+                    <p id="modal-desc" class="text-xs text-zinc-500 mt-8 leading-relaxed italic border-t border-zinc-900 pt-6 pb-12"></p>
                 </div>
             </div>
         </div>
@@ -190,13 +174,16 @@
             const loggedOutDiv = document.getElementById('user-logged-out');
             const loggedInDiv = document.getElementById('user-logged-in');
             const emailSpan = document.getElementById('user-email');
+
             if (user) {
                 if(loggedOutDiv) loggedOutDiv.classList.add('hidden');
                 if(loggedInDiv) loggedInDiv.classList.remove('hidden');
                 if(emailSpan) emailSpan.innerText = user.email.split('@')[0].toUpperCase();
+                
                 const presenceRef = ref(db, `usuarios/${user.uid}/presenca`);
                 set(presenceRef, "online");
                 onDisconnect(presenceRef).set("offline");
+
                 onValue(ref(db, `usuarios/${user.uid}/carrinho`), (snap) => {
                     const data = snap.val();
                     document.getElementById('cart-count').innerText = data ? Object.keys(data).length : 0;
@@ -208,7 +195,9 @@
             }
         });
 
-        window.fazerLogout = () => { signOut(auth).then(() => location.reload()); };
+        window.fazerLogout = () => {
+            signOut(auth).then(() => location.reload());
+        };
 
         onValue(ref(db, 'produtos'), (snapshot) => {
             const data = snapshot.val();
@@ -216,6 +205,7 @@
             if (!data) return;
             globalProducts = Object.values(data);
             const produtosAtivos = globalProducts.filter(p => p.status === 'ativo' || !p.status);
+
             grid.innerHTML = produtosAtivos.map(p => `
                 <div class="cursor-pointer group" onclick="openProductModal('${p.id}')">
                     <div class="aspect-[3/4] bg-zinc-900 mb-4 overflow-hidden">
@@ -233,12 +223,9 @@
             if(!p) return;
             selectedSize = "";
             
-            const modal = document.getElementById('product-modal');
-            modal.scrollTop = 0; // Garante que abre no topo da imagem
-
             const slider = document.getElementById('modal-slider');
             slider.innerHTML = p.imgs.map(img => `
-                <img src="${img}" onclick="openFullscreen('${img}')" class="w-full h-full object-cover flex-shrink-0 snap-center bg-zinc-950">
+                <img src="${img}" onclick="openFullscreen('${img}')" class="w-full h-full object-contain flex-shrink-0 snap-center bg-zinc-950">
             `).join('');
             slider.scrollLeft = 0;
 
@@ -256,12 +243,18 @@
                 if (!selectedSize && p.tamanhos?.length > 0) { alert("SELECIONE O TAMANHO"); return; }
                 const user = auth.currentUser;
                 if (!user) { alert("ACESSE SUA CONTA PARA COMPRAR."); location.href = 'login.html'; return; }
-                const itemCart = { id: p.id, nome: p.nome, preco: p.preco, img: p.imgs[0], tamanho: selectedSize || 'UN', cartId: Date.now() };
+
+                const itemCart = {
+                    id: p.id, nome: p.nome, preco: p.preco, img: p.imgs[0],
+                    tamanho: selectedSize || 'UN', cartId: Date.now()
+                };
                 await set(ref(db, `usuarios/${user.uid}/carrinho/${itemCart.cartId}`), itemCart);
                 location.href = 'carrinho.html';
             };
 
+            const modal = document.getElementById('product-modal');
             modal.classList.replace('hidden', 'flex');
+            modal.scrollTo(0, 0); // Faz o modal abrir no topo sempre
             document.body.style.overflow = 'hidden';
         };
 
@@ -276,16 +269,23 @@
             document.body.style.overflow = 'auto';
         };
 
-        window.toggleMenu = () => { document.getElementById('mobile-menu').classList.toggle('menu-open'); };
+        window.toggleMenu = () => {
+            document.getElementById('mobile-menu').classList.toggle('menu-open');
+        };
+
         window.scrollSlider = (direction) => {
             const slider = document.getElementById('modal-slider');
             slider.scrollBy({ left: direction * slider.clientWidth, behavior: 'smooth' });
         };
+
         window.openFullscreen = (src) => {
             document.getElementById('fullscreen-img').src = src;
             document.getElementById('fullscreen-view').classList.add('active');
         };
-        window.closeFullscreen = () => { document.getElementById('fullscreen-view').classList.remove('active'); };
+
+        window.closeFullscreen = () => {
+            document.getElementById('fullscreen-view').classList.remove('active');
+        };
     </script>
 </body>
 </html>
