@@ -202,23 +202,29 @@
             signOut(auth).then(() => location.reload());
         };
 
-        // --- CARREGAR PRODUTOS ---
-        onValue(ref(db, 'produtos'), (snapshot) => {
-            const data = snapshot.val();
-            const grid = document.getElementById('destaques-grid');
-            if (!data) return;
-            globalProducts = Object.values(data);
-            grid.innerHTML = globalProducts.map(p => `
-                <div class="cursor-pointer group" onclick="openProductModal('${p.id}')">
-                    <div class="aspect-[3/4] bg-zinc-900 mb-4 overflow-hidden">
-                        <img src="${p.imgs[0]}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
-                    </div>
-                    <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">${p.cat}</p>
-                    <h3 class="text-[11px] font-black uppercase tracking-tight text-white truncate">${p.nome}</h3>
-                    <p class="text-white text-xs mt-1">R$ ${p.preco.toFixed(2)}</p>
-                </div>
-            `).join('');
-        });
+      // --- CARREGAR PRODUTOS (COM FILTRO DE STATUS) ---
+onValue(ref(db, 'produtos'), (snapshot) => {
+    const data = snapshot.val();
+    const grid = document.getElementById('destaques-grid');
+    if (!data) return;
+    
+    // Converte o objeto em array
+    globalProducts = Object.values(data);
+    
+    // Filtra apenas os produtos que o status é 'ativo'
+    const produtosAtivos = globalProducts.filter(p => p.status === 'ativo' || !p.status);
+
+    grid.innerHTML = produtosAtivos.map(p => `
+        <div class="cursor-pointer group" onclick="openProductModal('${p.id}')">
+            <div class="aspect-[3/4] bg-zinc-900 mb-4 overflow-hidden">
+                <img src="${p.imgs && p.imgs[0] ? p.imgs[0] : ''}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+            </div>
+            <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">${p.cat}</p>
+            <h3 class="text-[11px] font-black uppercase tracking-tight text-white truncate">${p.nome}</h3>
+            <p class="text-white text-xs mt-1">R$ ${p.preco.toFixed(2)}</p>
+        </div>
+    `).join('');
+});
 
         // --- MODAL E CARRINHO ---
         window.openProductModal = (id) => {
