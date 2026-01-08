@@ -143,10 +143,16 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
+        // VALORES ATUALIZADOS SAINDO DE PARAUAPEBAS/PA + 20% DE MARGEM
         const TABELA_FRETE = {
-            "SP": 15.00, "RJ": 22.00, "MG": 20.00, "ES": 25.00,
-            "PR": 28.00, "SC": 28.00, "RS": 30.00, "DF": 25.00,
-            "GO": 35.00, "BA": 40.00, "PE": 45.00, "CE": 45.00, "OUTROS": 55.00
+            "PA": 28.00, // Frete Regional (PA)
+            "MA": 38.00, "TO": 38.00, "AP": 45.00, // Norte/Nordeste Próximo
+            "CE": 48.00, "PI": 48.00, "BA": 52.00, "PE": 52.00,
+            "SP": 58.00, "RJ": 62.00, "MG": 58.00, "ES": 60.00, // Sudeste
+            "DF": 45.00, "GO": 48.00, "MT": 50.00, "MS": 50.00, // Centro-Oeste
+            "PR": 65.00, "SC": 68.00, "RS": 72.00, // Sul (Mais longe de Parauapebas)
+            "AM": 55.00, "RO": 55.00, "RR": 60.00, "AC": 60.00,
+            "OUTROS": 75.00
         };
 
         let carrinhoGlobal = [];
@@ -233,7 +239,6 @@
             document.getElementById('total').innerText = `R$ ${totalFinal.toFixed(2)}`;
         };
 
-        // FUNÇÃO FINALIZAR ATUALIZADA - SALVANDO NO HISTÓRICO
         window.finalizarPedido = async () => {
             if(carrinhoGlobal.length === 0) return alert("BAG VAZIA");
             const estado = document.getElementById('estado').value.toUpperCase().trim();
@@ -260,11 +265,8 @@
             };
 
             try {
-                // Salva no histórico do usuário
                 await push(ref(db, `usuarios/${currentUser.uid}/pedidos`), pedidoObj);
-                // Limpa o carrinho
                 await remove(ref(db, `usuarios/${currentUser.uid}/carrinho`));
-                
                 alert("PEDIDO PROCESSADO COM SUCESSO");
                 window.location.href = metodo === 'pix' ? "pagamento-pix.html" : "pagamento-cartao.html";
             } catch (e) {
