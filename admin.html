@@ -59,14 +59,14 @@
             border-bottom-color: #fff;
         }
 
-        /* Status de Online */
         .dot-online { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px #10b981; }
         .dot-offline { width: 8px; height: 8px; background: #3f3f46; border-radius: 50%; display: inline-block; }
 
         .size-chip { border: 1px solid #1a1a1a; padding: 10px; cursor: pointer; text-align: center; font-weight: 900; text-transform: uppercase; font-size: 10px; transition: 0.3s; background: #0a0a0a; }
         .size-chip.active { background: #fff; color: #000; border-color: #fff; }
         
-        .status-off { opacity: 0.4; filter: grayscale(1); }
+        /* Estilo para produto desativado */
+        .status-off { opacity: 0.3; filter: grayscale(1); border: 1px dashed #333 !important; }
     </style>
 </head>
 <body class="bg-black">
@@ -153,16 +153,22 @@
                         <input type="text" id="p-nome" class="input-mutt" placeholder="NOME DO PRODUTO" required>
                         <div class="grid grid-cols-2 gap-4">
                             <select id="p-cat" class="input-mutt"><option value="camisetas">Camisetas</option><option value="jaquetas">Jaquetas</option></select>
-                            <select id="p-status" class="input-mutt"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
+                            <select id="p-status" class="input-mutt font-black uppercase">
+                                <option value="ativo" class="text-green-500">● ATIVO (Na Loja)</option>
+                                <option value="inativo" class="text-red-500">○ INATIVO (Oculto)</option>
+                            </select>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="PREÇO ATUAL" required>
                             <input type="number" step="0.01" id="p-preco-antigo" class="input-mutt" placeholder="PREÇO ANTIGO">
                         </div>
                         <textarea id="p-desc" rows="4" class="input-mutt" placeholder="DESCRIÇÃO"></textarea>
-                        <div id="grade-tamanhos" class="grid grid-cols-4 gap-2">
-                            <div class="size-chip" data-size="P">P</div><div class="size-chip" data-size="M">M</div>
-                            <div class="size-chip" data-size="G">G</div><div class="size-chip" data-size="GG">GG</div>
+                        <div id="grade-tamanhos" class="grid grid-cols-5 gap-2">
+                            <div class="size-chip" data-size="P">P</div>
+                            <div class="size-chip" data-size="M">M</div>
+                            <div class="size-chip" data-size="G">G</div>
+                            <div class="size-chip" data-size="GG">GG</div>
+                            <div class="size-chip" data-size="XG">XG</div>
                         </div>
                     </div>
                     <div class="space-y-6 flex flex-col">
@@ -209,53 +215,34 @@
             document.getElementById('tab-user').classList.toggle('active', tab === 'usuarios');
         };
 
-        // --- MONITOR DE USUÁRIOS E ANALYTICS ---
+        // ANALYTICS
         onValue(ref(db, 'usuarios'), (snapshot) => {
             const users = snapshot.val();
             const container = document.getElementById('lista-usuarios-adm');
             let totalAcessos = 0;
             let onlineCount = 0;
-            
             container.innerHTML = "";
-            
             if(users) {
                 Object.keys(users).forEach(uid => {
                     const dados = users[uid].perfil || {};
                     const status = users[uid].presenca || 'offline';
-                    
                     totalAcessos++;
                     if(status === 'online') onlineCount++;
-
                     container.innerHTML += `
                         <tr class="border-b border-zinc-900 hover:bg-zinc-950 transition">
-                            <td class="p-4">
-                                ${status === 'online' ? '<span class="dot-online"></span>' : '<span class="dot-offline"></span>'}
-                            </td>
-                            <td class="p-4">
-                                <span class="text-white block font-black">${dados.nome || 'USUÁRIO S/ NOME'}</span>
-                                <span class="text-[9px] text-zinc-600">ID: ${uid.substring(0,8)}...</span>
-                            </td>
-                            <td class="p-4">
-                                <span class="text-zinc-400 block">${dados.email || '---'}</span>
-                                <span class="text-zinc-600 text-[9px]">${dados.whatsapp || 'SEM TEL'}</span>
-                            </td>
-                            <td class="p-4 text-zinc-500">
-                                ${dados.dataCadastro || '---'}
-                            </td>
-                            <td class="p-4 text-right">
-                                <a href="https://wa.me/${dados.whatsapp}" target="_blank" class="text-white hover:text-green-500 transition mx-2">
-                                    <i class="fa-brands fa-whatsapp"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    `;
+                            <td class="p-4">${status === 'online' ? '<span class="dot-online"></span>' : '<span class="dot-offline"></span>'}</td>
+                            <td class="p-4"><span class="text-white block font-black">${dados.nome || 'USUÁRIO S/ NOME'}</span></td>
+                            <td class="p-4"><span class="text-zinc-400 block">${dados.email || '---'}</span></td>
+                            <td class="p-4 text-zinc-500">${dados.dataCadastro || '---'}</td>
+                            <td class="p-4 text-right"><a href="https://wa.me/${dados.whatsapp}" target="_blank" class="text-white hover:text-green-500 transition mx-2"><i class="fa-brands fa-whatsapp"></i></a></td>
+                        </tr>`;
                 });
             }
             document.getElementById('counter-online').innerText = onlineCount;
             document.getElementById('counter-total').innerText = totalAcessos;
         });
 
-        // --- LÓGICA DE PRODUTOS (MANTIDA IGUAL) ---
+        // LISTA PRODUTOS (COM LÓGICA DE STATUS)
         onValue(ref(db, 'produtos'), (snapshot) => {
             const data = snapshot.val();
             const container = document.getElementById('lista-produtos-adm');
@@ -264,11 +251,12 @@
                 document.getElementById('total-count').innerText = `${Object.keys(data).length} ITENS NO CLOUD`;
                 Object.keys(data).forEach(id => {
                     const p = data[id];
+                    const isOff = p.status === 'inativo';
                     container.innerHTML += `
-                        <div class="glass-panel p-5 flex gap-5 items-center ${p.status === 'inativo' ? 'status-off' : ''}">
+                        <div class="glass-panel p-5 flex gap-5 items-center ${isOff ? 'status-off' : ''}">
                             <img src="${p.imgs[0]}" class="w-20 h-24 object-cover border border-zinc-800">
                             <div class="flex-1">
-                                <h3 class="text-[11px] font-black uppercase italic">${p.nome}</h3>
+                                <h3 class="text-[11px] font-black uppercase italic">${p.nome} ${isOff ? '<span class="text-red-500 ml-2">[DESATIVADO]</span>' : ''}</h3>
                                 <p class="text-[9px] text-zinc-500 mb-4 font-bold">R$ ${p.preco.toFixed(2)}</p>
                                 <div class="flex gap-2">
                                     <button onclick="editarProduto('${id}')" class="bg-white text-black px-3 py-1 text-[9px] font-black uppercase">Editar</button>
@@ -295,20 +283,35 @@
             const id = document.getElementById('edit-id').value || Date.now().toString();
             const urls = Array.from(document.querySelectorAll('.foto-url')).map(i => i.value).filter(v => v !== '');
             const sizes = Array.from(document.querySelectorAll('.size-chip.active')).map(c => c.dataset.size);
+            
             const produto = {
-                id: id, nome: document.getElementById('p-nome').value,
-                cat: document.getElementById('p-cat').value, status: document.getElementById('p-status').value,
+                id: id, 
+                nome: document.getElementById('p-nome').value,
+                cat: document.getElementById('p-cat').value, 
+                status: document.getElementById('p-status').value, // SALVANDO STATUS
                 preco: parseFloat(document.getElementById('p-preco').value),
                 precoAntigo: parseFloat(document.getElementById('p-preco-antigo').value) || null,
-                imgs: urls, desc: document.getElementById('p-desc').value, tamanhos: sizes
+                imgs: urls, 
+                desc: document.getElementById('p-desc').value, 
+                tamanhos: sizes
             };
             await set(ref(db, 'produtos/' + id), produto);
             fecharModal();
         };
 
-        window.abrirModal = () => { document.getElementById('form-produto').reset(); document.getElementById('edit-id').value = ''; document.getElementById('container-fotos').innerHTML = ''; adicionarCampoFoto(); document.getElementById('modal-produto').classList.remove('hidden'); document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active')); };
+        window.abrirModal = () => { 
+            document.getElementById('form-produto').reset(); 
+            document.getElementById('edit-id').value = ''; 
+            document.getElementById('container-fotos').innerHTML = ''; 
+            adicionarCampoFoto(); 
+            document.getElementById('modal-produto').classList.remove('hidden'); 
+            document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active'));
+            document.getElementById('p-status').value = 'ativo';
+        };
+
         window.fecharModal = () => document.getElementById('modal-produto').classList.add('hidden');
         window.remover = (id) => { if(confirm("Deletar permanentemente?")) remove(ref(db, 'produtos/' + id)); };
+        
         window.editarProduto = (id) => {
             onValue(ref(db, 'produtos/' + id), (snap) => {
                 const p = snap.val();
@@ -320,7 +323,7 @@
                 document.getElementById('p-preco-antigo').value = p.precoAntigo || '';
                 document.getElementById('p-desc').value = p.desc || '';
                 document.getElementById('p-cat').value = p.cat;
-                document.getElementById('p-status').value = p.status;
+                document.getElementById('p-status').value = p.status || 'ativo';
                 document.getElementById('container-fotos').innerHTML = '';
                 p.imgs.forEach(url => adicionarCampoFoto(url));
                 document.querySelectorAll('.size-chip').forEach(chip => {
