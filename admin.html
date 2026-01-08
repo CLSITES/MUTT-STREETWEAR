@@ -8,24 +8,71 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap');
-        :root { --mutt-bg: #000; --mutt-card: #0a0a0a; --mutt-border: #1a1a1a; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--mutt-bg); color: #fff; overflow-x: hidden; }
-        .input-mutt { background: #0a0a0a; border: 1px solid #1a1a1a; color: white; padding: 14px; border-radius: 4px; width: 100%; font-size: 13px; transition: 0.3s; }
-        .input-mutt:focus { border-color: #fff; outline: none; }
-        .glass-panel { background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(25px); border: 1px solid #1a1a1a; }
-        .tab-btn { font-size: 10px; font-weight: 900; text-transform: uppercase; padding: 15px 25px; border-bottom: 2px solid transparent; color: #444; transition: 0.3s; }
-        .tab-btn.active { color: #fff; border-bottom-color: #fff; }
-        .size-chip { border: 1px solid #1a1a1a; padding: 10px; cursor: pointer; text-align: center; font-weight: 900; text-transform: uppercase; font-size: 10px; background: #0a0a0a; transition: 0.3s; }
-        .size-chip.active { background: #fff; color: #000; border-color: #fff; }
-        .status-off { opacity: 0.4; filter: grayscale(1); }
+        
+        :root {
+            --mutt-bg: #000000;
+            --mutt-card: #0a0a0a;
+            --mutt-border: #1a1a1a;
+            --mutt-accent: #ffffff;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--mutt-bg); 
+            color: #fff; 
+            overflow-x: hidden;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.5s ease forwards; }
+
+        .input-mutt { 
+            background: #0a0a0a; 
+            border: 1px solid #1a1a1a; 
+            color: white; 
+            padding: 14px; 
+            border-radius: 4px; 
+            width: 100%; 
+            font-size: 13px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .input-mutt:focus { border-color: #fff; outline: none; background: #111; box-shadow: 0 0 15px rgba(255,255,255,0.05); }
+
+        .glass-panel { 
+            background: rgba(10, 10, 10, 0.8); 
+            backdrop-filter: blur(25px); 
+            border: 1px solid #1a1a1a; 
+            transition: all 0.3s;
+        }
+
+        .tab-btn {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 15px 25px;
+            border-bottom: 2px solid transparent;
+            color: #444;
+            transition: 0.3s;
+        }
+        .tab-btn.active {
+            color: #fff;
+            border-bottom-color: #fff;
+        }
+
+        /* Status de Online */
         .dot-online { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px #10b981; }
         .dot-offline { width: 8px; height: 8px; background: #3f3f46; border-radius: 50%; display: inline-block; }
+
+        .size-chip { border: 1px solid #1a1a1a; padding: 10px; cursor: pointer; text-align: center; font-weight: 900; text-transform: uppercase; font-size: 10px; transition: 0.3s; background: #0a0a0a; }
+        .size-chip.active { background: #fff; color: #000; border-color: #fff; }
+        
+        .status-off { opacity: 0.4; filter: grayscale(1); }
     </style>
 </head>
 <body class="bg-black">
 
     <div id="login-screen" class="fixed inset-0 z-[1000] bg-black flex items-center justify-center p-6 transition-all duration-700">
-        <div class="w-full max-w-md">
+        <div class="w-full max-w-md animate-fade">
             <div class="text-center mb-10">
                 <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-24 mx-auto mb-6 invert brightness-200">
                 <h2 class="text-[10px] font-black tracking-[0.6em] text-zinc-500 uppercase">System Authentication</h2>
@@ -43,8 +90,14 @@
             <div class="flex items-center gap-6">
                 <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-12 invert">
                 <div class="flex gap-6 border-l border-zinc-800 pl-6">
-                    <div><p class="text-[8px] text-zinc-500 uppercase font-black">Online Agora</p><p id="counter-online" class="text-sm font-black text-green-500">0</p></div>
-                    <div><p class="text-[8px] text-zinc-500 uppercase font-black">Acessos Totais</p><p id="counter-total" class="text-sm font-black">0</p></div>
+                    <div>
+                        <p class="text-[8px] text-zinc-500 uppercase font-black">Online Agora</p>
+                        <p id="counter-online" class="text-sm font-black text-green-500">0</p>
+                    </div>
+                    <div>
+                        <p class="text-[8px] text-zinc-500 uppercase font-black">Acessos Totais</p>
+                        <p id="counter-total" class="text-sm font-black">0</p>
+                    </div>
                 </div>
             </div>
             <div class="flex gap-2">
@@ -57,16 +110,31 @@
         <main class="container mx-auto px-6 py-12">
             <section id="section-produtos" class="animate-fade">
                 <div class="mb-12 flex justify-between items-end border-b border-zinc-900 pb-8">
-                    <div><h2 class="text-5xl font-black uppercase italic tracking-tighter">Inventário</h2><p id="total-count" class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Carregando...</p></div>
+                    <div>
+                        <h2 class="text-5xl font-black uppercase italic tracking-tighter">Inventário</h2>
+                        <p id="total-count" class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Carregando...</p>
+                    </div>
                 </div>
                 <div id="lista-produtos-adm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </section>
 
             <section id="section-usuarios" class="hidden animate-fade">
-                <h2 class="text-5xl font-black uppercase italic tracking-tighter mb-8">Base de Clientes</h2>
+                <div class="mb-8">
+                    <h2 class="text-5xl font-black uppercase italic tracking-tighter">Base de Clientes</h2>
+                    <p class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Controle de acessos e dados</p>
+                </div>
+                
                 <div class="glass-panel overflow-hidden">
                     <table class="w-full text-left text-[11px] uppercase font-bold">
-                        <thead class="bg-zinc-900 text-zinc-500"><tr><th class="p-4">Status</th><th class="p-4">Nome</th><th class="p-4">Contato</th><th class="p-4 text-right">Ações</th></tr></thead>
+                        <thead class="bg-zinc-900 text-zinc-500">
+                            <tr>
+                                <th class="p-4">Status</th>
+                                <th class="p-4">Nome do Cliente</th>
+                                <th class="p-4">WhatsApp / Email</th>
+                                <th class="p-4">Membro desde</th>
+                                <th class="p-4 text-right">Ações</th>
+                            </tr>
+                        </thead>
                         <tbody id="lista-usuarios-adm"></tbody>
                     </table>
                 </div>
@@ -77,8 +145,8 @@
     <div id="modal-produto" class="fixed inset-0 bg-black/95 z-[600] hidden overflow-y-auto backdrop-blur-sm">
         <div class="min-h-screen flex items-center justify-center p-4">
             <div class="w-full max-w-5xl glass-panel p-8 md:p-12 relative rounded-lg border-zinc-800">
-                <button type="button" onclick="fecharModal()" class="absolute top-8 right-8 text-white text-2xl">&times;</button>
-                <h2 class="text-3xl font-black uppercase italic mb-10">Configurar Produto</h2>
+                <button onclick="fecharModal()" class="absolute top-8 right-8 text-white text-2xl">&times;</button>
+                <h2 id="modal-title" class="text-3xl font-black uppercase italic tracking-tighter mb-10">Configurar Produto</h2>
                 <form id="form-produto" class="grid grid-cols-1 md:grid-cols-2 gap-12">
                     <input type="hidden" id="edit-id">
                     <div class="space-y-6">
@@ -88,19 +156,18 @@
                             <select id="p-status" class="input-mutt"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="PREÇO" required>
-                            <input type="number" step="0.01" id="p-preco-antigo" class="input-mutt" placeholder="ANTIGO">
+                            <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="PREÇO ATUAL" required>
+                            <input type="number" step="0.01" id="p-preco-antigo" class="input-mutt" placeholder="PREÇO ANTIGO">
                         </div>
                         <textarea id="p-desc" rows="4" class="input-mutt" placeholder="DESCRIÇÃO"></textarea>
-                        <div id="grade-tamanhos" class="grid grid-cols-5 gap-2">
+                        <div id="grade-tamanhos" class="grid grid-cols-4 gap-2">
                             <div class="size-chip" data-size="P">P</div><div class="size-chip" data-size="M">M</div>
                             <div class="size-chip" data-size="G">G</div><div class="size-chip" data-size="GG">GG</div>
-                            <div class="size-chip" data-size="XG">XG</div>
                         </div>
                     </div>
                     <div class="space-y-6 flex flex-col">
                         <div id="container-fotos" class="space-y-3 max-h-[300px] overflow-y-auto"></div>
-                        <button type="button" onclick="adicionarCampoFoto()" class="w-full border border-dashed border-zinc-800 py-4 text-[10px] uppercase font-black">+ Foto</button>
+                        <button type="button" onclick="adicionarCampoFoto()" class="w-full border border-dashed border-zinc-800 py-4 text-[10px] uppercase font-black">+ Link de Foto</button>
                         <button type="submit" class="mt-auto w-full bg-white text-black py-5 font-black uppercase text-[12px] tracking-[0.4em]">Salvar na Nuvem</button>
                     </div>
                 </form>
@@ -110,7 +177,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, remove, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDr-W03cp72jHiyALGWlI4vBfxH2xrC-6w",
@@ -126,13 +193,15 @@
         const db = getDatabase(app);
 
         // LOGIN
-        document.getElementById('btn-login-trigger').onclick = () => {
+        window.fazerLogin = () => {
             if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === 'mutt2026') {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('admin-panel').classList.remove('hidden');
             } else { alert("Acesso Negado"); }
         };
+        document.getElementById('btn-login-trigger').onclick = window.fazerLogin;
 
+        // NAVEGAÇÃO
         window.switchTab = (tab) => {
             document.getElementById('section-produtos').classList.toggle('hidden', tab !== 'produtos');
             document.getElementById('section-usuarios').classList.toggle('hidden', tab !== 'usuarios');
@@ -140,7 +209,53 @@
             document.getElementById('tab-user').classList.toggle('active', tab === 'usuarios');
         };
 
-        // LISTAR PRODUTOS
+        // --- MONITOR DE USUÁRIOS E ANALYTICS ---
+        onValue(ref(db, 'usuarios'), (snapshot) => {
+            const users = snapshot.val();
+            const container = document.getElementById('lista-usuarios-adm');
+            let totalAcessos = 0;
+            let onlineCount = 0;
+            
+            container.innerHTML = "";
+            
+            if(users) {
+                Object.keys(users).forEach(uid => {
+                    const dados = users[uid].perfil || {};
+                    const status = users[uid].presenca || 'offline';
+                    
+                    totalAcessos++;
+                    if(status === 'online') onlineCount++;
+
+                    container.innerHTML += `
+                        <tr class="border-b border-zinc-900 hover:bg-zinc-950 transition">
+                            <td class="p-4">
+                                ${status === 'online' ? '<span class="dot-online"></span>' : '<span class="dot-offline"></span>'}
+                            </td>
+                            <td class="p-4">
+                                <span class="text-white block font-black">${dados.nome || 'USUÁRIO S/ NOME'}</span>
+                                <span class="text-[9px] text-zinc-600">ID: ${uid.substring(0,8)}...</span>
+                            </td>
+                            <td class="p-4">
+                                <span class="text-zinc-400 block">${dados.email || '---'}</span>
+                                <span class="text-zinc-600 text-[9px]">${dados.whatsapp || 'SEM TEL'}</span>
+                            </td>
+                            <td class="p-4 text-zinc-500">
+                                ${dados.dataCadastro || '---'}
+                            </td>
+                            <td class="p-4 text-right">
+                                <a href="https://wa.me/${dados.whatsapp}" target="_blank" class="text-white hover:text-green-500 transition mx-2">
+                                    <i class="fa-brands fa-whatsapp"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            document.getElementById('counter-online').innerText = onlineCount;
+            document.getElementById('counter-total').innerText = totalAcessos;
+        });
+
+        // --- LÓGICA DE PRODUTOS (MANTIDA IGUAL) ---
         onValue(ref(db, 'produtos'), (snapshot) => {
             const data = snapshot.val();
             const container = document.getElementById('lista-produtos-adm');
@@ -151,10 +266,10 @@
                     const p = data[id];
                     container.innerHTML += `
                         <div class="glass-panel p-5 flex gap-5 items-center ${p.status === 'inativo' ? 'status-off' : ''}">
-                            <img src="${p.imgs ? p.imgs[0] : ''}" class="w-20 h-24 object-cover border border-zinc-800">
+                            <img src="${p.imgs[0]}" class="w-20 h-24 object-cover border border-zinc-800">
                             <div class="flex-1">
                                 <h3 class="text-[11px] font-black uppercase italic">${p.nome}</h3>
-                                <p class="text-[9px] text-zinc-500 mb-4 font-bold">R$ ${p.preco}</p>
+                                <p class="text-[9px] text-zinc-500 mb-4 font-bold">R$ ${p.preco.toFixed(2)}</p>
                                 <div class="flex gap-2">
                                     <button onclick="editarProduto('${id}')" class="bg-white text-black px-3 py-1 text-[9px] font-black uppercase">Editar</button>
                                     <button onclick="remover('${id}')" class="text-zinc-700 hover:text-red-500 transition"><i class="fa-solid fa-trash"></i></button>
@@ -165,50 +280,35 @@
             }
         });
 
-        // SALVAR
-        document.getElementById('form-produto').onsubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('edit-id').value || Date.now().toString();
-            const urls = Array.from(document.querySelectorAll('.foto-url')).map(i => i.value).filter(v => v !== '');
-            const sizes = Array.from(document.querySelectorAll('.size-chip.active')).map(c => c.dataset.size);
-            
-            const produto = {
-                id, nome: document.getElementById('p-nome').value,
-                cat: document.getElementById('p-cat').value,
-                status: document.getElementById('p-status').value,
-                preco: parseFloat(document.getElementById('p-preco').value),
-                precoAntigo: parseFloat(document.getElementById('p-preco-antigo').value) || null,
-                imgs: urls, desc: document.getElementById('p-desc').value, tamanhos: sizes
-            };
-            
-            set(ref(db, 'produtos/' + id), produto).then(() => {
-                fecharModal();
-                alert("Produto Salvo!");
-            }).catch(err => alert("Erro: " + err.message));
-        };
-
         window.adicionarCampoFoto = (valor = '') => {
             const container = document.getElementById('container-fotos');
             const div = document.createElement('div');
-            div.className = "flex gap-2";
-            div.innerHTML = `<input type="text" class="input-mutt foto-url" value="${valor}" placeholder="URL"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 font-black">X</button>`;
+            div.className = "flex gap-2 animate-fade";
+            div.innerHTML = `<input type="text" class="input-mutt foto-url" value="${valor}" placeholder="URL IMAGEM"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 p-2 font-black">X</button>`;
             container.appendChild(div);
         }
 
         document.querySelectorAll('.size-chip').forEach(c => c.onclick = () => c.classList.toggle('active'));
 
-        window.abrirModal = () => { 
-            document.getElementById('form-produto').reset(); 
-            document.getElementById('edit-id').value = ''; 
-            document.getElementById('container-fotos').innerHTML = ''; 
-            adicionarCampoFoto(); 
-            document.getElementById('modal-produto').classList.remove('hidden'); 
-            document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active')); 
+        document.getElementById('form-produto').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value || Date.now().toString();
+            const urls = Array.from(document.querySelectorAll('.foto-url')).map(i => i.value).filter(v => v !== '');
+            const sizes = Array.from(document.querySelectorAll('.size-chip.active')).map(c => c.dataset.size);
+            const produto = {
+                id: id, nome: document.getElementById('p-nome').value,
+                cat: document.getElementById('p-cat').value, status: document.getElementById('p-status').value,
+                preco: parseFloat(document.getElementById('p-preco').value),
+                precoAntigo: parseFloat(document.getElementById('p-preco-antigo').value) || null,
+                imgs: urls, desc: document.getElementById('p-desc').value, tamanhos: sizes
+            };
+            await set(ref(db, 'produtos/' + id), produto);
+            fecharModal();
         };
-        
+
+        window.abrirModal = () => { document.getElementById('form-produto').reset(); document.getElementById('edit-id').value = ''; document.getElementById('container-fotos').innerHTML = ''; adicionarCampoFoto(); document.getElementById('modal-produto').classList.remove('hidden'); document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active')); };
         window.fecharModal = () => document.getElementById('modal-produto').classList.add('hidden');
-        window.remover = (id) => { if(confirm("Deletar?")) remove(ref(db, 'produtos/' + id)); };
-        
+        window.remover = (id) => { if(confirm("Deletar permanentemente?")) remove(ref(db, 'produtos/' + id)); };
         window.editarProduto = (id) => {
             onValue(ref(db, 'produtos/' + id), (snap) => {
                 const p = snap.val();
@@ -217,12 +317,14 @@
                 document.getElementById('edit-id').value = id;
                 document.getElementById('p-nome').value = p.nome;
                 document.getElementById('p-preco').value = p.preco;
+                document.getElementById('p-preco-antigo').value = p.precoAntigo || '';
+                document.getElementById('p-desc').value = p.desc || '';
                 document.getElementById('p-cat').value = p.cat;
-                document.getElementById('p-status').value = p.status || 'ativo';
+                document.getElementById('p-status').value = p.status;
                 document.getElementById('container-fotos').innerHTML = '';
-                p.imgs?.forEach(url => adicionarCampoFoto(url));
+                p.imgs.forEach(url => adicionarCampoFoto(url));
                 document.querySelectorAll('.size-chip').forEach(chip => {
-                    if(p.tamanhos?.includes(chip.dataset.size)) chip.classList.add('active');
+                    if(p.tamanhos && p.tamanhos.includes(chip.dataset.size)) chip.classList.add('active');
                 });
             }, { onlyOnce: true });
         };
