@@ -31,6 +31,10 @@
 
         #fullscreen-view { display: none; fixed: inset-0; background: black; z-index: 200; align-items: center; justify-content: center; }
         #fullscreen-view.active { display: flex; position: fixed; inset: 0; }
+        
+        /* CORREÇÃO DA ROLAGEM MANTENDO O DESIGN */
+        #product-modal { display: none; align-items: flex-start; }
+        #product-modal.flex { display: flex; }
     </style>
 </head>
 <body>
@@ -111,34 +115,38 @@
         <div id="destaques-grid" class="grid grid-cols-2 md:grid-cols-4 gap-x-3 md:gap-x-6 gap-y-10"></div>
     </main>
 
-    <div id="product-modal" class="fixed inset-0 z-[100] hidden flex-col items-start justify-start p-0 md:p-4 modal-blur overflow-y-auto">
-    <div class="bg-black md:bg-zinc-950 border-zinc-900 w-full max-w-5xl md:rounded-3xl overflow-hidden relative min-h-screen md:min-h-0 md:my-auto md:mx-auto">
+    <div id="product-modal" class="fixed inset-0 z-[100] hidden flex-col modal-blur overflow-y-auto">
+        <button onclick="closeModal()" class="fixed top-5 right-5 text-2xl z-[110] bg-white/10 w-10 h-10 rounded-full flex items-center justify-center md:absolute md:top-6 md:right-6">&times;</button>
         
-        <button onclick="closeModal()" class="fixed top-4 right-4 text-2xl z-[120] bg-black/50 backdrop-blur-md text-white w-10 h-10 rounded-full flex items-center justify-center md:absolute md:top-6 md:right-6">
-            &times;
-        </button>
-        
-        <div class="flex flex-col md:flex-row w-full">
-            <div class="w-full md:w-1/2 relative bg-zinc-900 group">
-                <div id="modal-slider" class="flex overflow-x-auto snap-x no-scrollbar aspect-[3/4] bg-black scroll-smooth"></div>
-            </div>
+        <div class="bg-black md:bg-zinc-950 border-zinc-900 w-full max-w-5xl md:rounded-3xl overflow-hidden relative min-h-screen md:min-h-0 md:my-10 md:mx-auto">
+            <div class="flex flex-col md:flex-row w-full">
+                <div class="w-full md:w-1/2 relative bg-zinc-900 group">
+                    <button onclick="scrollSlider(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-white hover:text-black w-10 h-10 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button onclick="scrollSlider(1)" class="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-white hover:text-black w-10 h-10 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                    <div id="modal-slider" class="flex overflow-x-auto snap-x no-scrollbar aspect-[3/4] bg-black scroll-smooth"></div>
+                    <div id="modal-thumbnails" class="hidden md:flex gap-2 p-4 bg-black overflow-x-auto no-scrollbar"></div>
+                </div>
 
-            <div class="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center bg-black md:bg-transparent">
-                <h2 id="modal-name" class="text-4xl font-black uppercase italic mb-4 tracking-tighter leading-none"></h2>
-                <div class="flex items-baseline gap-3 mb-8">
-                    <span id="modal-price" class="text-2xl font-bold"></span>
-                    <span id="modal-discount" class="text-xs text-zinc-600 line-through"></span>
+                <div class="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center">
+                    <h2 id="modal-name" class="text-4xl font-black uppercase italic mb-4 tracking-tighter leading-none"></h2>
+                    <div class="flex items-baseline gap-3 mb-8">
+                        <span id="modal-price" class="text-2xl font-bold"></span>
+                        <span id="modal-discount" class="text-xs text-zinc-600 line-through"></span>
+                    </div>
+                    <div class="mb-8">
+                        <h3 class="text-[9px] font-black uppercase text-zinc-500 mb-4 tracking-[0.2em]">Selecione o Tamanho</h3>
+                        <div id="modal-sizes" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <button id="add-to-cart-btn" class="w-full bg-white text-black py-5 font-black uppercase text-[10px] tracking-[0.3em] hover:bg-zinc-200 transition">🛒 Adicionar ao Carrinho</button>
+                    <p id="modal-desc" class="text-xs text-zinc-500 mt-8 leading-relaxed italic border-t border-zinc-900 pt-6"></p>
                 </div>
-                <div class="mb-8">
-                    <h3 class="text-[9px] font-black uppercase text-zinc-500 mb-4 tracking-[0.2em]">Selecione o Tamanho</h3>
-                    <div id="modal-sizes" class="flex flex-wrap gap-2"></div>
-                </div>
-                <button id="add-to-cart-btn" class="w-full bg-white text-black py-5 font-black uppercase text-[10px] tracking-[0.3em] hover:bg-zinc-200 transition">🛒 Adicionar ao Carrinho</button>
-                <p id="modal-desc" class="text-xs text-zinc-500 mt-8 leading-relaxed italic border-t border-zinc-900 pt-6"></p>
             </div>
         </div>
     </div>
-</div>
 
     <footer class="bg-black border-t border-zinc-900 py-16 text-center">
         <p class="text-zinc-700 text-[9px] uppercase tracking-[0.5em]">&copy; 2026 MUTT STREETWEAR.</p>
@@ -166,7 +174,6 @@
         let globalProducts = [];
         let selectedSize = "";
 
-        // --- MONITOR DE LOGIN E PRESENÇA ---
         onAuthStateChanged(auth, (user) => {
             const loggedOutDiv = document.getElementById('user-logged-out');
             const loggedInDiv = document.getElementById('user-logged-in');
@@ -176,13 +183,9 @@
                 if(loggedOutDiv) loggedOutDiv.classList.add('hidden');
                 if(loggedInDiv) loggedInDiv.classList.remove('hidden');
                 if(emailSpan) emailSpan.innerText = user.email.split('@')[0].toUpperCase();
-                
-                // --- LÓGICA DE PRESENÇA ---
                 const presenceRef = ref(db, `usuarios/${user.uid}/presenca`);
                 set(presenceRef, "online");
                 onDisconnect(presenceRef).set("offline");
-
-                // Atualiza contagem do carrinho do banco
                 onValue(ref(db, `usuarios/${user.uid}/carrinho`), (snap) => {
                     const data = snap.val();
                     document.getElementById('cart-count').innerText = data ? Object.keys(data).length : 0;
@@ -194,77 +197,71 @@
             }
         });
 
-        window.fazerLogout = () => {
-            signOut(auth).then(() => location.reload());
-        };
+        window.fazerLogout = () => { signOut(auth).then(() => location.reload()); };
 
-      // --- CARREGAR PRODUTOS (COM FILTRO DE STATUS) ---
-onValue(ref(db, 'produtos'), (snapshot) => {
-    const data = snapshot.val();
-    const grid = document.getElementById('destaques-grid');
-    if (!data) return;
-    
-    // Converte o objeto em array
-    globalProducts = Object.values(data);
-    
-    // Filtra apenas os produtos que o status é 'ativo'
-    const produtosAtivos = globalProducts.filter(p => p.status === 'ativo' || !p.status);
+        onValue(ref(db, 'produtos'), (snapshot) => {
+            const data = snapshot.val();
+            const grid = document.getElementById('destaques-grid');
+            if (!data) return;
+            globalProducts = Object.values(data);
+            const produtosAtivos = globalProducts.filter(p => p.status === 'ativo' || !p.status);
+            grid.innerHTML = produtosAtivos.map(p => `
+                <div class="cursor-pointer group" onclick="openProductModal('${p.id}')">
+                    <div class="aspect-[3/4] bg-zinc-900 mb-4 overflow-hidden">
+                        <img src="${p.imgs && p.imgs[0] ? p.imgs[0] : ''}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                    </div>
+                    <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">${p.cat}</p>
+                    <h3 class="text-[11px] font-black uppercase tracking-tight text-white truncate">${p.nome}</h3>
+                    <p class="text-white text-xs mt-1">R$ ${p.preco.toFixed(2)}</p>
+                </div>
+            `).join('');
+        });
 
-    grid.innerHTML = produtosAtivos.map(p => `
-        <div class="cursor-pointer group" onclick="openProductModal('${p.id}')">
-            <div class="aspect-[3/4] bg-zinc-900 mb-4 overflow-hidden">
-                <img src="${p.imgs && p.imgs[0] ? p.imgs[0] : ''}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
-            </div>
-            <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">${p.cat}</p>
-            <h3 class="text-[11px] font-black uppercase tracking-tight text-white truncate">${p.nome}</h3>
-            <p class="text-white text-xs mt-1">R$ ${p.preco.toFixed(2)}</p>
-        </div>
-    `).join('');
-});
-
-        // --- MODAL E CARRINHO ---
         window.openProductModal = (id) => {
-    const p = globalProducts.find(x => x.id == id);
-    if(!p) return;
-    selectedSize = "";
-    
-    // RESET DE SCROLL: Isso faz o modal abrir no topo da imagem sempre
-    const modalElement = document.getElementById('product-modal');
-    modalElement.scrollTop = 0; 
+            const p = globalProducts.find(x => x.id == id);
+            if(!p) return;
+            selectedSize = "";
+            
+            // RESET DO SCROLL SEM APAGAR NADA
+            const modalElement = document.getElementById('product-modal');
+            modalElement.scrollTop = 0;
 
-    const slider = document.getElementById('modal-slider');
-    slider.innerHTML = p.imgs.map(img => `
-        <img src="${img}" onclick="openFullscreen('${img}')" class="w-full h-full object-cover flex-shrink-0 snap-center bg-zinc-950">
-    `).join('');
-    slider.scrollLeft = 0;
+            const slider = document.getElementById('modal-slider');
+            slider.innerHTML = p.imgs.map(img => `
+                <img src="${img}" onclick="openFullscreen('${img}')" class="w-full h-full object-cover flex-shrink-0 snap-center bg-zinc-950">
+            `).join('');
+            slider.scrollLeft = 0;
 
-    document.getElementById('modal-name').innerText = p.nome;
-    document.getElementById('modal-price').innerText = `R$ ${p.preco.toFixed(2)}`;
-    document.getElementById('modal-discount').innerText = p.precoAntigo ? `R$ ${p.precoAntigo.toFixed(2)}` : '';
-    document.getElementById('modal-desc').innerText = p.desc || "Produto exclusivo MUTT.";
-    
-    const sizeArea = document.getElementById('modal-sizes');
-    sizeArea.innerHTML = (p.tamanhos || []).map(t => `
-        <button onclick="selectModalSize(this, '${t}')" class="size-btn border border-zinc-800 flex-1 min-w-[50px] py-3 text-[10px] font-bold transition uppercase">${t}</button>
-    `).join('');
+            // RECONSTRUINDO THUMBNAILS (FUNÇÃO QUE TINHA SUMIDO)
+            const thumbs = document.getElementById('modal-thumbnails');
+            if(thumbs) {
+                thumbs.innerHTML = p.imgs.map((img, idx) => `
+                    <img src="${img}" onclick="document.getElementById('modal-slider').scrollLeft = ${idx} * document.getElementById('modal-slider').clientWidth" class="w-16 h-20 object-cover cursor-pointer opacity-50 hover:opacity-100 transition">
+                `).join('');
+            }
 
-    document.getElementById('add-to-cart-btn').onclick = async () => {
-        if (!selectedSize && p.tamanhos?.length > 0) { alert("SELECIONE O TAMANHO"); return; }
-        const user = auth.currentUser;
-        if (!user) { alert("ACESSE SUA CONTA PARA COMPRAR."); location.href = 'login.html'; return; }
+            document.getElementById('modal-name').innerText = p.nome;
+            document.getElementById('modal-price').innerText = `R$ ${p.preco.toFixed(2)}`;
+            document.getElementById('modal-discount').innerText = p.precoAntigo ? `R$ ${p.precoAntigo.toFixed(2)}` : '';
+            document.getElementById('modal-desc').innerText = p.desc || "Produto exclusivo MUTT.";
+            
+            const sizeArea = document.getElementById('modal-sizes');
+            sizeArea.innerHTML = (p.tamanhos || []).map(t => `
+                <button onclick="selectModalSize(this, '${t}')" class="size-btn border border-zinc-800 flex-1 min-w-[50px] py-3 text-[10px] font-bold transition uppercase">${t}</button>
+            `).join('');
 
-        const itemCart = {
-            id: p.id, nome: p.nome, preco: p.preco, img: p.imgs[0],
-            tamanho: selectedSize || 'UN', cartId: Date.now()
+            document.getElementById('add-to-cart-btn').onclick = async () => {
+                if (!selectedSize && p.tamanhos?.length > 0) { alert("SELECIONE O TAMANHO"); return; }
+                const user = auth.currentUser;
+                if (!user) { alert("ACESSE SUA CONTA PARA COMPRAR."); location.href = 'login.html'; return; }
+                const itemCart = { id: p.id, nome: p.nome, preco: p.preco, img: p.imgs[0], tamanho: selectedSize || 'UN', cartId: Date.now() };
+                await set(ref(db, `usuarios/${user.uid}/carrinho/${itemCart.cartId}`), itemCart);
+                location.href = 'carrinho.html';
+            };
+
+            modalElement.classList.replace('hidden', 'flex');
+            document.body.style.overflow = 'hidden'; 
         };
-        await set(ref(db, `usuarios/${user.uid}/carrinho/${itemCart.cartId}`), itemCart);
-        location.href = 'carrinho.html';
-    };
-
-    // Abre o modal
-    modalElement.classList.replace('hidden', 'flex');
-    document.body.style.overflow = 'hidden'; // Trava o fundo
-};
 
         window.selectModalSize = (btn, size) => {
             document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
@@ -277,10 +274,8 @@ onValue(ref(db, 'produtos'), (snapshot) => {
             document.body.style.overflow = 'auto';
         };
 
-        window.toggleMenu = () => {
-            document.getElementById('mobile-menu').classList.toggle('menu-open');
-        };
-
+        window.toggleMenu = () => { document.getElementById('mobile-menu').classList.toggle('menu-open'); };
+        
         window.scrollSlider = (direction) => {
             const slider = document.getElementById('modal-slider');
             slider.scrollBy({ left: direction * slider.clientWidth, behavior: 'smooth' });
@@ -290,10 +285,7 @@ onValue(ref(db, 'produtos'), (snapshot) => {
             document.getElementById('fullscreen-img').src = src;
             document.getElementById('fullscreen-view').classList.add('active');
         };
-
-        window.closeFullscreen = () => {
-            document.getElementById('fullscreen-view').classList.remove('active');
-        };
+        window.closeFullscreen = () => { document.getElementById('fullscreen-view').classList.remove('active'); };
     </script>
 </body>
 </html>
