@@ -38,20 +38,6 @@
         }
         .input-mutt:focus { border-color: #fff; outline: none; background: #111; box-shadow: 0 0 15px rgba(255,255,255,0.05); }
 
-        .size-chip { 
-            border: 1px solid #1a1a1a; 
-            padding: 10px; 
-            cursor: pointer; 
-            text-align: center; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            font-size: 10px; 
-            transition: 0.3s; 
-            background: #0a0a0a; 
-        }
-        .size-chip:hover { border-color: #444; }
-        .size-chip.active { background: #fff; color: #000; border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
-
         .glass-panel { 
             background: rgba(10, 10, 10, 0.8); 
             backdrop-filter: blur(25px); 
@@ -73,23 +59,14 @@
             border-bottom-color: #fff;
         }
 
-        .btn-postimage {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: #007bff;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 50px;
-            font-weight: 900;
-            font-size: 10px;
-            text-transform: uppercase;
-            z-index: 100;
-            box-shadow: 0 10px 30px rgba(0, 123, 255, 0.3);
-        }
+        /* Status de Online */
+        .dot-online { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px #10b981; }
+        .dot-offline { width: 8px; height: 8px; background: #3f3f46; border-radius: 50%; display: inline-block; }
 
+        .size-chip { border: 1px solid #1a1a1a; padding: 10px; cursor: pointer; text-align: center; font-weight: 900; text-transform: uppercase; font-size: 10px; transition: 0.3s; background: #0a0a0a; }
+        .size-chip.active { background: #fff; color: #000; border-color: #fff; }
+        
         .status-off { opacity: 0.4; filter: grayscale(1); }
-        .status-badge { font-size: 8px; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; }
     </style>
 </head>
 <body class="bg-black">
@@ -109,16 +86,23 @@
     </div>
 
     <div id="admin-panel" class="hidden min-h-screen">
-        <nav class="border-b border-zinc-900 p-6 flex justify-between items-center bg-black/80 sticky top-0 backdrop-blur-xl z-50">
+        <nav class="border-b border-zinc-900 p-6 flex flex-wrap justify-between items-center bg-black/80 sticky top-0 backdrop-blur-xl z-50 gap-4">
             <div class="flex items-center gap-6">
-                <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-16 invert">
-                <div class="hidden md:block">
-                    <h1 class="text-[10px] font-black uppercase tracking-widest text-white italic">MUTT TERMINAL</h1>
+                <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-12 invert">
+                <div class="flex gap-6 border-l border-zinc-800 pl-6">
+                    <div>
+                        <p class="text-[8px] text-zinc-500 uppercase font-black">Online Agora</p>
+                        <p id="counter-online" class="text-sm font-black text-green-500">0</p>
+                    </div>
+                    <div>
+                        <p class="text-[8px] text-zinc-500 uppercase font-black">Acessos Totais</p>
+                        <p id="counter-total" class="text-sm font-black">0</p>
+                    </div>
                 </div>
             </div>
-            <div class="flex gap-4">
+            <div class="flex gap-2">
                 <button onclick="switchTab('produtos')" id="tab-prod" class="tab-btn active">Produtos</button>
-                <button onclick="switchTab('usuarios')" id="tab-user" class="tab-btn">Usuários</button>
+                <button onclick="switchTab('usuarios')" id="tab-user" class="tab-btn">Clientes</button>
             </div>
             <button onclick="abrirModal()" class="bg-white text-black px-6 py-3 font-black uppercase text-[10px] tracking-tighter">Novo Produto</button>
         </nav>
@@ -130,24 +114,28 @@
                         <h2 class="text-5xl font-black uppercase italic tracking-tighter">Inventário</h2>
                         <p id="total-count" class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Carregando...</p>
                     </div>
-                    <button id="btn-reset-banco" class="text-red-900 text-[10px] font-black uppercase hover:text-red-500 transition"><i class="fa-solid fa-skull"></i> Hard Reset</button>
                 </div>
                 <div id="lista-produtos-adm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </section>
 
             <section id="section-usuarios" class="hidden animate-fade">
-                <h2 class="text-5xl font-black uppercase italic tracking-tighter mb-8">Base de Clientes</h2>
+                <div class="mb-8">
+                    <h2 class="text-5xl font-black uppercase italic tracking-tighter">Base de Clientes</h2>
+                    <p class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Controle de acessos e dados</p>
+                </div>
+                
                 <div class="glass-panel overflow-hidden">
                     <table class="w-full text-left text-[11px] uppercase font-bold">
                         <thead class="bg-zinc-900 text-zinc-500">
                             <tr>
-                                <th class="p-4">Nome / Email</th>
-                                <th class="p-4">Cadastrado em</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4">Nome do Cliente</th>
+                                <th class="p-4">WhatsApp / Email</th>
+                                <th class="p-4">Membro desde</th>
                                 <th class="p-4 text-right">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="lista-usuarios-adm">
-                            </tbody>
+                        <tbody id="lista-usuarios-adm"></tbody>
                     </table>
                 </div>
             </section>
@@ -189,7 +177,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, remove, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDr-W03cp72jHiyALGWlI4vBfxH2xrC-6w",
@@ -204,7 +192,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // LOGIN (MANTER IGUAL)
+        // LOGIN
         window.fazerLogin = () => {
             if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === 'mutt2026') {
                 document.getElementById('login-screen').classList.add('hidden');
@@ -213,7 +201,7 @@
         };
         document.getElementById('btn-login-trigger').onclick = window.fazerLogin;
 
-        // TABS (NOVO)
+        // NAVEGAÇÃO
         window.switchTab = (tab) => {
             document.getElementById('section-produtos').classList.toggle('hidden', tab !== 'produtos');
             document.getElementById('section-usuarios').classList.toggle('hidden', tab !== 'usuarios');
@@ -221,28 +209,53 @@
             document.getElementById('tab-user').classList.toggle('active', tab === 'usuarios');
         };
 
-        // CARREGAR USUÁRIOS (NOVO - LÊ O QUE CRIAMOS NO LOGIN)
+        // --- MONITOR DE USUÁRIOS E ANALYTICS ---
         onValue(ref(db, 'usuarios'), (snapshot) => {
             const users = snapshot.val();
             const container = document.getElementById('lista-usuarios-adm');
+            let totalAcessos = 0;
+            let onlineCount = 0;
+            
             container.innerHTML = "";
+            
             if(users) {
                 Object.keys(users).forEach(uid => {
-                    const u = users[uid];
+                    const dados = users[uid].perfil || {};
+                    const status = users[uid].presenca || 'offline';
+                    
+                    totalAcessos++;
+                    if(status === 'online') onlineCount++;
+
                     container.innerHTML += `
                         <tr class="border-b border-zinc-900 hover:bg-zinc-950 transition">
-                            <td class="p-4 text-white">${u.nome}<br><span class="text-zinc-500 text-[9px]">${u.email}</span></td>
-                            <td class="p-4 text-zinc-500">${new Date().toLocaleDateString()}</td>
+                            <td class="p-4">
+                                ${status === 'online' ? '<span class="dot-online"></span>' : '<span class="dot-offline"></span>'}
+                            </td>
+                            <td class="p-4">
+                                <span class="text-white block font-black">${dados.nome || 'USUÁRIO S/ NOME'}</span>
+                                <span class="text-[9px] text-zinc-600">ID: ${uid.substring(0,8)}...</span>
+                            </td>
+                            <td class="p-4">
+                                <span class="text-zinc-400 block">${dados.email || '---'}</span>
+                                <span class="text-zinc-600 text-[9px]">${dados.whatsapp || 'SEM TEL'}</span>
+                            </td>
+                            <td class="p-4 text-zinc-500">
+                                ${dados.dataCadastro || '---'}
+                            </td>
                             <td class="p-4 text-right">
-                                <a href="https://wa.me/${u.telefone}" target="_blank" class="text-green-500 hover:text-green-400 mr-4"><i class="fa-brands fa-whatsapp"></i></a>
+                                <a href="https://wa.me/${dados.whatsapp}" target="_blank" class="text-white hover:text-green-500 transition mx-2">
+                                    <i class="fa-brands fa-whatsapp"></i>
+                                </a>
                             </td>
                         </tr>
                     `;
                 });
             }
+            document.getElementById('counter-online').innerText = onlineCount;
+            document.getElementById('counter-total').innerText = totalAcessos;
         });
 
-        // TODA A SUA LÓGICA DE PRODUTOS ABAIXO (MANTIDA)
+        // --- LÓGICA DE PRODUTOS (MANTIDA IGUAL) ---
         onValue(ref(db, 'produtos'), (snapshot) => {
             const data = snapshot.val();
             const container = document.getElementById('lista-produtos-adm');
@@ -253,13 +266,13 @@
                     const p = data[id];
                     container.innerHTML += `
                         <div class="glass-panel p-5 flex gap-5 items-center ${p.status === 'inativo' ? 'status-off' : ''}">
-                            <img src="${p.imgs[0]}" class="w-20 h-24 object-cover">
+                            <img src="${p.imgs[0]}" class="w-20 h-24 object-cover border border-zinc-800">
                             <div class="flex-1">
                                 <h3 class="text-[11px] font-black uppercase italic">${p.nome}</h3>
-                                <p class="text-[9px] text-zinc-500 mb-4">R$ ${p.preco.toFixed(2)}</p>
+                                <p class="text-[9px] text-zinc-500 mb-4 font-bold">R$ ${p.preco.toFixed(2)}</p>
                                 <div class="flex gap-2">
                                     <button onclick="editarProduto('${id}')" class="bg-white text-black px-3 py-1 text-[9px] font-black uppercase">Editar</button>
-                                    <button onclick="remover('${id}')" class="text-zinc-700 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                                    <button onclick="remover('${id}')" class="text-zinc-700 hover:text-red-500 transition"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </div>
                         </div>`;
@@ -267,12 +280,11 @@
             }
         });
 
-        // FUNÇÕES DO FORMULÁRIO (MANTIDAS)
         window.adicionarCampoFoto = (valor = '') => {
             const container = document.getElementById('container-fotos');
             const div = document.createElement('div');
-            div.className = "flex gap-2";
-            div.innerHTML = `<input type="text" class="input-mutt foto-url" value="${valor}" placeholder="URL IMAGEM"><button type="button" onclick="this.parentElement.remove()" class="text-red-500">X</button>`;
+            div.className = "flex gap-2 animate-fade";
+            div.innerHTML = `<input type="text" class="input-mutt foto-url" value="${valor}" placeholder="URL IMAGEM"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 p-2 font-black">X</button>`;
             container.appendChild(div);
         }
 
@@ -294,18 +306,26 @@
             fecharModal();
         };
 
-        window.abrirModal = () => { document.getElementById('form-produto').reset(); document.getElementById('edit-id').value = ''; document.getElementById('container-fotos').innerHTML = ''; adicionarCampoFoto(); document.getElementById('modal-produto').classList.remove('hidden'); };
+        window.abrirModal = () => { document.getElementById('form-produto').reset(); document.getElementById('edit-id').value = ''; document.getElementById('container-fotos').innerHTML = ''; adicionarCampoFoto(); document.getElementById('modal-produto').classList.remove('hidden'); document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active')); };
         window.fecharModal = () => document.getElementById('modal-produto').classList.add('hidden');
         window.remover = (id) => { if(confirm("Deletar permanentemente?")) remove(ref(db, 'produtos/' + id)); };
         window.editarProduto = (id) => {
             onValue(ref(db, 'produtos/' + id), (snap) => {
                 const p = snap.val();
+                if(!p) return;
                 abrirModal();
                 document.getElementById('edit-id').value = id;
                 document.getElementById('p-nome').value = p.nome;
                 document.getElementById('p-preco').value = p.preco;
+                document.getElementById('p-preco-antigo').value = p.precoAntigo || '';
+                document.getElementById('p-desc').value = p.desc || '';
+                document.getElementById('p-cat').value = p.cat;
+                document.getElementById('p-status').value = p.status;
                 document.getElementById('container-fotos').innerHTML = '';
                 p.imgs.forEach(url => adicionarCampoFoto(url));
+                document.querySelectorAll('.size-chip').forEach(chip => {
+                    if(p.tamanhos && p.tamanhos.includes(chip.dataset.size)) chip.classList.add('active');
+                });
             }, { onlyOnce: true });
         };
     </script>
