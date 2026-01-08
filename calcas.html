@@ -89,11 +89,11 @@
         <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-12"></div>
     </main>
 
-    <div id="product-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-0 md:p-4 modal-blur overflow-y-auto">
-        <div class="bg-black md:bg-zinc-950 border-zinc-900 w-full max-w-5xl md:rounded-3xl overflow-hidden relative min-h-screen md:min-h-0">
+    <div id="product-modal" class="fixed inset-0 z-[100] hidden items-start justify-center p-0 md:p-4 modal-blur overflow-y-auto">
+        <div class="bg-black md:bg-zinc-950 border-zinc-900 w-full max-w-5xl md:rounded-3xl overflow-hidden relative min-h-screen md:min-h-0 md:my-8">
             <button onclick="closeModal()" class="fixed top-5 right-5 text-2xl z-[110] bg-white/10 w-10 h-10 rounded-full flex items-center justify-center md:absolute md:top-6 md:right-6 hover:bg-white hover:text-black transition">&times;</button>
             <div class="flex flex-col md:flex-row w-full">
-                <div class="w-full md:w-1/2 relative bg-zinc-900 group">
+                <div class="w-full md:w-1/2 relative bg-zinc-900 group h-fit">
                     <button onclick="scrollSlider(-1)" class="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-white hover:text-black w-10 h-10 rounded-full items-center justify-center transition-all opacity-0 group-hover:opacity-100">
                         <i class="fa-solid fa-chevron-left text-xs"></i>
                     </button>
@@ -103,7 +103,7 @@
                     <div id="modal-slider" class="flex overflow-x-auto snap-x no-scrollbar aspect-[3/4] bg-black scroll-smooth"></div>
                     <div id="modal-thumbnails" class="hidden md:flex gap-2 p-4 bg-black overflow-x-auto no-scrollbar"></div>
                 </div>
-                <div class="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center">
+                <div class="w-full md:w-1/2 p-8 md:p-16 flex flex-col">
                     <h2 id="modal-name" class="text-4xl font-black uppercase italic mb-4 tracking-tighter leading-none"></h2>
                     <div class="flex items-baseline gap-3 mb-8">
                         <span id="modal-price" class="text-2xl font-bold"></span>
@@ -114,7 +114,7 @@
                         <div id="modal-sizes" class="flex flex-wrap gap-2"></div>
                     </div>
                     <button id="add-to-cart-btn" class="w-full bg-white text-black py-5 font-black uppercase text-[10px] tracking-[0.3em] hover:bg-zinc-200 transition">🛒 Adicionar ao Carrinho</button>
-                    <p id="modal-desc" class="text-xs text-zinc-500 mt-8 leading-relaxed italic border-t border-zinc-900 pt-6"></p>
+                    <p id="modal-desc" class="text-xs text-zinc-500 mt-8 leading-relaxed italic border-t border-zinc-900 pt-6 pb-12"></p>
                 </div>
             </div>
         </div>
@@ -139,15 +139,11 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        // ==========================================
-        // CONFIGURAÇÃO DA PÁGINA: Mude para 'jaquetas', 'shorts', etc.
         const categoriaAtual = 'calcas'; 
-        // ==========================================
         
         let globalProducts = [];
         let selectedSize = "";
 
-        // Monitorar Carrinho e Auth
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 onValue(ref(db, `usuarios/${user.uid}/carrinho`), (snap) => {
@@ -174,7 +170,6 @@
         };
         window.closeFullscreen = () => document.getElementById('fullscreen-view').classList.remove('active');
 
-        // CARREGAR PRODUTOS COM FILTRO DE STATUS E CATEGORIA
         onValue(ref(db, 'produtos'), (snapshot) => {
             const data = snapshot.val();
             const grid = document.getElementById('product-grid');
@@ -186,8 +181,6 @@
             }
 
             globalProducts = Object.values(data);
-            
-            // FILTRO: Deve ser da categoria certa E estar ATIVO (ou não ter status definido ainda)
             const filtrados = globalProducts.filter(p => 
                 p.cat === categoriaAtual && (p.status === 'ativo' || !p.status)
             );
@@ -237,7 +230,9 @@
                 location.href = 'carrinho.html';
             };
 
-            document.getElementById('product-modal').classList.replace('hidden', 'flex');
+            const modal = document.getElementById('product-modal');
+            modal.classList.replace('hidden', 'flex');
+            modal.scrollTo(0,0);
             document.body.style.overflow = 'hidden';
         };
 
