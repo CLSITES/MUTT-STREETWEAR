@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MUTT | PAGAMENTO PIX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
+        .mutt-card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 2rem; }
+        .btn-whatsapp { background-color: #25D366; color: black; }
+    </style>
+</head>
+<body>
+
+    <main class="container mx-auto px-6 py-12 max-w-lg">
+        <div class="text-center mb-10">
+            <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" alt="MUTT" class="w-20 mx-auto mb-6">
+            <h1 class="text-2xl font-black italic uppercase tracking-tighter">Finalize seu Pix</h1>
+            <p class="text-zinc-500 text-[10px] uppercase font-bold tracking-widest mt-2">O pedido será processado após o envio do comprovante</p>
+        </div>
+
+        <div class="mutt-card space-y-8">
+            <div class="text-center">
+                <span class="text-zinc-500 text-[9px] font-black uppercase tracking-widest">Valor Total</span>
+                <div id="valor-display" class="text-4xl font-black italic tracking-tighter">R$ 0,00</div>
+            </div>
+
+            <div class="flex justify-center bg-white p-4 mx-auto w-48 h-48" id="qrcode-container">
+                </div>
+
+            <div class="space-y-2">
+                <span class="text-[9px] font-black uppercase text-zinc-500">Pix Copia e Cola</span>
+                <div class="flex gap-2">
+                    <input type="text" id="pix-code" readonly class="bg-zinc-900 border border-zinc-800 text-[10px] p-3 w-full outline-none text-zinc-400">
+                    <button onclick="copyPix()" class="bg-white text-black px-4 font-black uppercase text-[10px]">Copiar</button>
+                </div>
+            </div>
+
+            <div class="border-t border-zinc-900 pt-6">
+                <button onclick="enviarWhatsApp()" class="w-full btn-whatsapp py-4 font-black uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 hover:opacity-90 transition-all">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    Enviar Comprovante
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="index.html" class="text-zinc-600 text-[9px] font-black uppercase tracking-widest hover:text-white transition-all">Voltar para a loja</a>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDr-W03cp72jHiyALGWlI4vBfxH2xrC-6w",
+            authDomain: "mutt-streetwear.firebaseapp.com",
+            databaseURL: "https://mutt-streetwear-default-rtdb.firebaseio.com",
+            projectId: "mutt-streetwear",
+            storageBucket: "mutt-streetwear.firebasestorage.app",
+            messagingSenderId: "65929911570",
+            appId: "1:65929911570:web:86299846ef5401b5c0a7cb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        let dadosPedido = null;
+        const chavePix = "06937246250"; // Seu CPF cadastrado
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Pega o último pedido feito pelo usuário
+                const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
+                onValue(pedidosRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        const id = Object.keys(data)[0];
+                        dadosPedido = data[id];
+                        gerarInterfacePix(dadosPedido);
+                    }
+                });
+            }
+        });
+
+        function gerarInterfacePix(pedido) {
+            const valor = pedido.total.toFixed(2);
+            document.getElementById('valor-display').innerText = `R$ ${valor}`;
+            
+            // Gerar código Pix Estático (BR Code simples)
+            // Nota: Este é um gerador de link simples para demonstração. 
+            // Para um QR Code que abre o banco direto com valor, o padrão é mais complexo, 
+            // mas o texto abaixo funciona em muitos leitores como "Copia e Cola".
+            const pixTexto = `00020126330014BR.GOV.BCB.PIX0111${chavePix}520400005303986540${valor}5802BR5915MUTT STREETWEAR6009SAO PAULO62070503***6304`;
+            
+            document.getElementById('pix-code').value = pixTexto;
+
+            // Limpa e gera o QR Code visual
+            document.getElementById('qrcode-container').innerHTML = "";
+            new QRCode(document.getElementById("qrcode-container"), {
+                text: pixTexto,
+                width: 180,
+                height: 180,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+
+        window.copyPix = () => {
+            const input = document.getElementById('pix-code');
+            input.select();
+            document.execCommand("copy");
+            alert("CÓDIGO PIX COPIADO!");
+        };
+
+        window.enviarWhatsApp = () => {
+            if(!dadosPedido) return;
+
+            const telefoneDono = "5594912345678"; // <--- COLOQUE SEU WHATSAPP AQUI (DDI + DDD + NUMERO)
+            
+            // Formatação da lista de itens
+            const itensTexto = dadosPedido.itens.map(item => `• ${item.nome} (${item.tamanho}) - R$ ${item.preco.toFixed(2)}`).join('%0A');
+
+            const mensagem = `*NOVO PEDIDO - MUTT STREETWEAR*%0A%0A` +
+                `*VALOR TOTAL:* R$ ${dadosPedido.total.toFixed(2)}%0A` +
+                `*MÉTODO:* PIX%0A` +
+                `*DATA:* ${dadosPedido.data}%0A%0A` +
+                `*PRODUTOS:*%0A${itensTexto}%0A%0A` +
+                `*ENDEREÇO DE ENTREGA:*%0A` +
+                `${dadosPedido.endereco.rua}, ${dadosPedido.endereco.numero}%0A` +
+                `${dadosPedido.endereco.cidade} - ${dadosPedido.endereco.estado}%0A%0A` +
+                `*DADOS DO CLIENTE:*%0A` +
+                `Nome: ${auth.currentUser.displayName || 'Cliente'}%0A` +
+                `Email: ${auth.currentUser.email}%0A%0A` +
+                `_Estou enviando o comprovante em anexo..._`;
+
+            window.open(`https://wa.me/${telefoneDono}?text=${mensagem}`, '_blank');
+        };
+    </script>
+</body>
+</html>
