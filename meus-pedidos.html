@@ -35,7 +35,7 @@
             letter-spacing: 1px;
         }
 
-        /* Cores de Status Profissionais */
+        /* Cores de Status */
         .status-pendente { background: #facc15; color: #000; }
         .status-aprovado { background: #fff; color: #000; }
         .status-enviado { background: #3b82f6; color: #fff; }
@@ -43,7 +43,7 @@
         .status-cancelado { background: #ef4444; color: #fff; }
 
         .mutt-logo {
-            filter: drop-shadow(0 0 5px rgba(255,255,255,0.1));
+            filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(255,255,255,0.1));
         }
 
         ::-webkit-scrollbar { width: 5px; }
@@ -67,7 +67,7 @@
         <div id="pedidos-container" class="space-y-6">
             <div class="text-center py-20">
                 <i class="fa-solid fa-circle-notch animate-spin text-xl mb-4 text-zinc-800"></i>
-                <p class="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-600">Sincronizando Banco de Dados...</p>
+                <p class="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-600">Sincronizando Terminal...</p>
             </div>
         </div>
     </main>
@@ -91,83 +91,83 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        // Verifica se o usuário está logado
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 carregarPedidos(user.uid);
             } else {
-                // Se não estiver logado, manda para o login que acabamos de arrumar
-                window.location.href = 'login.html';
+                // Se não houver login, você pode decidir se limpa a tela ou avisa
+                document.getElementById('pedidos-container').innerHTML = `
+                    <div class="text-center py-24 border border-zinc-900 border-dashed">
+                        <p class="text-[10px] text-zinc-600 font-black uppercase mb-6">Acesso restrito. Faça login.</p>
+                    </div>
+                `;
             }
         });
 
         function carregarPedidos(uid) {
-            const pedidosRef = ref(db, `pedidos`);
+            // CORREÇÃO: Busca dentro do nó do usuário específico
+            const pedidosRef = ref(db, `usuarios/${uid}/pedidos`);
+            
             onValue(pedidosRef, (snapshot) => {
                 const data = snapshot.val();
                 const container = document.getElementById('pedidos-container');
                 container.innerHTML = "";
 
-                let meusPedidos = [];
-                if (data) {
-                    meusPedidos = Object.keys(data)
-                        .map(id => ({ id, ...data[id] }))
-                        .filter(p => p.clienteId === uid);
-                }
-
-                if (meusPedidos.length === 0) {
+                if (!data) {
                     container.innerHTML = `
-                        <div class="text-center py-24 border border-zinc-900 border-dashed rounded-lg">
-                            <p class="text-[10px] text-zinc-600 font-black uppercase tracking-widest mb-6">Nenhuma atividade registrada.</p>
-                            <a href="index.html" class="bg-white text-black px-8 py-4 text-[10px] font-black uppercase tracking-tighter hover:bg-zinc-200 transition">
-                                Iniciar Compras
+                        <div class="text-center py-24 border border-zinc-900 border-dashed">
+                            <p class="text-[10px] text-zinc-600 font-black uppercase tracking-widest mb-6">Nenhum pedido encontrado.</p>
+                            <a href="index.html" class="bg-white text-black px-8 py-4 text-[10px] font-black uppercase tracking-tighter">
+                                Voltar à Loja
                             </a>
                         </div>
                     `;
                     return;
                 }
 
-                // Renderiza do mais novo para o mais antigo
-                meusPedidos.reverse().forEach(p => {
+                // Transforma o objeto em array e inverte para mostrar os mais recentes primeiro
+                const listaPedidos = Object.keys(data).map(key => ({
+                    id: key,
+                    ...data[key]
+                })).reverse();
+
+                listaPedidos.forEach(p => {
                     const statusClass = `status-${(p.status || 'pendente').toLowerCase()}`;
                     
                     container.innerHTML += `
-                        <div class="glass-card p-6">
+                        <div class="glass-card p-6 animate-fade">
                             <div class="flex justify-between items-start mb-6">
                                 <div>
-                                    <p class="text-[8px] text-zinc-600 font-black uppercase tracking-widest">ID: ${p.id.substring(p.id.length - 8)}</p>
-                                    <h3 class="text-[11px] font-black uppercase mt-1 text-white">${p.data}</h3>
+                                    <p class="text-[8px] text-zinc-600 font-black uppercase tracking-widest">PEDIDO #${p.id.slice(-6).toUpperCase()}</p>
+                                    <h3 class="text-[11px] font-black uppercase mt-1 text-white">${p.data || 'Data não registrada'}</h3>
                                 </div>
                                 <span class="status-badge ${statusClass}">${p.status || 'PENDENTE'}</span>
                             </div>
 
                             <div class="space-y-4 mb-6 border-y border-zinc-900 py-6">
-                                ${p.itens.map(item => `
+                                ${p.itens ? p.itens.map(item => `
                                     <div class="flex items-center gap-4">
-                                        <div class="w-16 h-20 bg-zinc-900 overflow-hidden">
-                                            <img src="${item.img}" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all">
+                                        <div class="w-14 h-18 bg-zinc-900 border border-zinc-800">
+                                            <img src="${item.img || (item.imgs ? item.imgs[0] : '')}" class="w-full h-full object-cover grayscale">
                                         </div>
                                         <div class="flex-1">
-                                            <p class="text-[11px] font-black uppercase tracking-tight">${item.nome}</p>
-                                            <div class="flex gap-3 mt-1">
-                                                <p class="text-[9px] text-zinc-500 font-bold uppercase">TAM: ${item.tamanho}</p>
-                                                <p class="text-[9px] text-zinc-500 font-bold uppercase">QTD: 1</p>
-                                            </div>
+                                            <p class="text-[10px] font-black uppercase">${item.nome}</p>
+                                            <p class="text-[9px] text-zinc-500 font-bold uppercase mt-1">TAM: ${item.tamanho} | QTD: ${item.quantidade || 1}</p>
                                         </div>
-                                        <p class="text-[10px] font-black italic">R$ ${item.preco}</p>
+                                        <p class="text-[10px] font-black italic">R$ ${item.preco.toFixed(2)}</p>
                                     </div>
-                                `).join('')}
+                                `).join('') : '<p class="text-[9px] uppercase text-zinc-700">Detalhes dos itens indisponíveis</p>'}
                             </div>
 
                             <div class="flex justify-between items-end">
                                 <div>
-                                    <p class="text-[8px] text-zinc-600 uppercase font-black tracking-widest">Valor Total</p>
-                                    <p class="text-xl font-black tracking-tighter">R$ ${p.total.toFixed(2)}</p>
+                                    <p class="text-[8px] text-zinc-600 uppercase font-black tracking-widest">Total Pago</p>
+                                    <p class="text-xl font-black tracking-tighter">R$ ${(p.total || 0).toFixed(2)}</p>
                                 </div>
-                                <a href="https://wa.me/551194984188337?text=SUPORTE MUTT: Olá, gostaria de informações sobre meu pedido #${p.id.substring(p.id.length - 8)}" 
+                                <a href="https://wa.me/551194984188337?text=SUPORTE MUTT: Olá, preciso de ajuda com o pedido #${p.id.slice(-6).toUpperCase()}" 
                                    target="_blank" 
                                    class="text-[9px] font-black uppercase border border-zinc-800 px-5 py-3 hover:bg-white hover:text-black transition-all">
-                                   Suporte <i class="fa-brands fa-whatsapp ml-2"></i>
+                                    Suporte <i class="fa-brands fa-whatsapp ml-2"></i>
                                 </a>
                             </div>
                         </div>
