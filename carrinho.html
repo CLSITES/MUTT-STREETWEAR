@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MUTT | CARRINHO DA LOJA</title>
+    <title>MUTT | TERMINAL DE CHECKOUT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -22,12 +22,25 @@
             outline: none;
             text-transform: uppercase;
             letter-spacing: 0.1em;
+            transition: 0.3s;
         }
-        .input-mutt:focus { border-color: #fff; }
+        .input-mutt:focus { border-color: #fff; background: #111; }
+        
         .step-title { font-weight: 900; text-transform: uppercase; font-style: italic; letter-spacing: -0.05em; font-size: 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 12px; }
         
-        input[type="radio"] { filter: invert(100%) hue-rotate(180deg) brightness(1.5); scale: 1.2; }
+        input[type="radio"] { filter: invert(100%) brightness(1.5); scale: 1.2; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        .btn-history {
+            border: 1px solid #1a1a1a;
+            padding: 8px 15px;
+            font-[9px];
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
+        }
+        .btn-history:hover { background: white; color: black; border-color: white; }
     </style>
 </head>
 <body>
@@ -37,7 +50,13 @@
             <a href="index.html" class="w-16">
                 <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" alt="MUTT" class="w-full">
             </a>
-            <span class="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-500">TERMINAL DE CHECKOUT</span>
+            
+            <div class="flex items-center gap-6">
+                <a href="meus-pedidos.html" class="btn-history text-[9px]">
+                    <i class="fa-solid fa-box-open mr-2"></i> Meus Pedidos
+                </a>
+                <span class="hidden md:block text-[9px] font-black uppercase tracking-[0.4em] text-zinc-600 italic">Checkout_Terminal.v2</span>
+            </div>
         </div>
     </header>
 
@@ -48,7 +67,7 @@
                 <section>
                     <h2 class="step-title"><span class="text-zinc-800 text-4xl">01</span> SEU CARRINHO</h2>
                     <div id="cart-items-container" class="space-y-8">
-                        <p class="text-zinc-500 animate-pulse">CARREGANDO SEU CARRINHO...</p>
+                        <p class="text-zinc-500 animate-pulse uppercase text-[10px] font-bold">Acessando Banco de Dados...</p>
                     </div>
                 </section>
 
@@ -67,17 +86,17 @@
                     </div>
 
                     <div id="frete-options" class="space-y-3 opacity-50 pointer-events-none transition-opacity">
-                        <label class="flex items-center justify-between border border-zinc-800 p-4 cursor-pointer hover:bg-zinc-900 has-[:checked]:border-white">
-                            <div class="flex items-center gap-3">
+                        <label class="flex items-center justify-between border border-zinc-900 p-5 cursor-pointer hover:bg-zinc-950 has-[:checked]:border-white transition-all">
+                            <div class="flex items-center gap-4">
                                 <input type="radio" name="tipoFrete" value="PAC" checked onchange="recalcularTudo()">
-                                <span class="text-[11px] font-black uppercase">PAC (Econômico)</span>
+                                <span class="text-[11px] font-black uppercase tracking-widest">PAC (Econômico)</span>
                             </div>
                             <span id="valor-pac" class="text-[11px] font-bold tracking-tighter">R$ 0,00</span>
                         </label>
-                        <label class="flex items-center justify-between border border-zinc-800 p-4 cursor-pointer hover:bg-zinc-900 has-[:checked]:border-white">
-                            <div class="flex items-center gap-3">
+                        <label class="flex items-center justify-between border border-zinc-900 p-5 cursor-pointer hover:bg-zinc-950 has-[:checked]:border-white transition-all">
+                            <div class="flex items-center gap-4">
                                 <input type="radio" name="tipoFrete" value="SEDEX" onchange="recalcularTudo()">
-                                <span class="text-[11px] font-black uppercase">SEDEX (Expresso)</span>
+                                <span class="text-[11px] font-black uppercase tracking-widest">SEDEX (Expresso)</span>
                             </div>
                             <span id="valor-sedex" class="text-[11px] font-bold tracking-tighter">R$ 0,00</span>
                         </label>
@@ -87,43 +106,43 @@
                 <section>
                     <h2 class="step-title"><span class="text-zinc-800 text-4xl">03</span> PAGAMENTO</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label class="border border-zinc-800 p-6 flex items-center justify-between cursor-pointer hover:bg-zinc-900 transition group has-[:checked]:border-white">
+                        <label class="border border-zinc-900 p-6 flex items-center justify-between cursor-pointer hover:bg-zinc-950 transition group has-[:checked]:border-white">
                             <div class="flex items-center gap-4">
-                                <input type="radio" name="pay" value="pix" class="accent-white" checked onchange="recalcularTudo()">
+                                <input type="radio" name="pay" value="pix" checked onchange="recalcularTudo()">
                                 <div class="flex flex-col">
                                     <span class="text-[11px] font-black uppercase tracking-widest">PIX</span>
                                     <span class="text-[9px] text-zinc-500 font-bold uppercase">Aprovação imediata</span>
                                 </div>
                             </div>
-                            <i class="fa-brands fa-pix text-zinc-700 group-hover:text-white"></i>
+                            <i class="fa-brands fa-pix text-zinc-700 group-hover:text-white text-xl"></i>
                         </label>
 
-                        <label class="border border-zinc-800 p-6 flex items-center justify-between cursor-pointer hover:bg-zinc-900 transition group has-[:checked]:border-white">
+                        <label class="border border-zinc-900 p-6 flex items-center justify-between cursor-pointer hover:bg-zinc-950 transition group has-[:checked]:border-white">
                             <div class="flex items-center gap-4">
-                                <input type="radio" name="pay" value="cartao" class="accent-white" onchange="recalcularTudo()">
+                                <input type="radio" name="pay" value="cartao" onchange="recalcularTudo()">
                                 <div class="flex flex-col">
-                                    <span class="text-[11px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white">Cartão</span>
+                                    <span class="text-[11px] font-black uppercase tracking-widest">Cartão de Crédito</span>
                                     <span class="text-[9px] text-zinc-600 font-bold uppercase">Via Link Seguro</span>
                                 </div>
                             </div>
-                            <i class="fa-solid fa-credit-card text-zinc-700 group-hover:text-white"></i>
+                            <i class="fa-solid fa-credit-card text-zinc-700 group-hover:text-white text-xl"></i>
                         </label>
                     </div>
                 </section>
             </div>
 
             <div class="lg:col-span-5">
-                <div class="sticky top-32 bg-zinc-950 border border-zinc-900 p-10 rounded-sm shadow-2xl">
-                    <h2 class="text-[10px] font-black uppercase tracking-[0.4em] mb-10 border-b border-zinc-900 pb-5 text-zinc-400 italic">RESUMO DO PEDIDO</h2>
+                <div class="sticky top-32 bg-[#050505] border border-zinc-900 p-10 rounded-sm">
+                    <h2 class="text-[10px] font-black uppercase tracking-[0.4em] mb-10 border-b border-zinc-900 pb-5 text-zinc-500 italic">Checkout Summary</h2>
                     
                     <div class="space-y-5 mb-10">
                         <div class="flex justify-between text-sm">
-                            <span class="text-zinc-500 uppercase font-black text-[9px] tracking-widest">Subtotal</span>
+                            <span class="text-zinc-600 uppercase font-black text-[9px] tracking-widest">Produtos</span>
                             <span id="subtotal" class="font-bold tracking-tighter">R$ 0,00</span>
                         </div>
                         <div class="flex justify-between text-sm">
-                            <span class="text-zinc-500 uppercase font-black text-[9px] tracking-widest">Frete (<span id="uf-display">--</span>)</span>
-                            <span id="frete-valor" class="font-bold tracking-tighter">R$ 0,00</span>
+                            <span class="text-zinc-600 uppercase font-black text-[9px] tracking-widest">Envio (<span id="uf-display">--</span>)</span>
+                            <span id="frete-valor" class="font-bold tracking-tighter text-zinc-400">R$ 0,00</span>
                         </div>
                         <div class="h-[1px] bg-zinc-900 my-6"></div>
                         <div class="flex justify-between items-end">
@@ -132,9 +151,11 @@
                         </div>
                     </div>
 
-                    <button onclick="finalizarPedido()" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.3em] hover:bg-zinc-200 transition-all hover:tracking-[0.4em]">
-                        Finalizar Pedido
+                    <button onclick="finalizarPedido()" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.3em] hover:bg-zinc-200 transition-all active:scale-[0.98]">
+                        Confirmar Pedido
                     </button>
+                    
+                    <p class="text-[8px] text-center text-zinc-600 uppercase font-black mt-6 tracking-widest">Ambiente Criptografado & Seguro</p>
                 </div>
             </div>
         </div>
@@ -160,15 +181,9 @@
         const auth = getAuth(app);
 
         const TABELA_FRETE = {
-            "PA": { pac: 28.00, sedex: 45.00 },
-            "MA": { pac: 38.00, sedex: 65.00 }, "TO": { pac: 38.00, sedex: 65.00 },
-            "SP": { pac: 58.00, sedex: 95.00 }, "RJ": { pac: 62.00, sedex: 105.00 },
-            "MG": { pac: 58.00, sedex: 95.00 }, "ES": { pac: 60.00, sedex: 98.00 },
-            "DF": { pac: 45.00, sedex: 85.00 }, "GO": { pac: 48.00, sedex: 88.00 },
-            "PR": { pac: 65.00, sedex: 115.00 }, "RS": { pac: 72.00, sedex: 125.00 },
-            "SC": { pac: 68.00, sedex: 120.00 },
-            "BA": { pac: 52.00, sedex: 89.00 }, "CE": { pac: 48.00, sedex: 85.00 },
-            "OUTROS": { pac: 75.00, sedex: 130.00 }
+            "PA": { pac: 28.00, sedex: 45.00 }, "MA": { pac: 38.00, sedex: 65.00 },
+            "SP": { pac: 18.00, sedex: 35.00 }, "RJ": { pac: 22.00, sedex: 45.00 },
+            "OUTROS": { pac: 45.00, sedex: 80.00 }
         };
 
         let carrinhoGlobal = [];
@@ -178,16 +193,9 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                const cartRef = ref(db, `usuarios/${user.uid}/carrinho`);
-                onValue(cartRef, (snapshot) => {
+                onValue(ref(db, `usuarios/${user.uid}/carrinho`), (snapshot) => {
                     const data = snapshot.val();
-                    carrinhoGlobal = [];
-                    if (data) {
-                        // Preservamos o cartId original para a remoção funcionar
-                        Object.keys(data).forEach(key => {
-                            carrinhoGlobal.push({ ...data[key], cartId: key });
-                        });
-                    }
+                    carrinhoGlobal = data ? Object.keys(data).map(key => ({ ...data[key], cartId: key })) : [];
                     renderCarrinho();
                 });
             } else {
@@ -199,24 +207,24 @@
             const container = document.getElementById('cart-items-container');
             let subtotal = 0;
             if(carrinhoGlobal.length === 0) {
-                container.innerHTML = `<div class="py-20 text-center border border-zinc-900 uppercase text-[10px] font-black tracking-widest text-zinc-500">Carrinho Vazio</div>`;
+                container.innerHTML = `<div class="py-20 text-center border border-zinc-900 uppercase text-[9px] font-black tracking-[0.4em] text-zinc-700 italic">Terminal: Carrinho Vazio</div>`;
                 atualizarResumo(0);
                 return;
             }
             container.innerHTML = carrinhoGlobal.map((item) => {
                 subtotal += item.preco;
                 return `
-                    <div class="flex gap-8 border-b border-zinc-900 pb-8 items-start group">
-                        <div class="w-24 h-32 bg-zinc-900 overflow-hidden border border-zinc-800">
-                            <img src="${item.img}" class="w-full h-full object-cover">
+                    <div class="flex gap-8 border-b border-zinc-950 pb-8 items-start">
+                        <div class="w-20 h-28 bg-zinc-900 border border-zinc-800 shadow-xl overflow-hidden">
+                            <img src="${item.img}" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all">
                         </div>
                         <div class="flex-1">
-                            <div class="flex justify-between">
-                                <h3 class="text-sm font-black uppercase italic tracking-tighter">${item.nome}</h3>
-                                <button onclick="removerItem('${item.cartId}')" class="text-zinc-800 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-[12px] font-black uppercase italic tracking-tighter">${item.nome}</h3>
+                                <button onclick="removerItem('${item.cartId}')" class="text-zinc-800 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
                             </div>
-                            <p class="text-[9px] text-zinc-500 font-black uppercase mt-2">Tam: ${item.tamanho}</p>
-                            <p class="text-sm font-black italic mt-8">R$ ${item.preco.toFixed(2)}</p>
+                            <p class="text-[9px] text-zinc-500 font-black uppercase mt-2 tracking-widest">SIZE: ${item.tamanho} / QTY: 1</p>
+                            <p class="text-sm font-black italic mt-6 tracking-tighter text-white">R$ ${item.preco.toFixed(2)}</p>
                         </div>
                     </div>
                 `;
@@ -224,99 +232,64 @@
             atualizarResumo(subtotal);
         };
 
-        window.removerItem = async (cartId) => {
-            if (currentUser && confirm("Remover este item?")) {
-                await remove(ref(db, `usuarios/${currentUser.uid}/carrinho/${cartId}`));
-            }
-        };
+        window.removerItem = (id) => confirm("REMOVER ITEM?") && remove(ref(db, `usuarios/${currentUser.uid}/carrinho/${id}`));
 
         window.calcularFrete = () => {
             const uf = document.getElementById('estado').value.toUpperCase().trim();
-            const display = document.getElementById('uf-display');
-            const optionsDiv = document.getElementById('frete-options');
-            display.innerText = uf || "--";
+            document.getElementById('uf-display').innerText = uf || "--";
+            const opt = document.getElementById('frete-options');
             if (uf.length === 2) {
-                const precos = TABELA_FRETE[uf] || TABELA_FRETE["OUTROS"];
-                document.getElementById('valor-pac').innerText = `R$ ${precos.pac.toFixed(2)}`;
-                document.getElementById('valor-sedex').innerText = `R$ ${precos.sedex.toFixed(2)}`;
-                optionsDiv.classList.remove('opacity-50', 'pointer-events-none');
-            } else {
-                optionsDiv.classList.add('opacity-50', 'pointer-events-none');
-            }
+                const p = TABELA_FRETE[uf] || TABELA_FRETE["OUTROS"];
+                document.getElementById('valor-pac').innerText = `R$ ${p.pac.toFixed(2)}`;
+                document.getElementById('valor-sedex').innerText = `R$ ${p.sedex.toFixed(2)}`;
+                opt.classList.remove('opacity-50', 'pointer-events-none');
+            } else opt.classList.add('opacity-50', 'pointer-events-none');
             recalcularTudo();
         };
 
         window.recalcularTudo = () => {
-            let subtotal = carrinhoGlobal.reduce((acc, item) => acc + item.preco, 0);
+            const sub = carrinhoGlobal.reduce((acc, i) => acc + i.preco, 0);
             const uf = document.getElementById('estado').value.toUpperCase().trim();
             if (uf.length === 2) {
                 const tipo = document.querySelector('input[name="tipoFrete"]:checked').value;
-                const precos = TABELA_FRETE[uf] || TABELA_FRETE["OUTROS"];
-                freteSelecionado = tipo === "PAC" ? precos.pac : precos.sedex;
-            } else { freteSelecionado = 0; }
-            atualizarResumo(subtotal);
+                const p = TABELA_FRETE[uf] || TABELA_FRETE["OUTROS"];
+                freteSelecionado = tipo === "PAC" ? p.pac : p.sedex;
+            } else freteSelecionado = 0;
+            atualizarResumo(sub);
         };
 
-        window.atualizarResumo = (subtotal) => {
-            const totalFinal = subtotal + freteSelecionado;
-            document.getElementById('subtotal').innerText = `R$ ${subtotal.toFixed(2)}`;
+        window.atualizarResumo = (sub) => {
+            document.getElementById('subtotal').innerText = `R$ ${sub.toFixed(2)}`;
             document.getElementById('frete-valor').innerText = `R$ ${freteSelecionado.toFixed(2)}`;
-            document.getElementById('total').innerText = `R$ ${totalFinal.toFixed(2)}`;
+            document.getElementById('total').innerText = `R$ ${(sub + freteSelecionado).toFixed(2)}`;
         };
 
         window.finalizarPedido = async () => {
             const nome = document.getElementById('nome-completo').value;
             const zap = document.getElementById('whatsapp').value;
-            const estado = document.getElementById('estado').value.toUpperCase().trim();
-            
-            if(carrinhoGlobal.length === 0) return alert("CARRINHO VAZIO");
-            if(!nome || !zap) return alert("PREENCHA SEU NOME E WHATSAPP");
-            if(estado.length < 2) return alert("INFORME O ESTADO PARA O FRETE");
+            const uf = document.getElementById('estado').value.toUpperCase();
 
-            let subtotal = carrinhoGlobal.reduce((acc, item) => acc + item.preco, 0);
-            const metodo = document.querySelector('input[name="pay"]:checked').value;
-            const tipoFrete = document.querySelector('input[name="tipoFrete"]:checked').value;
+            if(!carrinhoGlobal.length || !nome || !zap || uf.length < 2) return alert("ERRO: DADOS INCOMPLETOS");
 
             const pedidoObj = {
+                clienteId: currentUser.uid, // OBRIGATÓRIO PARA APARECER EM "MEUS PEDIDOS"
                 data: new Date().toLocaleDateString('pt-BR'),
                 status: "Pendente",
-                metodoPagamento: metodo,
-                modalidadeFrete: tipoFrete,
-                total: subtotal + freteSelecionado,
+                total: (carrinhoGlobal.reduce((acc, i) => acc + i.preco, 0)) + freteSelecionado,
                 itens: carrinhoGlobal,
-                endereco: {
-                    nome: nome,
-                    cpf: document.getElementById('cpf').value,
-                    whatsapp: zap,
-                    rua: document.getElementById('rua').value,
-                    numero: document.getElementById('numero').value,
-                    cidade: document.getElementById('cidade').value,
-                    estado: estado,
-                    cep: document.getElementById('cep').value
-                }
+                clienteEmail: currentUser.email,
+                endereco: { nome, zap, uf, rua: document.getElementById('rua').value, num: document.getElementById('numero').value }
             };
 
             try {
-                // SALVA O PEDIDO
-                const novoPedidoRef = push(ref(db, `usuarios/${currentUser.uid}/pedidos`));
-                await set(novoPedidoRef, pedidoObj);
+                // SALVA NA PASTA GLOBAL DE PEDIDOS (PARA O ADMIN VER)
+                const refPedidosGlobal = push(ref(db, 'pedidos'));
+                await set(refPedidosGlobal, pedidoObj);
 
-                // ATUALIZA PERFIL DO CLIENTE
-                await set(ref(db, `usuarios/${currentUser.uid}/perfil`), {
-                    nome: nome,
-                    whatsapp: zap,
-                    cpf: document.getElementById('cpf').value,
-                    email: currentUser.email,
-                    ultimoAcesso: new Date().toLocaleString('pt-BR')
-                });
-
-                // O CARRINHO NÃO É MAIS REMOVIDO AQUI
-                // Ele continua lá até que você aprove o pedido no admin.
-                
-                window.location.href = metodo === 'pix' ? "pagamento-pix.html" : "pagamento-cartao.html";
-            } catch (e) {
-                alert("ERRO AO PROCESSAR PEDIDO");
-            }
+                // REDIRECIONA
+                const metodo = document.querySelector('input[name="pay"]:checked').value;
+                location.href = metodo === 'pix' ? "pagamento-pix.html" : "pagamento-cartao.html";
+            } catch (e) { alert("ERRO AO PROCESSAR"); }
         };
     </script>
 </body>
