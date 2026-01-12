@@ -59,7 +59,7 @@
         </div>
 
         <div id="success-screen" class="hidden text-center space-y-8">
-            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto">
+            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(255,255,255,0.2)]">
                 <i class="fa-solid fa-check text-4xl text-black"></i>
             </div>
             <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Aprovado</h2>
@@ -87,9 +87,9 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        // ATENÇÃO: COLOQUE SUA CHAVE AQUI (E-MAIL OU CPF)
+        // CONFIGURAÇÃO DOS DADOS
         const CHAVE_PIX = "06937246250"; 
-        const NOME_RECEBEDOR = "MUTT STREETWEAR"; // Nome sem acentos se possível
+        const NOME_RECEBEDOR = "MUTT STREETWEAR"; 
         const CIDADE_RECEBEDOR = "SAO PAULO";
 
         onAuthStateChanged(auth, (user) => {
@@ -115,11 +115,12 @@
             document.getElementById('total-pix').innerText = `R$ ${valor.replace('.', ',')}`;
             document.getElementById('order-id-display').innerText = `ORDEM #${id.substring(id.length - 8).toUpperCase()}`;
             
-            // Gerar Payload Pix
-            const payload = gerarPayloadPix(CHAVE_PIX, valor, NOME_RECEBEDOR, CIDADE_RECEBEDOR, id.substring(0, 10));
+            // Gerar Payload Pix (TXID limpo sem caracteres especiais)
+            const cleanId = id.replace(/[^a-zA-Z0-9]/g, '').substring(0, 15);
+            const payload = gerarPayloadPix(CHAVE_PIX, valor, NOME_RECEBEDOR, CIDADE_RECEBEDOR, cleanId);
+            
             document.getElementById('pix-payload').value = payload;
 
-            // Gerar QR Code
             document.getElementById('qrcode').innerHTML = ""; 
             new QRCode(document.getElementById("qrcode"), {
                 text: payload,
@@ -127,30 +128,30 @@
                 height: 200,
                 colorDark : "#000000",
                 colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.L // Nível L é mais compatível com scanners de celular
+                correctLevel : QRCode.CorrectLevel.M
             });
 
             exibirTela('payment-screen');
         }
 
         function gerarPayloadPix(chave, valor, nome, cidade, txtId) {
+            // Remove espaços e acentos para compatibilidade máxima
+            const cleanString = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
             const format = (id, text) => id + String(text.length).padStart(2, '0') + text;
             
-            // Informações da conta e chave
             const merchantAccount = format("00", "br.gov.bcb.pix") + format("01", chave);
             
-            let payload = "000201"; // Versão do Payload
+            let payload = "000201"; 
             payload += format("26", merchantAccount);
-            payload += "52040000"; // Categoria (Geral)
-            payload += "5303986";  // Moeda (BRL)
-            payload += format("54", valor); // Valor
-            payload += "5802BR";  // País
-            payload += format("59", nome.substring(0, 25)); // Nome Recebedor
-            payload += format("60", cidade.substring(0, 15)); // Cidade Recebedor
-            payload += format("62", format("05", txtId)); // TXID (ID da transação)
-            payload += "6304"; // Início do CRC16
+            payload += "52040000"; 
+            payload += "5303986";  
+            payload += format("54", valor); 
+            payload += "5802BR";  
+            payload += format("59", cleanString(nome)); 
+            payload += format("60", cleanString(cidade)); 
+            payload += format("62", format("05", txtId || "PEDIDO")); 
+            payload += "6304"; 
 
-            // Cálculo do CRC16 (Essencial para o banco aceitar)
             function getCRC16(data) {
                 let crc = 0xFFFF;
                 for (let i = 0; i < data.length; i++) {
@@ -174,7 +175,6 @@
         window.copyField = () => {
             const input = document.getElementById('pix-payload');
             input.select();
-            input.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(input.value).then(() => {
                 alert("Código Pix copiado!");
             });
