@@ -8,27 +8,66 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
-        .glass-card { background: #0a0a0a; border: 1px solid #1a1a1a; transition: 0.3s; }
-        .status-badge { font-size: 8px; padding: 4px 8px; border-radius: 2px; text-transform: uppercase; font-weight: 900; }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #000; 
+            color: #fff; 
+        }
+
+        .glass-card { 
+            background: #0a0a0a; 
+            border: 1px solid #1a1a1a; 
+            transition: 0.3s; 
+            border-radius: 2px;
+        }
+
+        .glass-card:hover {
+            border-color: #333;
+        }
+
+        .status-badge { 
+            font-size: 8px; 
+            padding: 4px 10px; 
+            border-radius: 2px; 
+            text-transform: uppercase; 
+            font-weight: 900; 
+            letter-spacing: 1px;
+        }
+
+        /* Cores de Status Profissionais */
         .status-pendente { background: #facc15; color: #000; }
+        .status-aprovado { background: #fff; color: #000; }
         .status-enviado { background: #3b82f6; color: #fff; }
         .status-entregue { background: #10b981; color: #fff; }
+        .status-cancelado { background: #ef4444; color: #fff; }
+
+        .mutt-logo {
+            filter: drop-shadow(0 0 5px rgba(255,255,255,0.1));
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #1a1a1a; }
     </style>
 </head>
 <body class="bg-black min-h-screen">
 
-    <header class="p-6 border-b border-zinc-900 flex justify-between items-center">
-        <a href="index.html"><img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-16 invert"></a>
-        <h1 class="text-[10px] font-black uppercase tracking-[0.4em]">Meus Pedidos</h1>
-        <a href="index.html" class="text-zinc-500 text-xl"><i class="fa-solid fa-xmark"></i></a>
+    <header class="p-6 border-b border-zinc-900 flex justify-between items-center sticky top-0 bg-black/80 backdrop-blur-md z-50">
+        <a href="index.html">
+            <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-20 mutt-logo">
+        </a>
+        <h1 class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">Histórico de Pedidos</h1>
+        <a href="index.html" class="text-white text-xl hover:rotate-90 transition-transform">
+            <i class="fa-solid fa-xmark"></i>
+        </a>
     </header>
 
     <main class="container mx-auto px-6 py-12 max-w-2xl">
         <div id="pedidos-container" class="space-y-6">
-            <div class="text-center py-20 opacity-20">
-                <i class="fa-solid fa-circle-notch animate-spin text-3xl mb-4"></i>
-                <p class="text-[10px] font-black uppercase tracking-widest">Sincronizando com a Nuvem...</p>
+            <div class="text-center py-20">
+                <i class="fa-solid fa-circle-notch animate-spin text-xl mb-4 text-zinc-800"></i>
+                <p class="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-600">Sincronizando Banco de Dados...</p>
             </div>
         </div>
     </main>
@@ -52,16 +91,17 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
+        // Verifica se o usuário está logado
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 carregarPedidos(user.uid);
             } else {
+                // Se não estiver logado, manda para o login que acabamos de arrumar
                 window.location.href = 'login.html';
             }
         });
 
         function carregarPedidos(uid) {
-            // Buscamos apenas os pedidos que tem o UID do usuário
             const pedidosRef = ref(db, `pedidos`);
             onValue(pedidosRef, (snapshot) => {
                 const data = snapshot.val();
@@ -70,7 +110,6 @@
 
                 let meusPedidos = [];
                 if (data) {
-                    // Filtra os pedidos que pertencem a este usuário
                     meusPedidos = Object.keys(data)
                         .map(id => ({ id, ...data[id] }))
                         .filter(p => p.clienteId === uid);
@@ -78,49 +117,57 @@
 
                 if (meusPedidos.length === 0) {
                     container.innerHTML = `
-                        <div class="text-center py-20 border border-dashed border-zinc-900">
-                            <p class="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Nenhum pedido encontrado.</p>
-                            <a href="index.html" class="inline-block mt-6 bg-white text-black px-6 py-3 text-[10px] font-black uppercase">Ir para a Loja</a>
+                        <div class="text-center py-24 border border-zinc-900 border-dashed rounded-lg">
+                            <p class="text-[10px] text-zinc-600 font-black uppercase tracking-widest mb-6">Nenhuma atividade registrada.</p>
+                            <a href="index.html" class="bg-white text-black px-8 py-4 text-[10px] font-black uppercase tracking-tighter hover:bg-zinc-200 transition">
+                                Iniciar Compras
+                            </a>
                         </div>
                     `;
                     return;
                 }
 
-                // Renderiza os pedidos (do mais novo para o mais antigo)
+                // Renderiza do mais novo para o mais antigo
                 meusPedidos.reverse().forEach(p => {
-                    const statusClass = `status-${p.status.toLowerCase()}`;
+                    const statusClass = `status-${(p.status || 'pendente').toLowerCase()}`;
                     
                     container.innerHTML += `
-                        <div class="glass-card p-6 rounded-sm">
+                        <div class="glass-card p-6">
                             <div class="flex justify-between items-start mb-6">
                                 <div>
-                                    <p class="text-[9px] text-zinc-600 font-black uppercase tracking-tighter">Pedido #${p.id.substring(p.id.length - 6)}</p>
-                                    <h3 class="text-xs font-black uppercase mt-1 italic">${p.data}</h3>
+                                    <p class="text-[8px] text-zinc-600 font-black uppercase tracking-widest">ID: ${p.id.substring(p.id.length - 8)}</p>
+                                    <h3 class="text-[11px] font-black uppercase mt-1 text-white">${p.data}</h3>
                                 </div>
-                                <span class="status-badge ${statusClass}">${p.status}</span>
+                                <span class="status-badge ${statusClass}">${p.status || 'PENDENTE'}</span>
                             </div>
 
-                            <div class="space-y-4 mb-6 border-y border-zinc-900 py-4">
+                            <div class="space-y-4 mb-6 border-y border-zinc-900 py-6">
                                 ${p.itens.map(item => `
                                     <div class="flex items-center gap-4">
-                                        <img src="${item.img}" class="w-12 h-14 object-cover">
-                                        <div>
-                                            <p class="text-[10px] font-black uppercase">${item.nome}</p>
-                                            <p class="text-[9px] text-zinc-500">TAM: ${item.tamanho} | QTD: 1</p>
+                                        <div class="w-16 h-20 bg-zinc-900 overflow-hidden">
+                                            <img src="${item.img}" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all">
                                         </div>
+                                        <div class="flex-1">
+                                            <p class="text-[11px] font-black uppercase tracking-tight">${item.nome}</p>
+                                            <div class="flex gap-3 mt-1">
+                                                <p class="text-[9px] text-zinc-500 font-bold uppercase">TAM: ${item.tamanho}</p>
+                                                <p class="text-[9px] text-zinc-500 font-bold uppercase">QTD: 1</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-[10px] font-black italic">R$ ${item.preco}</p>
                                     </div>
                                 `).join('')}
                             </div>
 
-                            <div class="flex justify-between items-center">
+                            <div class="flex justify-between items-end">
                                 <div>
-                                    <p class="text-[8px] text-zinc-500 uppercase font-black">Total Pago</p>
-                                    <p class="text-sm font-black tracking-tighter">R$ ${p.total.toFixed(2)}</p>
+                                    <p class="text-[8px] text-zinc-600 uppercase font-black tracking-widest">Valor Total</p>
+                                    <p class="text-xl font-black tracking-tighter">R$ ${p.total.toFixed(2)}</p>
                                 </div>
-                                <a href="https://wa.me/551194984188337?text=Olá, queria informações sobre meu pedido #${p.id.substring(p.id.length - 6)}" 
+                                <a href="https://wa.me/551194984188337?text=SUPORTE MUTT: Olá, gostaria de informações sobre meu pedido #${p.id.substring(p.id.length - 8)}" 
                                    target="_blank" 
-                                   class="text-[9px] font-black uppercase border border-zinc-800 px-4 py-2 hover:bg-white hover:text-black transition">
-                                   Suporte <i class="fa-brands fa-whatsapp ml-1"></i>
+                                   class="text-[9px] font-black uppercase border border-zinc-800 px-5 py-3 hover:bg-white hover:text-black transition-all">
+                                   Suporte <i class="fa-brands fa-whatsapp ml-2"></i>
                                 </a>
                             </div>
                         </div>
