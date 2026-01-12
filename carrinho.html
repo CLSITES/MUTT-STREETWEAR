@@ -82,7 +82,6 @@
                             <span id="valor-sedex" class="text-[11px] font-bold tracking-tighter">R$ 0,00</span>
                         </label>
                     </div>
-                    <p class="text-[9px] text-zinc-500 mt-2 uppercase font-bold">* Digite o estado para liberar as opções de frete</p>
                 </section>
 
                 <section>
@@ -229,9 +228,7 @@
             const uf = document.getElementById('estado').value.toUpperCase().trim();
             const display = document.getElementById('uf-display');
             const optionsDiv = document.getElementById('frete-options');
-            
             display.innerText = uf || "--";
-
             if (uf.length === 2) {
                 const precos = TABELA_FRETE[uf] || TABELA_FRETE["OUTROS"];
                 document.getElementById('valor-pac').innerText = `R$ ${precos.pac.toFixed(2)}`;
@@ -246,15 +243,11 @@
         window.recalcularTudo = () => {
             let subtotal = carrinhoGlobal.reduce((acc, item) => acc + item.preco, 0);
             const uf = document.getElementById('estado').value.toUpperCase().trim();
-            
             if (uf.length === 2) {
                 const tipo = document.querySelector('input[name="tipoFrete"]:checked').value;
                 const precos = TABELA_FRETE[uf] || TABELA_FRETE["OUTROS"];
                 freteSelecionado = tipo === "PAC" ? precos.pac : precos.sedex;
-            } else {
-                freteSelecionado = 0;
-            }
-            
+            } else { freteSelecionado = 0; }
             atualizarResumo(subtotal);
         };
 
@@ -266,7 +259,6 @@
         };
 
         window.finalizarPedido = async () => {
-            // VALIDAÇÕES
             const nome = document.getElementById('nome-completo').value;
             const zap = document.getElementById('whatsapp').value;
             const estado = document.getElementById('estado').value.toUpperCase().trim();
@@ -274,20 +266,17 @@
             if(carrinhoGlobal.length === 0) return alert("BAG VAZIA");
             if(!nome || !zap) return alert("PREENCHA SEU NOME E WHATSAPP");
             if(estado.length < 2) return alert("INFORME O ESTADO PARA O FRETE");
-            if(!document.getElementById('rua').value) return alert("PREENCHA O ENDEREÇO");
 
             let subtotal = carrinhoGlobal.reduce((acc, item) => acc + item.preco, 0);
             const metodo = document.querySelector('input[name="pay"]:checked').value;
             const tipoFrete = document.querySelector('input[name="tipoFrete"]:checked').value;
-            let totalFinal = subtotal + freteSelecionado;
 
-            // CRIAÇÃO DO OBJETO DO PEDIDO
             const pedidoObj = {
                 data: new Date().toLocaleDateString('pt-BR'),
                 status: "Pendente",
                 metodoPagamento: metodo,
                 modalidadeFrete: tipoFrete,
-                total: totalFinal,
+                total: subtotal + freteSelecionado,
                 itens: carrinhoGlobal,
                 endereco: {
                     nome: nome,
@@ -302,29 +291,28 @@
             };
 
             try {
-                // 1. Salva o pedido na lista de pedidos do usuário
+                // SALVA O PEDIDO PARA O ADM VER
                 const novoPedidoRef = push(ref(db, `usuarios/${currentUser.uid}/pedidos`));
                 await set(novoPedidoRef, pedidoObj);
 
-                // 2. Também atualiza o "perfil" do usuário com os dados novos (para o ADM puxar fácil)
+                // ATUALIZA PERFIL DO CLIENTE
                 await set(ref(db, `usuarios/${currentUser.uid}/perfil`), {
                     nome: nome,
                     whatsapp: zap,
+                    cpf: document.getElementById('cpf').value,
                     email: currentUser.email,
                     dataCadastro: new Date().toLocaleDateString('pt-BR')
                 });
 
-                // 3. Limpa o carrinho
-                await remove(ref(db, `usuarios/${currentUser.uid}/carrinho`));
-
-                // 4. Redireciona
+                // --- IMPORTANTE ---
+                // REMOVI O "remove(ref(db, ...carrinho))" daqui!
+                // O carrinho só vai ser limpo pelo seu botão "APROVAR" no adm.html
+                
                 window.location.href = metodo === 'pix' ? "pagamento-pix.html" : "pagamento-cartao.html";
             } catch (e) {
-                console.error(e);
-                alert("ERRO AO SALVAR PEDIDO");
+                alert("ERRO AO PROCESSAR");
             }
         };
-
     </script>
 </body>
 </html>
