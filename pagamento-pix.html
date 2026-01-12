@@ -12,8 +12,6 @@
         .mutt-card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 2rem; }
         .loader { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .btn-comprovante { background: #25d366; color: black; transition: all 0.3s; }
-        .btn-comprovante:hover { background: #128c7e; transform: scale(1.02); }
     </style>
 </head>
 <body>
@@ -22,59 +20,54 @@
         
         <div id="loading-screen" class="text-center space-y-4">
             <div class="loader mx-auto"></div>
-            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Gerando seu PIX exclusivo...</p>
+            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Sincronizando com a MUTT...</p>
         </div>
 
         <div id="payment-screen" class="hidden space-y-8">
             <div class="text-center">
-                <h1 class="text-2xl font-black italic uppercase tracking-tighter">Aguardando Pagamento</h1>
-                <p class="text-zinc-500 text-[10px] uppercase font-bold tracking-widest mt-2">Pague para liberar o pedido</p>
+                <h1 class="text-2xl font-black italic uppercase tracking-tighter">Aguardando Pix</h1>
+                <p id="order-id-display" class="text-zinc-500 text-[10px] uppercase font-bold tracking-widest mt-2 text-white bg-zinc-900 inline-block px-3 py-1">PEDIDO #----</p>
             </div>
 
             <div class="mutt-card space-y-6">
                 <div class="text-center">
-                    <span class="text-zinc-500 text-[9px] font-black uppercase tracking-widest">Valor Total</span>
+                    <span class="text-zinc-500 text-[9px] font-black uppercase tracking-widest">Valor para transferência</span>
                     <div id="total-pix" class="text-4xl font-black italic tracking-tighter text-white">R$ 0,00</div>
                 </div>
 
-                <div class="bg-white p-4 w-56 h-56 mx-auto rounded-sm">
-                    <img id="qr-code-img" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SUA_CHAVE_PIX_AQUI" alt="QR Code Pix" class="w-full h-full">
-                </div>
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <span class="text-[9px] font-black uppercase text-zinc-500">Chave Pix (E-mail ou CPF)</span>
+                        <div class="flex gap-2">
+                            <input type="text" id="pix-key" value="SUA_CHAVE_AQUI@EMAIL.COM" readonly class="bg-zinc-950 border border-zinc-900 text-[11px] p-3 w-full outline-none text-white font-bold">
+                            <button onclick="copyField('pix-key')" class="bg-white text-black px-4 font-black uppercase text-[10px]">Copiar</button>
+                        </div>
+                    </div>
 
-                <div class="space-y-2">
-                    <span class="text-[9px] font-black uppercase text-zinc-500">Chave Pix (E-mail ou CPF)</span>
-                    <div class="flex gap-2">
-                        <input type="text" id="pix-copy-paste" value="seu-email@exemplo.com" readonly class="bg-zinc-950 border border-zinc-900 text-[10px] p-3 w-full outline-none text-white font-bold">
-                        <button onclick="copyPix()" class="bg-white text-black px-4 font-black uppercase text-[10px]">Copiar</button>
+                    <div class="p-4 border border-zinc-900 bg-zinc-950/50">
+                        <p class="text-[10px] text-zinc-400 leading-relaxed uppercase font-bold text-center italic">
+                            Após o pagamento, nosso sistema identificará o valor. <br>
+                            <span class="text-white">Não é necessário enviar comprovante.</span>
+                        </p>
                     </div>
                 </div>
 
-                <div class="h-[1px] bg-zinc-900 my-2"></div>
-
-                <div class="space-y-3">
-                    <p class="text-[9px] text-center font-black uppercase text-zinc-500">Pagou por outra conta? Envie o print:</p>
-                    <button id="btn-whatsapp" class="btn-comprovante w-full py-4 rounded-sm font-black uppercase text-[11px] flex items-center justify-center gap-2">
-                        <i class="fa-brands fa-whatsapp text-lg"></i>
-                        Enviar Comprovante
-                    </button>
-                </div>
-
-                <div class="flex items-center justify-center gap-3 pt-2">
+                <div class="flex items-center justify-center gap-3 pt-4 border-t border-zinc-900">
                     <div class="loader"></div>
-                    <span class="text-[9px] font-bold uppercase text-zinc-400">Aguardando aprovação no sistema...</span>
+                    <span class="text-[9px] font-bold uppercase text-zinc-400">Verificando recebimento no banco...</span>
                 </div>
             </div>
         </div>
 
-        <div id="success-screen" class="hidden text-center space-y-8 animate-pulse">
-            <div class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto">
+        <div id="success-screen" class="hidden text-center space-y-8">
+            <div class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-[0_0_40px_rgba(34,197,94,0.4)]">
                 <i class="fa-solid fa-check text-5xl text-black"></i>
             </div>
             <div>
-                <h2 class="text-3xl font-black italic uppercase tracking-tighter">Pagamento Confirmado</h2>
-                <p class="text-zinc-500 text-xs mt-2 uppercase font-bold tracking-widest">Já recebemos seu pedido!</p>
+                <h2 class="text-3xl font-black italic uppercase tracking-tighter text-white">Pagamento Confirmado</h2>
+                <p class="text-zinc-500 text-[10px] mt-2 uppercase font-bold tracking-widest leading-loose">Seu pedido já está em separação. <br> Enviaremos o código de rastreio em breve.</p>
             </div>
-            <button onclick="window.location.href='index.html'" class="w-full border border-white py-4 font-black uppercase text-[11px] tracking-widest hover:bg-white hover:text-black transition-all">Voltar para a Loja</button>
+            <button onclick="window.location.href='index.html'" class="w-full bg-white text-black py-5 font-black uppercase text-[11px] tracking-[0.3em] hover:tracking-[0.5em] transition-all">Voltar para a Loja</button>
         </div>
 
     </main>
@@ -100,18 +93,23 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                // Busca o último pedido feito pelo usuário logado
                 const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
+                
                 onValue(pedidosRef, (snapshot) => {
                     const data = snapshot.val();
                     if (data) {
                         const pedidoId = Object.keys(data)[0];
                         const pedido = data[pedidoId];
                         
-                        if(pedido.status === "Aprovado") {
+                        // SE VOCÊ MUDAR O STATUS NO SEU PAINEL ADM, ISSO AQUI DISPARA NA HORA
+                        if (pedido.status === "Aprovado" || pedido.status === "Pago") {
                             exibirSucesso();
                         } else {
                             renderizarPagamento(pedido, pedidoId);
                         }
+                    } else {
+                        window.location.href = 'index.html'; // Se não achar pedido, volta pro início
                     }
                 });
             } else {
@@ -121,14 +119,9 @@
 
         function renderizarPagamento(pedido, id) {
             document.getElementById('total-pix').innerText = `R$ ${pedido.total.toFixed(2)}`;
+            // Pega apenas os 6 últimos caracteres do ID do Firebase para ficar um código curto
+            document.getElementById('order-id-display').innerText = `PEDIDO #${id.substring(id.length - 6).toUpperCase()}`;
             
-            // CONFIGURAÇÃO DO WHATSAPP
-            const meuNumero = "5594984188337"; // <-- COLOQUE SEU NUMERO AQUI (DDD + NUMERO)
-            const msg = encodeURIComponent(`Olá MUTT! Segue o comprovante do meu pedido.\n\nPedido: #${id}\nCliente: ${pedido.endereco.nome}\nValor: R$ ${pedido.total.toFixed(2)}`);
-            document.getElementById('btn-whatsapp').onclick = () => {
-                window.open(`https://wa.me/${meuNumero}?text=${msg}`, '_blank');
-            };
-
             document.getElementById('loading-screen').classList.add('hidden');
             document.getElementById('payment-screen').classList.remove('hidden');
         }
@@ -139,11 +132,11 @@
             document.getElementById('success-screen').classList.remove('hidden');
         }
 
-        window.copyPix = () => {
-            const input = document.getElementById('pix-copy-paste');
+        window.copyField = (id) => {
+            const input = document.getElementById(id);
             input.select();
             document.execCommand('copy');
-            alert("CHAVE PIX COPIADA!");
+            alert("COPIADO!");
         }
     </script>
 </body>
