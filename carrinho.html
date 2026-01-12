@@ -37,7 +37,7 @@
             <a href="index.html" class="w-16">
                 <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" alt="MUTT" class="w-full">
             </a>
-            <span class="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-500">CHECKOUT TERMINAL</span>
+            <span class="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-500">TERMINAL DE CHECKOUT</span>
         </div>
     </header>
 
@@ -53,7 +53,7 @@
                 </section>
 
                 <section>
-                    <h2 class="step-title"><span class="text-zinc-800 text-4xl">02</span> Entrega</h2>
+                    <h2 class="step-title"><span class="text-zinc-800 text-4xl">02</span> ENTREGA</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
                         <input type="text" id="nome-completo" placeholder="NOME COMPLETO" class="input-mutt md:col-span-2">
                         <input type="text" id="cpf" placeholder="CPF (PARA NOTA FISCAL)" class="input-mutt">
@@ -85,7 +85,7 @@
                 </section>
 
                 <section>
-                    <h2 class="step-title"><span class="text-zinc-800 text-4xl">03</span> Pagamento</h2>
+                    <h2 class="step-title"><span class="text-zinc-800 text-4xl">03</span> PAGAMENTO</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label class="border border-zinc-800 p-6 flex items-center justify-between cursor-pointer hover:bg-zinc-900 transition group has-[:checked]:border-white">
                             <div class="flex items-center gap-4">
@@ -114,7 +114,7 @@
 
             <div class="lg:col-span-5">
                 <div class="sticky top-32 bg-zinc-950 border border-zinc-900 p-10 rounded-sm shadow-2xl">
-                    <h2 class="text-[10px] font-black uppercase tracking-[0.4em] mb-10 border-b border-zinc-900 pb-5 text-zinc-400 italic">Order Summary</h2>
+                    <h2 class="text-[10px] font-black uppercase tracking-[0.4em] mb-10 border-b border-zinc-900 pb-5 text-zinc-400 italic">RESUMO DO PEDIDO</h2>
                     
                     <div class="space-y-5 mb-10">
                         <div class="flex justify-between text-sm">
@@ -181,7 +181,13 @@
                 const cartRef = ref(db, `usuarios/${user.uid}/carrinho`);
                 onValue(cartRef, (snapshot) => {
                     const data = snapshot.val();
-                    carrinhoGlobal = data ? Object.values(data) : [];
+                    carrinhoGlobal = [];
+                    if (data) {
+                        // Preservamos o cartId original para a remoção funcionar
+                        Object.keys(data).forEach(key => {
+                            carrinhoGlobal.push({ ...data[key], cartId: key });
+                        });
+                    }
                     renderCarrinho();
                 });
             } else {
@@ -193,7 +199,7 @@
             const container = document.getElementById('cart-items-container');
             let subtotal = 0;
             if(carrinhoGlobal.length === 0) {
-                container.innerHTML = `<div class="py-20 text-center border border-zinc-900 uppercase text-[10px] font-black tracking-widest text-zinc-500">Bag Vazia</div>`;
+                container.innerHTML = `<div class="py-20 text-center border border-zinc-900 uppercase text-[10px] font-black tracking-widest text-zinc-500">Carrinho Vazio</div>`;
                 atualizarResumo(0);
                 return;
             }
@@ -219,7 +225,7 @@
         };
 
         window.removerItem = async (cartId) => {
-            if (currentUser) {
+            if (currentUser && confirm("Remover este item?")) {
                 await remove(ref(db, `usuarios/${currentUser.uid}/carrinho/${cartId}`));
             }
         };
@@ -263,7 +269,7 @@
             const zap = document.getElementById('whatsapp').value;
             const estado = document.getElementById('estado').value.toUpperCase().trim();
             
-            if(carrinhoGlobal.length === 0) return alert("BAG VAZIA");
+            if(carrinhoGlobal.length === 0) return alert("CARRINHO VAZIO");
             if(!nome || !zap) return alert("PREENCHA SEU NOME E WHATSAPP");
             if(estado.length < 2) return alert("INFORME O ESTADO PARA O FRETE");
 
@@ -291,7 +297,7 @@
             };
 
             try {
-                // SALVA O PEDIDO PARA O ADM VER
+                // SALVA O PEDIDO
                 const novoPedidoRef = push(ref(db, `usuarios/${currentUser.uid}/pedidos`));
                 await set(novoPedidoRef, pedidoObj);
 
@@ -301,16 +307,15 @@
                     whatsapp: zap,
                     cpf: document.getElementById('cpf').value,
                     email: currentUser.email,
-                    dataCadastro: new Date().toLocaleDateString('pt-BR')
+                    ultimoAcesso: new Date().toLocaleString('pt-BR')
                 });
 
-                // --- IMPORTANTE ---
-                // REMOVI O "remove(ref(db, ...carrinho))" daqui!
-                // O carrinho só vai ser limpo pelo seu botão "APROVAR" no adm.html
+                // O CARRINHO NÃO É MAIS REMOVIDO AQUI
+                // Ele continua lá até que você aprove o pedido no admin.
                 
                 window.location.href = metodo === 'pix' ? "pagamento-pix.html" : "pagamento-cartao.html";
             } catch (e) {
-                alert("ERRO AO PROCESSAR");
+                alert("ERRO AO PROCESSAR PEDIDO");
             }
         };
     </script>
