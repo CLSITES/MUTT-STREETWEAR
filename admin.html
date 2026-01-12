@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MUTT | SYSTEM TERMINAL</title>
+    <title>MUTT | TERMINAL DO SISTEMA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -74,12 +74,12 @@
         <div class="w-full max-w-md animate-fade">
             <div class="text-center mb-10">
                 <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-24 mx-auto mb-6 invert brightness-200">
-                <h2 class="text-[10px] font-black tracking-[0.6em] text-zinc-500 uppercase">System Authentication</h2>
+                <h2 class="text-[10px] font-black tracking-[0.6em] text-zinc-500 uppercase">Autenticação do Sistema</h2>
             </div>
             <div class="space-y-4">
                 <input type="text" id="user" placeholder="USUÁRIO" class="input-mutt text-center tracking-[0.3em] uppercase">
                 <input type="password" id="pass" placeholder="SENHA" class="input-mutt text-center tracking-[0.3em]">
-                <button id="btn-login-trigger" class="w-full bg-white text-black py-4 font-black uppercase text-[11px] tracking-[0.3em] hover:tracking-[0.5em] transition-all duration-500">Acessar Terminal</button>
+                <button id="btn-login-trigger" class="w-full bg-white text-black py-4 font-black uppercase text-[11px] tracking-[0.3em] hover:tracking-[0.5em] transition-all duration-500">Acessar Painel</button>
             </div>
         </div>
     </div>
@@ -94,7 +94,7 @@
                         <p id="counter-online" class="text-sm font-black text-green-500">0</p>
                     </div>
                     <div>
-                        <p class="text-[8px] text-zinc-500 uppercase font-black">Acessos Totais</p>
+                        <p class="text-[8px] text-zinc-500 uppercase font-black">Usuários Totais</p>
                         <p id="counter-total" class="text-sm font-black">0</p>
                     </div>
                 </div>
@@ -121,7 +121,7 @@
             <section id="section-pedidos" class="hidden animate-fade">
                 <div class="mb-8">
                     <h2 class="text-5xl font-black uppercase italic tracking-tighter">Pedidos</h2>
-                    <p class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Controle de pagamentos em tempo real</p>
+                    <p class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Controle de Vendas e Pagamentos</p>
                 </div>
                 <div id="lista-pedidos-adm" class="space-y-4"></div>
             </section>
@@ -136,8 +136,8 @@
                         <thead class="bg-zinc-900 text-zinc-500">
                             <tr>
                                 <th class="p-4">Status</th>
-                                <th class="p-4">Nome do Cliente</th>
-                                <th class="p-4">WhatsApp / Email</th>
+                                <th class="p-4">Nome</th>
+                                <th class="p-4">Contato / Email</th>
                                 <th class="p-4">Membro desde</th>
                                 <th class="p-4 text-right">Ações</th>
                             </tr>
@@ -166,14 +166,17 @@
                                 <option value="calcas">Calças</option>
                                 <option value="acessorios">Acessórios</option>
                             </select>
-                            <select id="p-status" class="input-mutt"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
+                            <select id="p-status" class="input-mutt">
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo (Pausado)</option>
+                            </select>
                         </div>
                         <div class="grid grid-cols-3 gap-4">
                             <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="PREÇO" required>
                             <input type="number" step="0.01" id="p-preco-antigo" class="input-mutt" placeholder="ANTIGO">
                             <input type="number" id="p-desconto" class="input-mutt" placeholder="DESC %">
                         </div>
-                        <textarea id="p-desc" rows="4" class="input-mutt" placeholder="DESCRIÇÃO"></textarea>
+                        <textarea id="p-desc" rows="4" class="input-mutt" placeholder="DESCRIÇÃO DO PRODUTO"></textarea>
                         <div id="grade-tamanhos" class="grid grid-cols-5 gap-2">
                             <div class="size-chip" data-size="P">P</div>
                             <div class="size-chip" data-size="M">M</div>
@@ -184,8 +187,8 @@
                     </div>
                     <div class="space-y-6 flex flex-col">
                         <div id="container-fotos" class="space-y-3 max-h-[300px] overflow-y-auto"></div>
-                        <button type="button" onclick="adicionarCampoFoto()" class="w-full border border-dashed border-zinc-800 py-4 text-[10px] uppercase font-black">+ Link de Foto</button>
-                        <button type="submit" class="mt-auto w-full bg-white text-black py-5 font-black uppercase text-[12px] tracking-[0.4em]">Salvar na Nuvem</button>
+                        <button type="button" onclick="adicionarCampoFoto()" class="w-full border border-dashed border-zinc-800 py-4 text-[10px] uppercase font-black">+ Adicionar Link de Foto</button>
+                        <button type="submit" class="mt-auto w-full bg-white text-black py-5 font-black uppercase text-[12px] tracking-[0.4em]">Salvar Alterações</button>
                     </div>
                 </form>
             </div>
@@ -209,16 +212,20 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // LOGIN
+        // LOGIN ADMINISTRATIVO
         window.fazerLogin = () => {
-            if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === 'mutt2026') {
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
+            if(user === 'admin' && pass === 'mutt2026') {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('admin-panel').classList.remove('hidden');
-            } else { alert("Acesso Negado"); }
+            } else { 
+                alert("ACESSO NEGADO: Credenciais Inválidas"); 
+            }
         };
         document.getElementById('btn-login-trigger').onclick = window.fazerLogin;
 
-        // NAVEGAÇÃO
+        // TROCA DE ABAS
         window.switchTab = (tab) => {
             document.getElementById('section-produtos').classList.toggle('hidden', tab !== 'produtos');
             document.getElementById('section-usuarios').classList.toggle('hidden', tab !== 'usuarios');
@@ -228,7 +235,7 @@
             document.getElementById('tab-order').classList.toggle('active', tab === 'pedidos');
         };
 
-        // MONITORAMENTO DE DADOS (USUÁRIOS E PEDIDOS)
+        // MONITORAMENTO DE USUÁRIOS E PEDIDOS
         onValue(ref(db, 'usuarios'), (snapshot) => {
             const users = snapshot.val();
             const containerUsers = document.getElementById('lista-usuarios-adm');
@@ -241,46 +248,47 @@
             if(users) {
                 Object.keys(users).forEach(uid => {
                     const dados = users[uid].perfil || {};
-                    const statusPresenca = users[uid].presenca || 'offline';
+                    const status = users[uid].presenca || 'offline';
                     const pedidos = users[uid].pedidos || {};
 
                     totalAcessos++;
-                    if(statusPresenca === 'online') onlineCount++;
+                    if(status === 'online') onlineCount++;
 
-                    // Renderizar Tabela de Clientes
+                    // Renderizar Clientes
                     containerUsers.innerHTML += `
                         <tr class="border-b border-zinc-900 hover:bg-zinc-950 transition">
-                            <td class="p-4">${statusPresenca === 'online' ? '<span class="dot-online"></span>' : '<span class="dot-offline"></span>'}</td>
+                            <td class="p-4">${status === 'online' ? '<span class="dot-online"></span>' : '<span class="dot-offline"></span>'}</td>
                             <td class="p-4"><span class="text-white block font-black">${dados.nome || 'S/ NOME'}</span></td>
-                            <td class="p-4"><span class="text-zinc-400 block">${dados.email || '---'}</span></td>
+                            <td class="p-4">
+                                <span class="text-zinc-400 block">${dados.whatsapp || '---'}</span>
+                                <span class="text-zinc-600 block text-[9px]">${dados.email || '---'}</span>
+                            </td>
                             <td class="p-4 text-zinc-500">${dados.dataCadastro || '---'}</td>
                             <td class="p-4 text-right">
                                 <a href="https://wa.me/${dados.whatsapp}" target="_blank" class="text-white mx-2"><i class="fa-brands fa-whatsapp"></i></a>
                             </td>
                         </tr>`;
 
-                    // Renderizar Cards de Pedidos
+                    // Renderizar Pedidos Pendentes e Aprovados
                     Object.keys(pedidos).forEach(orderId => {
                         const ord = pedidos[orderId];
                         containerOrders.innerHTML += `
                             <div class="glass-panel p-6 flex flex-wrap justify-between items-center gap-4 animate-fade">
                                 <div>
-                                    <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">PEDIDO #${orderId.slice(-6).toUpperCase()}</p>
-                                    <h3 class="text-lg font-black uppercase italic">${dados.nome || 'Cliente Anônimo'}</h3>
-                                    <p class="text-[10px] text-zinc-400 font-bold">CPF: ${dados.cpf || '---'} | ZAP: ${dados.whatsapp || '---'}</p>
+                                    <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">PEDIDO #${orderId.slice(-6)}</p>
+                                    <h3 class="text-lg font-black uppercase italic">${dados.nome || 'Cliente'}</h3>
+                                    <p class="text-[10px] text-zinc-400 font-bold">PAGAMENTO: ${ord.metodoPagamento} | FRETE: ${ord.modalidadeFrete}</p>
                                 </div>
                                 <div class="text-center">
-                                    <p class="text-[9px] font-black text-zinc-500 uppercase">Valor do Pix</p>
+                                    <p class="text-[9px] font-black text-zinc-500 uppercase">Valor Total</p>
                                     <p class="text-xl font-black italic">R$ ${ord.total.toFixed(2)}</p>
                                 </div>
                                 <div class="flex items-center gap-4">
                                     ${ord.status === 'Pendente' ? `
-                                        <button onclick="aprovarPedido('${uid}', '${orderId}')" class="bg-white text-black px-6 py-3 font-black uppercase text-[10px] hover:bg-green-600 hover:text-white transition-all">Aprovar Pagamento</button>
+                                        <button onclick="aprovarPedido('${uid}', '${orderId}')" class="bg-white text-black px-6 py-3 font-black uppercase text-[10px] hover:bg-green-500 hover:text-white transition-all">Confirmar Pagamento</button>
                                         <button onclick="recusarPedido('${uid}', '${orderId}')" class="border border-zinc-800 text-zinc-500 px-6 py-3 font-black uppercase text-[10px] hover:bg-red-600 hover:text-white transition-all">Recusar</button>
                                     ` : `
-                                        <span class="text-green-500 font-black italic text-[10px] uppercase tracking-[0.2em] border border-green-500/30 px-4 py-2">
-                                            <i class="fa-solid fa-check mr-2"></i> ${ord.status.toUpperCase()}
-                                        </span>
+                                        <span class="text-green-500 font-black italic text-[10px] uppercase tracking-widest border border-green-500/20 px-4 py-2">Pagamento Aprovado</span>
                                     `}
                                 </div>
                             </div>
@@ -292,40 +300,34 @@
             document.getElementById('counter-total').innerText = totalAcessos;
         });
 
-        // LÓGICA DE APROVAÇÃO (Onde a mágica acontece)
+        // FUNÇÃO DE APROVAR (LIMPA CARRINHO)
         window.aprovarPedido = async (uid, orderId) => {
-            if(confirm("Deseja aprovar este pagamento? O carrinho do cliente será limpo e ele verá a tela de sucesso.")) {
+            if(confirm("CONFIRMAR PAGAMENTO? Isso irá zerar o carrinho do cliente.")) {
                 try {
-                    // 1. Atualiza status do pedido
                     await update(ref(db, `usuarios/${uid}/pedidos/${orderId}`), { status: "Aprovado" });
-                    // 2. Limpa o carrinho do usuário
-                    await remove(ref(db, `usuarios/${uid}/carrinho`));
-                    alert("PAGAMENTO APROVADO COM SUCESSO!");
-                } catch (e) {
-                    alert("Erro ao processar: " + e.message);
-                }
+                    await remove(ref(db, `usuarios/${uid}/carrinho`)); 
+                    alert("PAGAMENTO CONFIRMADO E CARRINHO LIMPO.");
+                } catch(e) { alert("ERRO NA OPERAÇÃO"); }
             }
         };
 
-        // LÓGICA DE RECUSA
+        // FUNÇÃO DE RECUSAR (MANTÉM CARRINHO)
         window.recusarPedido = async (uid, orderId) => {
-            if(confirm("Deseja recusar? O pedido será cancelado, mas os itens continuarão no carrinho do cliente.")) {
+            if(confirm("RECUSAR PEDIDO? O cliente manterá os itens no carrinho para tentar novamente.")) {
                 try {
-                    await update(ref(db, `usuarios/${uid}/pedidos/${orderId}`), { status: "Recusado" });
-                    alert("Pedido recusado.");
-                } catch (e) {
-                    alert("Erro ao processar: " + e.message);
-                }
+                    await remove(ref(db, `usuarios/${uid}/pedidos/${orderId}`)); 
+                    alert("PEDIDO REMOVIDO DO PAINEL.");
+                } catch(e) { alert("ERRO NA OPERAÇÃO"); }
             }
         };
 
-        // MONITORAMENTO DE PRODUTOS
+        // GESTÃO DE PRODUTOS
         onValue(ref(db, 'produtos'), (snapshot) => {
             const data = snapshot.val();
             const container = document.getElementById('lista-produtos-adm');
             container.innerHTML = "";
             if(data) {
-                document.getElementById('total-count').innerText = `${Object.keys(data).length} ITENS NO INVENTÁRIO`;
+                document.getElementById('total-count').innerText = `${Object.keys(data).length} PRODUTOS REGISTRADOS`;
                 Object.keys(data).forEach(id => {
                     const p = data[id];
                     container.innerHTML += `
@@ -344,12 +346,11 @@
             }
         });
 
-        // FUNÇÕES AUXILIARES DO PRODUTO
         window.adicionarCampoFoto = (valor = '') => {
             const container = document.getElementById('container-fotos');
             const div = document.createElement('div');
             div.className = "flex gap-2 animate-fade";
-            div.innerHTML = `<input type="text" class="input-mutt foto-url" value="${valor}" placeholder="URL IMAGEM"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 p-2 font-black">X</button>`;
+            div.innerHTML = `<input type="text" class="input-mutt foto-url" value="${valor}" placeholder="URL DA IMAGEM"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 p-2 font-black">X</button>`;
             container.appendChild(div);
         }
 
@@ -376,6 +377,7 @@
 
             await set(ref(db, 'produtos/' + id), produto);
             fecharModal();
+            alert("PRODUTO SALVO COM SUCESSO!");
         };
 
         window.abrirModal = () => { 
@@ -388,7 +390,7 @@
         };
 
         window.fecharModal = () => document.getElementById('modal-produto').classList.add('hidden');
-        window.remover = (id) => { if(confirm("Deletar permanentemente?")) remove(ref(db, 'produtos/' + id)); };
+        window.remover = (id) => { if(confirm("DELETAR PRODUTO? Esta ação não pode ser desfeita.")) remove(ref(db, 'produtos/' + id)); };
         
         window.editarProduto = (id) => {
             onValue(ref(db, 'produtos/' + id), (snap) => {
