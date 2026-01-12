@@ -28,7 +28,7 @@
         <div id="payment-screen" class="hidden space-y-8">
             <div class="text-center">
                 <h1 class="text-3xl font-black italic uppercase tracking-tighter text-white">Pagamento Pix</h1>
-                <p id="order-id-display" class="text-zinc-500 text-[9px] uppercase font-black tracking-[0.2em] mt-3 border border-zinc-900 px-4 py-1 inline-block italic">CARREGANDO...</p>
+                <p id="order-id-display" class="text-zinc-500 text-[9px] uppercase font-black tracking-[0.2em] mt-3 border border-zinc-900 px-4 py-1 inline-block italic">GERANDO QR CODE...</p>
             </div>
 
             <div class="mutt-card space-y-8 text-center">
@@ -45,7 +45,7 @@
                     <p class="text-[9px] font-black uppercase text-zinc-500 tracking-widest">Pix Copia e Cola:</p>
                     <div class="flex gap-2">
                         <input type="text" id="pix-payload" readonly class="bg-black border border-zinc-900 text-[10px] p-4 w-full outline-none text-zinc-500 font-mono truncate">
-                        <button onclick="copyField()" class="bg-white text-black px-4 font-black uppercase text-[10px] hover:bg-zinc-200 active:scale-95 transition-all">COPIAR</button>
+                        <button onclick="copyField()" class="bg-white text-black px-4 font-black uppercase text-[10px] hover:bg-zinc-200">COPIAR</button>
                     </div>
                 </div>
 
@@ -58,22 +58,22 @@
             </div>
         </div>
 
-        <div id="success-screen" class="hidden text-center space-y-8 animate-fade">
-            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+        <div id="success-screen" class="hidden text-center space-y-8">
+            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto">
                 <i class="fa-solid fa-check text-4xl text-black"></i>
             </div>
-            <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Aprovado</h2>
-            <p class="text-zinc-500 text-[10px] uppercase font-black">Seu pagamento foi confirmado com sucesso.</p>
-            <button onclick="window.location.href='index.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Voltar ao Início</button>
+            <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Pago</h2>
+            <p class="text-zinc-500 text-[10px] uppercase font-black">Pagamento confirmado. Verifique "Meus Pedidos".</p>
+            <button onclick="window.location.href='index.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Sair do Terminal</button>
         </div>
 
-        <div id="error-screen" class="hidden text-center space-y-8 animate-fade">
-            <div class="w-20 h-20 border-2 border-red-600 rounded-full flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(220,38,38,0.2)]">
+        <div id="error-screen" class="hidden text-center space-y-8">
+            <div class="w-20 h-20 border-2 border-red-600 rounded-full flex items-center justify-center mx-auto">
                 <i class="fa-solid fa-xmark text-4xl text-red-600"></i>
             </div>
-            <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Recusado</h2>
-            <p class="text-zinc-500 text-[10px] uppercase font-black">O pedido foi negado pelo sistema ou não existe.</p>
-            <button onclick="window.location.href='index.html'" class="w-full border border-zinc-800 text-white py-6 font-black uppercase text-[11px] tracking-[0.2em]">Tentar Novamente</button>
+            <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Negado</h2>
+            <p class="text-zinc-500 text-[10px] uppercase font-black">Este pedido foi recusado pelo administrador.</p>
+            <button onclick="window.location.href='index.html'" class="w-full border border-zinc-800 text-white py-6 font-black uppercase text-[11px]">Voltar</button>
         </div>
 
     </main>
@@ -99,50 +99,49 @@
 
         const CHAVE_PIX = "06937246250"; 
         const NOME_RECEBEDOR = "MUTT STREETWEAR"; 
-        const CIDADE_RECEBEDOR = "SAO PAULO";
+        const CIDADE_RECEBEDOR = "PARAUAPEBAS"; // Atualizado para sua cidade
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Monitora o último pedido do usuário em tempo real
+                // Busca o pedido mais recente
                 const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
+                
                 onValue(pedidosRef, (snapshot) => {
                     const data = snapshot.val();
                     
-                    // Se o pedido sumir (ADM negou/excluiu)
                     if (!data) {
-                        exibirTela('error-screen');
+                        // Aguarda 2 segundos antes de dar erro, para dar tempo do Firebase salvar
+                        setTimeout(() => {
+                            if (!document.getElementById('payment-screen').classList.contains('hidden')) return;
+                            exibirTela('error-screen');
+                        }, 2000);
                         return;
                     }
 
                     const pedidoId = Object.keys(data)[0];
                     const pedido = data[pedidoId];
 
-                    // Se o ADM aprovou
+                    // LOGICA DE STATUS
                     if (pedido.status === "Aprovado" || pedido.status === "Pago") {
                         exibirTela('success-screen');
-                    } 
-                    // Se ainda estiver pendente, mostra o QR Code
-                    else if (pedido.status === "Pendente") {
-                        renderizarPagamento(pedido, pedidoId);
-                    }
-                    // Qualquer outro status (Negado, Cancelado)
-                    else {
+                    } else if (pedido.status === "Recusado" || pedido.status === "Cancelado") {
                         exibirTela('error-screen');
+                    } else {
+                        // Se o status for "Pendente" ou qualquer outro, mostra o pagamento
+                        renderizarPagamento(pedido, pedidoId);
                     }
                 });
             } else {
-                window.location.href = 'index.html'; // Proteção básica
+                window.location.href = 'login.html';
             }
         });
 
         function renderizarPagamento(pedido, id) {
-            const valor = pedido.total.toFixed(2);
+            const valor = parseFloat(pedido.total).toFixed(2);
             document.getElementById('total-pix').innerText = `R$ ${valor.replace('.', ',')}`;
-            document.getElementById('order-id-display').innerText = `ORDEM #${id.substring(id.length - 8).toUpperCase()}`;
+            document.getElementById('order-id-display').innerText = `ORDEM #${id.substring(id.length - 6).toUpperCase()}`;
             
-            const cleanId = id.replace(/[^a-zA-Z0-9]/g, '').substring(0, 15);
-            const payload = gerarPayloadPix(CHAVE_PIX, valor, NOME_RECEBEDOR, CIDADE_RECEBEDOR, cleanId);
-            
+            const payload = gerarPayloadPix(CHAVE_PIX, valor, NOME_RECEBEDOR, CIDADE_RECEBEDOR, "PEDIDO");
             document.getElementById('pix-payload').value = payload;
 
             document.getElementById('qrcode').innerHTML = ""; 
@@ -151,60 +150,43 @@
                 width: 200,
                 height: 200,
                 colorDark : "#000000",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.M
+                colorLight : "#ffffff"
             });
 
             exibirTela('payment-screen');
         }
 
+        // FUNÇÃO DE PAYLOAD PIX (PADRÃO BC)
         function gerarPayloadPix(chave, valor, nome, cidade, txtId) {
-            const cleanString = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
-            const format = (id, text) => id + String(text.length).padStart(2, '0') + text;
+            const clean = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+            const f = (id, val) => id + String(val.length).padStart(2, '0') + val;
+            const account = f("00", "br.gov.bcb.pix") + f("01", chave);
+            let p = "000201" + f("26", account) + "520400005303986" + f("54", valor) + "5802BR" + f("59", clean(nome)) + f("60", clean(cidade)) + f("62", f("05", txtId)) + "6304";
             
-            const merchantAccount = format("00", "br.gov.bcb.pix") + format("01", chave);
-            
-            let payload = "000201"; 
-            payload += format("26", merchantAccount);
-            payload += "52040000"; 
-            payload += "5303986";  
-            payload += format("54", valor); 
-            payload += "5802BR";  
-            payload += format("59", cleanString(nome)); 
-            payload += format("60", cleanString(cidade)); 
-            payload += format("62", format("05", txtId || "PEDIDO")); 
-            payload += "6304"; 
-
-            function getCRC16(data) {
-                let crc = 0xFFFF;
-                for (let i = 0; i < data.length; i++) {
-                    crc ^= data.charCodeAt(i) << 8;
-                    for (let j = 0; j < 8; j++) {
-                        if ((crc & 0x8000) !== 0) crc = (crc << 1) ^ 0x1021;
-                        else crc <<= 1;
-                    }
+            // CRC16 Simples
+            let crc = 0xFFFF;
+            for (let i = 0; i < p.length; i++) {
+                crc ^= p.charCodeAt(i) << 8;
+                for (let j = 0; j < 8; j++) {
+                    if ((crc & 0x8000) !== 0) crc = (crc << 1) ^ 0x1021;
+                    else crc <<= 1;
                 }
-                return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
             }
-
-            return payload + getCRC16(payload);
+            return p + (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
         }
 
         function exibirTela(id) {
             ['loading-screen', 'payment-screen', 'success-screen', 'error-screen'].forEach(t => {
-                const el = document.getElementById(t);
-                if(el) el.classList.add('hidden');
+                document.getElementById(t).classList.add('hidden');
             });
-            const target = document.getElementById(id);
-            if(target) target.classList.remove('hidden');
+            document.getElementById(id).classList.remove('hidden');
         }
 
         window.copyField = () => {
-            const input = document.getElementById('pix-payload');
-            input.select();
-            navigator.clipboard.writeText(input.value).then(() => {
-                alert("Código Pix copiado!");
-            });
+            const el = document.getElementById('pix-payload');
+            el.select();
+            navigator.clipboard.writeText(el.value);
+            alert("Copiado!");
         }
     </script>
 </body>
