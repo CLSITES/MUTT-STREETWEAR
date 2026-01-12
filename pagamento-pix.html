@@ -12,9 +12,8 @@
         .mutt-card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 2rem; }
         .loader { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* Efeito de brilho no sucesso */
         .success-glow { box-shadow: 0 0 50px rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.5); }
+        .error-glow { box-shadow: 0 0 50px rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); }
     </style>
 </head>
 <body>
@@ -46,23 +45,16 @@
                             <button onclick="copyField('pix-key')" class="bg-white text-black px-6 font-black uppercase text-[10px] hover:bg-zinc-200 transition-all">Copiar</button>
                         </div>
                     </div>
-
-                    <div class="p-5 border border-zinc-900 bg-zinc-950/50 rounded-sm">
-                        <p class="text-[10px] text-zinc-400 leading-relaxed uppercase font-bold text-center italic">
-                            O sistema está aguardando a sua transferência. <br>
-                            <span class="text-white">A verificação é automática em nosso terminal.</span>
-                        </p>
-                    </div>
                 </div>
 
                 <div class="flex items-center justify-center gap-3 pt-4 border-t border-zinc-900">
                     <div class="loader"></div>
-                    <span class="text-[9px] font-black uppercase text-yellow-500 animate-pulse">Verificação em andamento...</span>
+                    <span class="text-[9px] font-black uppercase text-yellow-500 animate-pulse">Verificando no Terminal...</span>
                 </div>
             </div>
         </div>
 
-        <div id="success-screen" class="hidden text-center space-y-8 scale-95 animate-in duration-500">
+        <div id="success-screen" class="hidden text-center space-y-8 animate-in duration-500">
             <div class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-[0_0_60px_rgba(34,197,94,0.4)]">
                 <i class="fa-solid fa-check text-5xl text-black"></i>
             </div>
@@ -70,15 +62,24 @@
                 <h2 class="text-4xl font-black italic uppercase tracking-tighter text-white">Pago com Sucesso</h2>
                 <p class="text-zinc-400 text-[10px] uppercase font-bold tracking-widest leading-loose">
                     Recebemos seu Pix! <br> 
-                    Seu pedido entrou na linha de produção. <br>
-                    <span class="text-green-500">O rastreio chegará no seu WhatsApp.</span>
+                    Seu pedido entrou na linha de produção.
                 </p>
             </div>
-            <div class="mutt-card success-glow">
-                <p class="text-[9px] font-black text-zinc-500 uppercase">Status do Pedido</p>
-                <p class="text-xl font-black italic text-white uppercase tracking-tighter">Preparando Envio</p>
-            </div>
             <button onclick="window.location.href='index.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.3em] hover:bg-zinc-200 transition-all">Sair do Checkout</button>
+        </div>
+
+        <div id="error-screen" class="hidden text-center space-y-8 animate-in duration-500">
+            <div class="w-24 h-24 bg-red-600 rounded-full flex items-center justify-center mx-auto shadow-[0_0_60px_rgba(220,38,38,0.4)]">
+                <i class="fa-solid fa-xmark text-5xl text-white"></i>
+            </div>
+            <div class="space-y-2">
+                <h2 class="text-4xl font-black italic uppercase tracking-tighter text-white">Ops, algo deu errado</h2>
+                <p class="text-zinc-400 text-[10px] uppercase font-bold tracking-widest leading-loose">
+                    Seu pedido foi recusado ou cancelado. <br>
+                    <span class="text-red-500">Verifique os dados ou tente novamente.</span>
+                </p>
+            </div>
+            <button onclick="window.location.href='carrinho.html'" class="w-full bg-zinc-900 text-white py-6 font-black uppercase text-[11px] tracking-[0.3em] hover:bg-zinc-800 transition-all border border-zinc-800">Voltar ao Carrinho</button>
         </div>
 
     </main>
@@ -104,7 +105,6 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Monitora o último pedido do usuário em tempo real
                 const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
                 
                 onValue(pedidosRef, (snapshot) => {
@@ -113,13 +113,16 @@
                         const pedidoId = Object.keys(data)[0];
                         const pedido = data[pedidoId];
                         
-                        // SE O STATUS MUDAR PARA QUALQUER COISA DIFERENTE DE "PENDENTE", É SUCESSO
+                        // LÓGICA DE STATUS
                         if (pedido.status === "Aprovado" || pedido.status === "Pago") {
-                            exibirSucesso();
+                            exibirTela('success-screen');
+                        } else if (pedido.status === "Recusado" || pedido.status === "Cancelado") {
+                            exibirTela('error-screen');
                         } else {
                             renderizarPagamento(pedido, pedidoId);
                         }
                     } else {
+                        // Se não houver pedido nenhum, volta pra loja
                         window.location.href = 'index.html';
                     }
                 });
@@ -131,22 +134,18 @@
         function renderizarPagamento(pedido, id) {
             document.getElementById('total-pix').innerText = `R$ ${pedido.total.toFixed(2)}`;
             document.getElementById('order-id-display').innerText = `PEDIDO #${id.substring(id.length - 6).toUpperCase()}`;
-            
-            document.getElementById('loading-screen').classList.add('hidden');
-            document.getElementById('payment-screen').classList.remove('hidden');
+            exibirTela('payment-screen');
         }
 
-        function exibirSucesso() {
-            document.getElementById('loading-screen').classList.add('hidden');
-            document.getElementById('payment-screen').classList.add('hidden');
-            document.getElementById('success-screen').classList.remove('hidden');
-            document.getElementById('success-screen').classList.add('animate-fade');
+        function exibirTela(id) {
+            const telas = ['loading-screen', 'payment-screen', 'success-screen', 'error-screen'];
+            telas.forEach(t => document.getElementById(t).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         }
 
         window.copyField = (id) => {
             const input = document.getElementById(id);
             input.select();
-            input.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(input.value);
             
             const btn = event.target;
