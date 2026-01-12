@@ -55,7 +55,7 @@
                 <section>
                     <h2 class="step-title"><span class="text-zinc-800 text-4xl">01</span> SEU CARRINHO</h2>
                     <div id="cart-items-container" class="space-y-8">
-                        <p class="text-zinc-500 animate-pulse uppercase text-[10px] font-bold">Acessando Terminal...</p>
+                        <p class="text-zinc-500 animate-pulse uppercase text-[10px] font-bold">Sincronizando Carrinho...</p>
                     </div>
                 </section>
 
@@ -69,21 +69,21 @@
                         <input type="text" id="numero" placeholder="NÚMERO" class="input-mutt">
                         <input type="text" id="rua" placeholder="ENDEREÇO COMPLETO" class="input-mutt md:col-span-2">
                         <input type="text" id="cidade" placeholder="CIDADE" class="input-mutt">
-                        <input type="text" id="estado" placeholder="UF (EX: SP, RJ, PA)" class="input-mutt" maxlength="2" oninput="calcularFrete()">
+                        <input type="text" id="estado" placeholder="UF (EX: PA, SP)" class="input-mutt" maxlength="2" oninput="this.value = this.value.toUpperCase(); calcularFrete();">
                     </div>
 
                     <div id="frete-options" class="space-y-3 opacity-50 pointer-events-none">
                         <label class="flex items-center justify-between border border-zinc-900 p-5 cursor-pointer has-[:checked]:border-white">
                             <div class="flex items-center gap-4">
                                 <input type="radio" name="tipoFrete" value="PAC" checked onchange="recalcularTudo()">
-                                <span class="text-[11px] font-black uppercase tracking-widest">PAC (Logística + Embalagem)</span>
+                                <span class="text-[11px] font-black uppercase tracking-widest">PAC (Envio Econômico)</span>
                             </div>
                             <span id="valor-pac" class="text-[11px] font-bold">R$ 0,00</span>
                         </label>
                         <label class="flex items-center justify-between border border-zinc-900 p-5 cursor-pointer has-[:checked]:border-white">
                             <div class="flex items-center gap-4">
                                 <input type="radio" name="tipoFrete" value="SEDEX" onchange="recalcularTudo()">
-                                <span class="text-[11px] font-black uppercase tracking-widest">SEDEX (Envio Expresso)</span>
+                                <span class="text-[11px] font-black uppercase tracking-widest">SEDEX (Envio Rápido)</span>
                             </div>
                             <span id="valor-sedex" class="text-[11px] font-bold">R$ 0,00</span>
                         </label>
@@ -95,15 +95,15 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label class="border border-zinc-900 p-6 flex items-center justify-between cursor-pointer has-[:checked]:border-white group">
                             <div class="flex items-center gap-4">
-                                <input type="radio" name="pay" value="pix" checked onchange="recalcularTudo()">
-                                <span class="text-[11px] font-black uppercase">PIX (Desconto Instantâneo)</span>
+                                <input type="radio" name="pay" value="pix" checked>
+                                <span class="text-[11px] font-black uppercase">PIX</span>
                             </div>
                             <i class="fa-brands fa-pix text-zinc-700 group-hover:text-white"></i>
                         </label>
                         <label class="border border-zinc-900 p-6 flex items-center justify-between cursor-pointer has-[:checked]:border-white group">
                             <div class="flex items-center gap-4">
-                                <input type="radio" name="pay" value="cartao" onchange="recalcularTudo()">
-                                <span class="text-[11px] font-black uppercase">CARTÃO (Link Seguro)</span>
+                                <input type="radio" name="pay" value="cartao">
+                                <span class="text-[11px] font-black uppercase">CARTÃO</span>
                             </div>
                             <i class="fa-solid fa-credit-card text-zinc-700 group-hover:text-white"></i>
                         </label>
@@ -116,11 +116,11 @@
                     <h2 class="text-[10px] font-black uppercase tracking-[0.4em] mb-10 border-b border-zinc-900 pb-5 text-zinc-500 italic">Resumo do Pedido</h2>
                     <div class="space-y-5 mb-10 text-[11px]">
                         <div class="flex justify-between">
-                            <span class="text-zinc-600 font-black uppercase">Produtos</span>
+                            <span class="text-zinc-600 font-black uppercase">Subtotal</span>
                             <span id="subtotal" class="font-bold">R$ 0,00</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-zinc-600 font-black uppercase">Entrega para (<span id="uf-display">--</span>)</span>
+                            <span class="text-zinc-600 font-black uppercase">Frete (<span id="uf-display">--</span>)</span>
                             <span id="frete-valor" class="font-bold">R$ 0,00</span>
                         </div>
                         <div class="h-[1px] bg-zinc-900 my-6"></div>
@@ -129,8 +129,7 @@
                             <span id="total" class="text-4xl font-black italic tracking-tighter">R$ 0,00</span>
                         </div>
                     </div>
-                    <button onclick="finalizarPedido()" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.3em] hover:bg-zinc-200">Finalizar Compra</button>
-                    <p class="text-[8px] text-center text-zinc-700 uppercase font-black mt-6 tracking-widest">Ambiente 100% Criptografado</p>
+                    <button onclick="finalizarPedido()" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.3em] hover:bg-zinc-200 transition-all">Finalizar Compra</button>
                 </div>
             </div>
         </div>
@@ -155,23 +154,14 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        // TABELA DE FRETE REAJUSTADA (INCLUINDO CUSTO DE EMBALAGEM)
+        // AJUSTADO PARA PARAUAPEBAS / PARÁ
         const TABELA_FRETE = { 
-            "SP": { pac: 25.0, sedex: 42.0 }, 
-            "RJ": { pac: 32.0, sedex: 55.0 },
-            "MG": { pac: 32.0, sedex: 55.0 },
-            "ES": { pac: 35.0, sedex: 58.0 },
-            "SC": { pac: 38.0, sedex: 62.0 },
-            "PR": { pac: 38.0, sedex: 62.0 },
-            "RS": { pac: 38.0, sedex: 62.0 },
-            "DF": { pac: 42.0, sedex: 75.0 },
-            "GO": { pac: 45.0, sedex: 78.0 },
-            "BA": { pac: 45.0, sedex: 82.0 },
-            "PE": { pac: 52.0, sedex: 95.0 },
-            "CE": { pac: 52.0, sedex: 95.0 },
-            "PA": { pac: 65.0, sedex: 110.0 },
-            "AM": { pac: 68.0, sedex: 120.0 },
-            "OUTROS": { pac: 55.0, sedex: 98.0 } 
+            "PA": { pac: 45.0, sedex: 85.0 }, // Frete otimizado para sua região
+            "SP": { pac: 22.0, sedex: 35.0 }, 
+            "RJ": { pac: 28.0, sedex: 45.0 },
+            "MA": { pac: 35.0, sedex: 60.0 },
+            "TO": { pac: 35.0, sedex: 60.0 },
+            "OUTROS": { pac: 40.0, sedex: 75.0 } 
         };
 
         let carrinhoGlobal = [];
@@ -201,7 +191,7 @@
                 atualizarResumo(0); return;
             }
             container.innerHTML = carrinhoGlobal.map((item) => {
-                const totalItem = item.preco * item.quantidade;
+                const totalItem = (item.preco || 0) * (item.quantidade || 1);
                 subtotal += totalItem;
                 return `
                     <div class="flex gap-6 border-b border-zinc-950 pb-8 items-start">
@@ -213,7 +203,7 @@
                                 <h3 class="text-[11px] font-black uppercase italic">${item.nome}</h3>
                                 <button onclick="removerItem('${item.cartId}')" class="text-zinc-800 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
                             </div>
-                            <p class="text-[9px] text-zinc-600 font-black uppercase mt-1">TAMANHO: ${item.tamanho}</p>
+                            <p class="text-[9px] text-zinc-600 font-black uppercase mt-1">TAM: ${item.tamanho}</p>
                             <div class="flex justify-between items-end mt-6">
                                 <div class="flex items-center border border-zinc-900">
                                     <button onclick="alterarQuantidade('${item.cartId}', -1)" class="qty-btn">-</button>
@@ -232,88 +222,84 @@
         window.alterarQuantidade = (cartId, delta) => {
             const item = carrinhoGlobal.find(i => i.cartId === cartId);
             const novaQtde = Math.max(1, item.quantidade + delta);
-            if(novaQtde !== item.quantidade) {
-                update(ref(db, `usuarios/${currentUser.uid}/carrinho/${cartId}`), { quantidade: novaQtde });
-            }
+            update(ref(db, `usuarios/${currentUser.uid}/carrinho/${cartId}`), { quantidade: novaQtde });
         };
 
-        window.removerItem = (id) => confirm("REMOVER ITEM?") && remove(ref(db, `usuarios/${currentUser.uid}/carrinho/${id}`));
+        window.removerItem = (id) => confirm("REMOVER?") && remove(ref(db, `usuarios/${currentUser.uid}/carrinho/${id}`));
 
         window.calcularFrete = () => {
             const uf = document.getElementById('estado').value.toUpperCase().trim();
             document.getElementById('uf-display').innerText = uf || "--";
+            const freteDiv = document.getElementById('frete-options');
+            
             if (uf.length === 2) {
-                document.getElementById('frete-options').classList.remove('opacity-50', 'pointer-events-none');
+                freteDiv.classList.remove('opacity-50', 'pointer-events-none');
+                recalcularTudo();
             } else {
-                document.getElementById('frete-options').classList.add('opacity-50', 'pointer-events-none');
+                freteDiv.classList.add('opacity-50', 'pointer-events-none');
             }
-            recalcularTudo();
         };
 
         window.recalcularTudo = () => {
-            const totalItens = carrinhoGlobal.reduce((acc, i) => acc + i.quantidade, 0);
             const sub = carrinhoGlobal.reduce((acc, i) => acc + (i.preco * i.quantidade), 0);
             const uf = document.getElementById('estado').value.toUpperCase().trim();
             
             if (uf.length === 2) {
                 const tipo = document.querySelector('input[name="tipoFrete"]:checked').value;
-                const precosBase = TABELA_FRETE[uf] || TABELA_FRETE["OUTROS"];
+                const precos = TABELA_FRETE[uf] || TABELA_FRETE["OUTROS"];
+                freteSelecionado = (tipo === "PAC" ? precos.pac : precos.sedex);
                 
-                // Taxa extra de R$ 5,00 a partir do segundo item (compensação de embalagem/peso)
-                const taxaVolume = totalItens > 1 ? (totalItens - 1) * 5 : 0;
-                
-                freteSelecionado = (tipo === "PAC" ? precosBase.pac : precosBase.sedex) + taxaVolume;
-                
-                document.getElementById('valor-pac').innerText = `R$ ${(precosBase.pac + taxaVolume).toFixed(2)}`;
-                document.getElementById('valor-sedex').innerText = `R$ ${(precosBase.sedex + taxaVolume).toFixed(2)}`;
+                document.getElementById('valor-pac').innerText = `R$ ${precos.pac.toFixed(2)}`;
+                document.getElementById('valor-sedex').innerText = `R$ ${precos.sedex.toFixed(2)}`;
             } else {
                 freteSelecionado = 0;
             }
-            atualizarResumo(sub);
-        };
-
-        window.atualizarResumo = (sub) => {
+            
             document.getElementById('subtotal').innerText = `R$ ${sub.toFixed(2)}`;
             document.getElementById('frete-valor').innerText = `R$ ${freteSelecionado.toFixed(2)}`;
             document.getElementById('total').innerText = `R$ ${(sub + freteSelecionado).toFixed(2)}`;
         };
 
         window.finalizarPedido = async () => {
-            const campos = ['nome-completo', 'cpf', 'whatsapp', 'cep', 'numero', 'rua', 'cidade', 'estado'];
-            const faltamDados = campos.some(id => !document.getElementById(id).value);
-
             if(!carrinhoGlobal.length) return alert("CARRINHO VAZIO");
-            if(faltamDados) return alert("POR FAVOR, PREENCHA TODOS OS DADOS DE ENTREGA");
+            
+            const campos = ['nome-completo', 'cpf', 'whatsapp', 'cep', 'rua', 'estado'];
+            for(let id of campos) {
+                if(!document.getElementById(id).value) return alert("PREENCHA OS DADOS DE ENTREGA");
+            }
 
-            const totalFinal = carrinhoGlobal.reduce((acc, i) => acc + (i.preco * i.quantidade), 0) + freteSelecionado;
+            const sub = carrinhoGlobal.reduce((acc, i) => acc + (i.preco * i.quantidade), 0);
+            const totalFinal = sub + freteSelecionado;
 
             const pedidoObj = {
-                clienteId: currentUser.uid,
-                data: new Date().toLocaleDateString('pt-BR'),
-                status: "Pendente",
+                data: new Date().toLocaleString('pt-BR'),
+                status: "PENDENTE",
                 total: totalFinal,
+                frete: freteSelecionado,
+                metodo: document.querySelector('input[name="pay"]:checked').value,
                 itens: carrinhoGlobal,
-                clienteEmail: currentUser.email,
-                endereco: {
+                cliente: {
                     nome: document.getElementById('nome-completo').value,
-                    cpf: document.getElementById('cpf').value,
                     whatsapp: document.getElementById('whatsapp').value,
-                    cep: document.getElementById('cep').value,
-                    uf: document.getElementById('estado').value.toUpperCase(),
+                    endereco: `${document.getElementById('rua').value}, ${document.getElementById('numero').value}`,
                     cidade: document.getElementById('cidade').value,
-                    rua: document.getElementById('rua').value,
-                    numero: document.getElementById('numero').value
+                    uf: document.getElementById('estado').value.toUpperCase()
                 }
             };
 
             try {
-                // Salva no banco e redireciona
-                const refNovoPedido = push(ref(db, `usuarios/${currentUser.uid}/pedidos`));
-                await set(refNovoPedido, pedidoObj);
+                // SALVA NO HISTÓRICO DO USUÁRIO
+                const novoPedidoRef = push(ref(db, `usuarios/${currentUser.uid}/pedidos`));
+                await set(novoPedidoRef, pedidoObj);
                 
-                const metodo = document.querySelector('input[name="pay"]:checked').value;
-                location.href = metodo === 'pix' ? "pagamento-pix.html" : "pagamento-cartao.html";
-            } catch (e) { alert("ERRO AO PROCESSAR PEDIDO"); }
+                // LIMPA O CARRINHO
+                await remove(ref(db, `usuarios/${currentUser.uid}/carrinho`));
+                
+                // REDIRECIONA
+                location.href = pedidoObj.metodo === 'pix' ? "pagamento-pix.html" : "pagamento-cartao.html";
+            } catch (e) {
+                alert("ERRO AO PROCESSAR PEDIDO");
+            }
         };
     </script>
 </body>
