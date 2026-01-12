@@ -9,10 +9,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap');
         
-        :root { 
-            --mutt-bg: #000000; 
-            --mutt-card: #0a0a0a; 
-            --mutt-border: #1a1a1a; 
+        :root {
+            --mutt-bg: #000000;
+            --mutt-card: #0a0a0a;
+            --mutt-border: #1a1a1a;
             --mutt-accent: #ffffff;
         }
 
@@ -21,222 +21,197 @@
             background-color: var(--mutt-bg); 
             color: #fff; 
             overflow-x: hidden;
-            position: relative;
         }
 
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: 
-                radial-gradient(circle at 50% 50%, rgba(20, 20, 20, 1) 0%, rgba(0, 0, 0, 1) 100%),
-                url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
-            z-index: -1;
-            opacity: 0.5;
-        }
-
-        .bg-glow {
-            position: fixed;
-            width: 600px; height: 600px;
-            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0) 70%);
-            border-radius: 50%;
-            z-index: -1;
-            animation: move 20s infinite alternate;
-        }
-
-        @keyframes move {
-            from { transform: translate(-10%, -10%); }
-            to { transform: translate(20%, 20%); }
-        }
-
-        .animate-fade { animation: fadeIn 0.4s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.5s ease forwards; }
 
         .input-mutt { 
             background: #0a0a0a; 
             border: 1px solid #1a1a1a; 
             color: white; 
             padding: 14px; 
-            border-radius: 2px; 
+            border-radius: 4px; 
             width: 100%; 
             font-size: 13px; 
-            outline: none; 
-            transition: 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
         }
-        .input-mutt:focus { border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.05); }
+        .input-mutt:focus { border-color: #fff; outline: none; background: #111; box-shadow: 0 0 15px rgba(255,255,255,0.05); }
 
         .glass-panel { 
-            background: rgba(8, 8, 8, 0.9); 
-            backdrop-filter: blur(20px); 
+            background: rgba(10, 10, 10, 0.8); 
+            backdrop-filter: blur(25px); 
             border: 1px solid #1a1a1a; 
+            transition: all 0.3s;
         }
 
-        .tab-btn { 
-            font-size: 10px; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            padding: 15px 20px; 
-            border-bottom: 2px solid transparent; 
-            color: #444; 
-            transition: 0.3s; 
-            letter-spacing: 2px;
+        .tab-btn {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 15px 25px;
+            border-bottom: 2px solid transparent;
+            color: #444;
+            transition: 0.3s;
         }
-        .tab-btn.active { color: #fff; border-bottom-color: #fff; }
-
-        .btn-glow:hover {
-            box-shadow: 0 0 20px rgba(255,255,255,0.2);
-            transform: translateY(-1px);
+        .tab-btn.active {
+            color: #fff;
+            border-bottom-color: #fff;
         }
 
+        .dot-online { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px #10b981; }
+        .dot-offline { width: 8px; height: 8px; background: #3f3f46; border-radius: 50%; display: inline-block; }
+
+        .size-chip { border: 1px solid #1a1a1a; padding: 10px; cursor: pointer; text-align: center; font-weight: 900; text-transform: uppercase; font-size: 10px; transition: 0.3s; background: #0a0a0a; }
+        .size-chip.active { background: #fff; color: #000; border-color: #fff; }
+        
+        .status-off { opacity: 0.4; filter: grayscale(1); }
+
+        /* AJUSTE DE VISIBILIDADE DA LOGO */
         .logo-mutt {
-            filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255,255,255,0.3));
+            filter: brightness(0) invert(1) drop-shadow(0 0 15px rgba(255,255,255,0.3));
         }
-
-        .size-chip { 
-            border: 1px solid #1a1a1a; 
-            padding: 10px; 
-            cursor: pointer; 
-            text-align: center; 
-            font-weight: 900; 
-            font-size: 10px; 
-            background: #0a0a0a; 
-            transition: 0.3s; 
-        }
-        .size-chip.active { background: #fff; color: #000; }
-
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #1a1a1a; }
-        ::-webkit-scrollbar-thumb:hover { background: #333; }
     </style>
 </head>
-<body>
+<body class="bg-black">
 
-    <div class="bg-glow"></div>
-
-    <div id="login-screen" class="fixed inset-0 z-[1000] bg-black flex items-center justify-center p-6">
-        <div class="w-full max-w-md animate-fade text-center">
-            <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-32 mx-auto mb-10 logo-mutt">
-            <div class="glass-panel p-8 border-zinc-900 rounded-lg">
-                <h2 class="text-[10px] font-black tracking-[0.5em] text-zinc-500 uppercase mb-8">System Authentication</h2>
-                <div class="space-y-4">
-                    <input type="text" id="user" placeholder="USUÁRIO" class="input-mutt text-center">
-                    <input type="password" id="pass" placeholder="SENHA" class="input-mutt text-center">
-                    <button id="btn-login-trigger" class="w-full bg-white text-black py-4 font-black uppercase text-[11px] tracking-[0.3em] btn-glow transition-all">Acessar Terminal</button>
-                </div>
+    <div id="login-screen" class="fixed inset-0 z-[1000] bg-black flex items-center justify-center p-6 transition-all duration-700">
+        <div class="w-full max-w-md animate-fade">
+            <div class="text-center mb-10">
+                <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-64 mx-auto mb-6 logo-mutt">
+                <h2 class="text-[10px] font-black tracking-[0.6em] text-zinc-500 uppercase">Autenticação do Sistema</h2>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="user" placeholder="USUÁRIO" class="input-mutt text-center tracking-[0.3em] uppercase">
+                <input type="password" id="pass" placeholder="SENHA" class="input-mutt text-center tracking-[0.3em]">
+                <button id="btn-login-trigger" class="w-full bg-white text-black py-4 font-black uppercase text-[11px] tracking-[0.3em] hover:tracking-[0.5em] transition-all duration-500">Acessar Terminal</button>
             </div>
         </div>
     </div>
 
     <div id="admin-panel" class="hidden min-h-screen">
-        <nav class="border-b border-zinc-900 p-6 flex flex-wrap justify-between items-center bg-black/90 sticky top-0 backdrop-blur-xl z-50">
+        <nav class="border-b border-zinc-900 p-6 flex flex-wrap justify-between items-center bg-black/80 sticky top-0 backdrop-blur-xl z-50 gap-4">
             <div class="flex items-center gap-6">
-                <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-12 logo-mutt">
-                <div class="flex gap-4 border-l border-zinc-800 pl-6">
-                    <div class="text-left">
-                        <p class="text-[8px] text-zinc-500 uppercase font-black tracking-widest">Status</p>
-                        <p class="text-[10px] font-black text-green-500 uppercase"><span class="dot-online mr-2"></span>Terminal Online</p>
+                <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-20 logo-mutt">
+                <div class="flex gap-6 border-l border-zinc-800 pl-6">
+                    <div>
+                        <p class="text-[8px] text-zinc-500 uppercase font-black">Online Agora</p>
+                        <p id="counter-online" class="text-sm font-black text-green-500">0</p>
+                    </div>
+                    <div>
+                        <p class="text-[8px] text-zinc-500 uppercase font-black">Acessos Totais</p>
+                        <p id="counter-total" class="text-sm font-black">0</p>
                     </div>
                 </div>
             </div>
             <div class="flex gap-2">
-                <button onclick="switchTab('produtos')" id="tab-prod" class="tab-btn active">Produtos</button>
-                <button onclick="switchTab('pedidos')" id="tab-order" class="tab-btn">Pendentes</button>
+                <button onclick="switchTab('produtos')" id="tab-prod" class="tab-btn active">Estoque</button>
+                <button onclick="switchTab('pedidos')" id="tab-order" class="tab-btn">Pedidos</button>
                 <button onclick="switchTab('historico')" id="tab-hist" class="tab-btn">Histórico</button>
                 <button onclick="switchTab('usuarios')" id="tab-user" class="tab-btn">Clientes</button>
             </div>
-            <button onclick="abrirModal()" class="bg-white text-black px-6 py-2 font-black uppercase text-[10px] btn-glow">Novo Item</button>
+            <button onclick="abrirModal()" class="bg-white text-black px-6 py-3 font-black uppercase text-[10px] tracking-tighter">Novo Produto</button>
         </nav>
 
         <main class="container mx-auto px-6 py-12">
-            
             <section id="section-produtos" class="animate-fade">
-                <div class="mb-10">
-                    <h2 class="text-6xl font-black italic tracking-tighter uppercase leading-none">Inventário</h2>
-                    <p class="text-zinc-500 text-[10px] font-black uppercase tracking-[0.4em] mt-2">Mutt Streetwear Warehouse</p>
+                <div class="mb-12 flex justify-between items-end border-b border-zinc-900 pb-8">
+                    <div>
+                        <h2 class="text-5xl font-black uppercase italic tracking-tighter">Inventário</h2>
+                        <p id="total-count" class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Carregando...</p>
+                    </div>
                 </div>
-                <div id="lista-produtos-adm" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+                <div id="lista-produtos-adm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </section>
 
             <section id="section-pedidos" class="hidden animate-fade">
-                <div class="mb-10">
-                    <h2 class="text-6xl font-black italic tracking-tighter uppercase leading-none">Checkout</h2>
-                    <p class="text-zinc-500 text-[10px] font-black uppercase tracking-[0.4em] mt-2">Aguardando Aprovação de Venda</p>
+                <div class="mb-12">
+                    <h2 class="text-5xl font-black uppercase italic tracking-tighter">Pendentes</h2>
+                    <p class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Aguardando aprovação de pagamento</p>
                 </div>
                 <div id="lista-pedidos-adm" class="space-y-4"></div>
             </section>
 
             <section id="section-historico" class="hidden animate-fade">
-                <div class="flex flex-wrap justify-between items-end mb-10 gap-4">
-                    <div>
-                        <h2 class="text-6xl font-black italic tracking-tighter uppercase leading-none">History</h2>
-                        <p class="text-zinc-500 text-[10px] font-black uppercase tracking-[0.4em] mt-2">Vendas Aprovadas nos últimos 120 dias</p>
-                    </div>
-                    <input type="date" id="filtro-data" onchange="renderizarHistorico()" class="input-mutt !w-auto !py-2 !text-[10px]">
+                <div class="mb-12">
+                    <h2 class="text-5xl font-black uppercase italic tracking-tighter">Histórico</h2>
+                    <p class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Vendas finalizadas</p>
                 </div>
                 <div id="lista-historico-adm" class="space-y-3"></div>
             </section>
 
             <section id="section-usuarios" class="hidden animate-fade">
-                <div class="mb-10">
-                    <h2 class="text-6xl font-black italic tracking-tighter uppercase leading-none">Database</h2>
-                    <p class="text-zinc-500 text-[10px] font-black uppercase tracking-[0.4em] mt-2">Registro de Clientes e Acessos</p>
+                <div class="mb-8">
+                    <h2 class="text-5xl font-black uppercase italic tracking-tighter">Base de Clientes</h2>
+                    <p class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Controle de acessos e dados</p>
                 </div>
-                <div class="glass-panel overflow-hidden rounded-lg border-zinc-900">
-                    <table class="w-full text-left text-[11px] uppercase">
-                        <thead class="bg-zinc-900/50 text-zinc-500 font-black tracking-widest">
-                            <tr><th class="p-5">Status</th><th class="p-5">Nome</th><th class="p-5">WhatsApp</th><th class="p-5 text-right">Ações</th></tr>
+                <div class="glass-panel overflow-hidden">
+                    <table class="w-full text-left text-[11px] uppercase font-bold">
+                        <thead class="bg-zinc-900 text-zinc-500">
+                            <tr>
+                                <th class="p-4">Status</th>
+                                <th class="p-4">Nome do Cliente</th>
+                                <th class="p-4">WhatsApp / Email</th>
+                                <th class="p-4">Membro desde</th>
+                                <th class="p-4 text-right">Ações</th>
+                            </tr>
                         </thead>
-                        <tbody id="lista-usuarios-adm" class="font-bold"></tbody>
+                        <tbody id="lista-usuarios-adm"></tbody>
                     </table>
                 </div>
             </section>
         </main>
     </div>
 
-    <div id="modal-detalhes" class="fixed inset-0 bg-black/95 z-[700] hidden flex items-center justify-center p-4">
+    <div id="modal-detalhes" class="fixed inset-0 bg-black/95 z-[700] hidden flex items-center justify-center p-4 backdrop-blur-md">
         <div class="w-full max-w-2xl glass-panel p-8 relative rounded-lg">
-            <button onclick="fecharDetalhes()" class="absolute top-6 right-6 text-2xl hover:text-red-500 transition-colors">&times;</button>
-            <h3 class="text-3xl font-black italic uppercase mb-8 border-b border-zinc-800 pb-4 tracking-tighter">Manifesto do Pedido</h3>
-            <div id="detalhes-itens" class="space-y-4 max-h-[50vh] overflow-y-auto pr-4 mb-8"></div>
-            <div class="flex justify-between items-center bg-white text-black p-6 rounded">
-                <span class="font-black uppercase text-[12px] tracking-widest">Valor Final Recebido</span>
-                <span id="detalhes-total" class="text-3xl font-black italic">R$ 0,00</span>
+            <button onclick="fecharDetalhes()" class="absolute top-6 right-6 text-2xl">&times;</button>
+            <h3 class="text-2xl font-black italic uppercase mb-8 border-b border-zinc-800 pb-4">Itens do Pedido</h3>
+            <div id="detalhes-itens" class="space-y-4 max-h-[50vh] overflow-y-auto mb-8"></div>
+            <div class="flex justify-between items-center bg-white text-black p-4">
+                <span class="font-black text-[10px] uppercase">Total</span>
+                <span id="detalhes-total" class="text-2xl font-black italic">R$ 0,00</span>
             </div>
         </div>
     </div>
 
-    <div id="modal-produto" class="fixed inset-0 bg-black/95 z-[600] hidden overflow-y-auto">
-        <div class="min-h-screen flex items-center justify-center p-6">
-            <div class="w-full max-w-4xl glass-panel p-10 relative rounded-xl border-zinc-800">
-                <button onclick="fecharModal()" class="absolute top-8 right-8 text-2xl font-black">&times;</button>
-                <h2 id="modal-title" class="text-4xl font-black uppercase italic mb-10 tracking-tighter">Configurações de Produto</h2>
-                <form id="form-produto" class="grid grid-cols-1 md:grid-cols-2 gap-10">
+    <div id="modal-produto" class="fixed inset-0 bg-black/95 z-[600] hidden overflow-y-auto backdrop-blur-sm">
+        <div class="min-h-screen flex items-center justify-center p-4">
+            <div class="w-full max-w-5xl glass-panel p-8 md:p-12 relative rounded-lg border-zinc-800">
+                <button onclick="fecharModal()" class="absolute top-8 right-8 text-white text-2xl">&times;</button>
+                <h2 id="modal-title" class="text-3xl font-black uppercase italic tracking-tighter mb-10">Configurar Produto</h2>
+                <form id="form-produto" class="grid grid-cols-1 md:grid-cols-2 gap-12">
                     <input type="hidden" id="edit-id">
-                    <div class="space-y-5">
-                        <label class="text-[9px] font-black text-zinc-500 uppercase">Informações Básicas</label>
-                        <input type="text" id="p-nome" class="input-mutt" placeholder="Nome do Produto" required>
-                        <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="Preço (BRL)" required>
-                        <select id="p-status" class="input-mutt">
-                            <option value="ativo">Disponível</option>
-                            <option value="inativo">Indisponível (Pausar)</option>
-                        </select>
-                        <label class="text-[9px] font-black text-zinc-500 uppercase block mt-6">Grade de Tamanhos</label>
+                    <div class="space-y-6">
+                        <input type="text" id="p-nome" class="input-mutt" placeholder="NOME DO PRODUTO" required>
+                        <div class="grid grid-cols-2 gap-4">
+                           <select id="p-cat" class="input-mutt">
+                                <option value="camisetas">Camisetas</option>
+                                <option value="jaquetas">Jaquetas</option>
+                                <option value="shorts">Shorts</option>
+                                <option value="calcas">Calças</option>
+                                <option value="acessorios">Acessórios</option>
+                            </select>
+                            <select id="p-status" class="input-mutt"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="PREÇO" required>
+                            <input type="number" step="0.01" id="p-preco-antigo" class="input-mutt" placeholder="ANTIGO">
+                            <input type="number" id="p-desconto" class="input-mutt" placeholder="DESC %">
+                        </div>
+                        <textarea id="p-desc" rows="4" class="input-mutt" placeholder="DESCRIÇÃO"></textarea>
                         <div id="grade-tamanhos" class="grid grid-cols-5 gap-2">
                             <div class="size-chip" data-size="P">P</div>
                             <div class="size-chip" data-size="M">M</div>
                             <div class="size-chip" data-size="G">G</div>
                             <div class="size-chip" data-size="GG">GG</div>
-                            <div class="size-chip" data-size="XG">XG</div>
+                            <div class="size-chip" data-size="XG">XG</div> 
                         </div>
                     </div>
-                    <div class="space-y-5">
-                        <label class="text-[9px] font-black text-zinc-500 uppercase">Mídia e URLs</label>
-                        <div id="container-fotos" class="space-y-3 max-h-[200px] overflow-y-auto pr-2"></div>
-                        <button type="button" onclick="adicionarCampoFoto()" class="w-full border border-dashed border-zinc-800 py-4 text-[10px] font-black uppercase hover:bg-zinc-900 transition-all">+ Inserir Foto</button>
-                        <button type="submit" class="w-full bg-white text-black py-5 font-black uppercase text-[12px] tracking-[0.4em] btn-glow mt-10">Salvar Alterações</button>
+                    <div class="space-y-6 flex flex-col">
+                        <div id="container-fotos" class="space-y-3 max-h-[300px] overflow-y-auto"></div>
+                        <button type="button" onclick="adicionarCampoFoto()" class="w-full border border-dashed border-zinc-800 py-4 text-[10px] uppercase font-black">+ Link de Foto</button>
+                        <button type="submit" class="mt-auto w-full bg-white text-black py-5 font-black uppercase text-[12px] tracking-[0.4em]">Salvar na Nuvem</button>
                     </div>
                 </form>
             </div>
@@ -262,70 +237,74 @@
         let dadosGlobais = {};
 
         // LOGIN
-        document.getElementById('btn-login-trigger').onclick = () => {
-            const u = document.getElementById('user').value;
-            const p = document.getElementById('pass').value;
-            if(u === 'admin' && p === 'mutt2026') {
-                document.getElementById('login-screen').style.display = 'none';
+        window.fazerLogin = () => {
+            if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === 'mutt2026') {
+                document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('admin-panel').classList.remove('hidden');
-            } else alert("ACESSO BLOQUEADO PELO SISTEMA.");
+            } else { alert("Acesso Negado"); }
         };
+        document.getElementById('btn-login-trigger').onclick = window.fazerLogin;
 
+        // NAVEGAÇÃO
         window.switchTab = (tab) => {
-            const sections = ['produtos', 'pedidos', 'historico', 'usuarios'];
-            sections.forEach(s => {
-                document.getElementById(`section-${s}`).classList.toggle('hidden', s !== tab);
-                const btnId = s === 'historico' ? 'hist' : (s === 'pedidos' ? 'order' : (s === 'produtos' ? 'prod' : 'user'));
-                document.getElementById(`tab-${btnId}`).classList.toggle('active', s === tab);
+            const tabs = ['produtos', 'pedidos', 'historico', 'usuarios'];
+            tabs.forEach(t => {
+                document.getElementById(`section-${t}`).classList.toggle('hidden', t !== tab);
+                const btnMap = {produtos: 'prod', pedidos: 'order', historico: 'hist', usuarios: 'user'};
+                document.getElementById(`tab-${btnMap[t]}`).classList.toggle('active', t === tab);
             });
             if(tab === 'historico') renderizarHistorico();
         };
 
-        // MONITORAMENTO PRINCIPAL
+        // MONITOR DE USUÁRIOS E PEDIDOS
         onValue(ref(db, 'usuarios'), (snapshot) => {
             const users = snapshot.val();
-            dadosGlobais = users;
-            const contUsers = document.getElementById('lista-usuarios-adm');
-            const contOrders = document.getElementById('lista-pedidos-adm');
-            contUsers.innerHTML = "";
-            contOrders.innerHTML = "";
+            dadosGlobais = users || {};
+            const containerUser = document.getElementById('lista-usuarios-adm');
+            const containerOrder = document.getElementById('lista-pedidos-adm');
+            
+            let totalAcessos = 0; let onlineCount = 0;
+            containerUser.innerHTML = "";
+            containerOrder.innerHTML = "";
 
             if(users) {
                 Object.keys(users).forEach(uid => {
                     const usr = users[uid];
-                    const perfil = usr.perfil || {};
+                    const dados = usr.perfil || {};
                     const status = usr.presenca || 'offline';
-                    
-                    contUsers.innerHTML += `
-                        <tr class="border-b border-zinc-900 hover:bg-zinc-950 transition-colors">
-                            <td class="p-5">${status === 'online' ? '<span class="w-2 h-2 rounded-full bg-green-500 inline-block shadow-[0_0_8px_#22c55e]"></span>' : '●'}</td>
-                            <td class="p-5">${perfil.nome || 'Visitante'}</td>
-                            <td class="p-5">${perfil.whatsapp || '---'}</td>
-                            <td class="p-5 text-right">
-                                <a href="https://wa.me/${perfil.whatsapp}" target="_blank" class="text-white hover:text-green-500 mr-4"><i class="fa-brands fa-whatsapp"></i></a>
-                                <button onclick="removerUsuario('${uid}')" class="text-zinc-800 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>
+                    totalAcessos++;
+                    if(status === 'online') onlineCount++;
+
+                    // Renderizar Tabela de Clientes
+                    containerUser.innerHTML += `
+                        <tr class="border-b border-zinc-900 hover:bg-zinc-950 transition">
+                            <td class="p-4">${status === 'online' ? '<span class="dot-online"></span>' : '<span class="dot-offline"></span>'}</td>
+                            <td class="p-4"><span class="text-white block font-black">${dados.nome || 'VISITANTE'}</span></td>
+                            <td class="p-4"><span class="text-zinc-400 block">${dados.whatsapp || '---'}</span></td>
+                            <td class="p-4 text-zinc-500">${dados.dataCadastro || '---'}</td>
+                            <td class="p-4 text-right">
+                                <a href="https://wa.me/${dados.whatsapp}" target="_blank" class="text-white mx-2"><i class="fa-brands fa-whatsapp"></i></a>
+                                <button onclick="removerUsuario('${uid}')" class="text-zinc-800 hover:text-red-500 mx-2"><i class="fa-solid fa-trash"></i></button>
                             </td>
                         </tr>`;
 
+                    // Renderizar Pedidos Pendentes
                     if(usr.pedidos) {
                         Object.keys(usr.pedidos).forEach(pid => {
-                            const ord = usr.pedidos[pid];
-                            if(ord.status === 'Pendente') {
-                                contOrders.innerHTML += `
-                                    <div class="glass-panel p-6 flex flex-wrap justify-between items-center animate-fade border-l-4 border-l-white">
+                            const o = usr.pedidos[pid];
+                            if(o.status === 'Pendente') {
+                                containerOrder.innerHTML += `
+                                    <div class="glass-panel p-6 flex justify-between items-center border-l-2 border-white">
                                         <div>
-                                            <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">REQ. ID: ${pid.slice(-6)} | ${ord.data}</p>
-                                            <h3 class="text-xl font-black uppercase italic">${perfil.nome || 'Desconhecido'}</h3>
-                                            <p class="text-[10px] text-zinc-400 font-bold">MÉTODO: ${ord.metodoPagamento} | ENVIO: ${ord.modalidadeFrete}</p>
+                                            <p class="text-[9px] text-zinc-500 font-black mb-1">${o.data} | ID: ${pid.slice(-5)}</p>
+                                            <h3 class="text-lg font-black uppercase italic">${dados.nome || 'Desconhecido'}</h3>
                                         </div>
-                                        <div class="flex items-center gap-8">
-                                            <button onclick="verDetalhes('${uid}', '${pid}')" class="text-[10px] font-black uppercase underline decoration-zinc-700 hover:text-white">Conferir Pedido</button>
-                                            <div class="text-right">
-                                                <p class="text-2xl font-black italic">R$ ${ord.total.toFixed(2)}</p>
-                                                <div class="flex gap-2 mt-3">
-                                                    <button onclick="aprovarPedido('${uid}', '${pid}')" class="bg-white text-black px-5 py-2 text-[9px] font-black uppercase btn-glow">Confirmar</button>
-                                                    <button onclick="recusarPedido('${uid}', '${pid}')" class="border border-zinc-800 text-zinc-500 px-5 py-2 text-[9px] font-black uppercase hover:bg-red-600 hover:text-white transition-all">Recusar</button>
-                                                </div>
+                                        <div class="flex items-center gap-6">
+                                            <button onclick="verDetalhes('${uid}', '${pid}')" class="text-[10px] font-black underline">ITENS</button>
+                                            <p class="font-black italic">R$ ${o.total.toFixed(2)}</p>
+                                            <div class="flex gap-2">
+                                                <button onclick="aprovarPedido('${uid}', '${pid}')" class="bg-white text-black px-4 py-2 text-[9px] font-black">APROVAR</button>
+                                                <button onclick="cancelarPedido('${uid}', '${pid}')" class="border border-zinc-800 px-4 py-2 text-[9px] font-black hover:bg-red-600">X</button>
                                             </div>
                                         </div>
                                     </div>`;
@@ -334,61 +313,37 @@
                     }
                 });
             }
+            document.getElementById('counter-online').innerText = onlineCount;
+            document.getElementById('counter-total').innerText = totalAcessos;
         });
 
-        // FUNÇÕES DE LIMPEZA (REMOVER TUDO)
-        window.removerUsuario = (uid) => {
-            if(confirm("REMOVER ESTE CLIENTE E TODOS OS SEUS DADOS?")) {
-                remove(ref(db, `usuarios/${uid}`));
+        // FUNÇÕES GLOBAIS
+        window.removerUsuario = (uid) => { if(confirm("Excluir cliente e todos os dados dele?")) remove(ref(db, `usuarios/${uid}`)); };
+        
+        window.aprovarPedido = (uid, pid) => {
+            if(confirm("Confirmar pagamento e enviar para histórico?")) {
+                update(ref(db, `usuarios/${uid}/pedidos/${pid}`), { status: "Aprovado" });
+                remove(ref(db, `usuarios/${uid}/carrinho`));
             }
         };
 
-        window.limparTudoProdutos = () => {
-            if(confirm("ATENÇÃO: VOCÊ VAI APAGAR TODOS OS PRODUTOS DO SISTEMA. CONTINUAR?")) {
-                remove(ref(db, 'produtos'));
-            }
-        };
+        window.cancelarPedido = (uid, pid) => { if(confirm("Excluir este pedido pendente?")) remove(ref(db, `usuarios/${uid}/pedidos/${pid}`)); };
 
-        window.limparTudoClientes = () => {
-            if(confirm("ATENÇÃO: VOCÊ VAI APAGAR TODOS OS CLIENTES E PEDIDOS. CONTINUAR?")) {
-                remove(ref(db, 'usuarios'));
-            }
-        };
-
-        // HISTÓRICO
         window.renderizarHistorico = () => {
             const cont = document.getElementById('lista-historico-adm');
-            const filtro = document.getElementById('filtro-data').value;
             cont.innerHTML = "";
-            const hoje = new Date();
-
-            Object.keys(dadosGlobais || {}).forEach(uid => {
+            Object.keys(dadosGlobais).forEach(uid => {
                 const peds = dadosGlobais[uid].pedidos || {};
                 Object.keys(peds).forEach(pid => {
                     const o = peds[pid];
                     if(o.status === 'Aprovado') {
-                        const [d, m, a] = o.data.split('/');
-                        const dataPed = new Date(a, m - 1, d);
-                        if(Math.floor((hoje - dataPed)/(1000*3600*24)) > 120) {
-                            remove(ref(db, `usuarios/${uid}/pedidos/${pid}`));
-                            return;
-                        }
-                        const fmt = `${a}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-                        if(filtro && fmt !== filtro) return;
-
                         cont.innerHTML += `
-                            <div class="glass-panel p-4 flex justify-between items-center opacity-60 hover:opacity-100 transition-all">
-                                <div class="flex items-center gap-5">
-                                    <i class="fa-solid fa-circle-check text-green-500"></i>
-                                    <div>
-                                        <p class="text-[10px] font-black uppercase">${o.data} - ${dadosGlobais[uid].perfil?.nome}</p>
-                                        <p class="text-[8px] text-zinc-600 tracking-widest">TRANSAÇÃO CONCLUÍDA</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-6">
-                                    <button onclick="verDetalhes('${uid}', '${pid}')" class="text-[9px] font-black uppercase text-zinc-500 hover:text-white">Review</button>
-                                    <p class="font-black italic text-lg">R$ ${o.total.toFixed(2)}</p>
-                                    <button onclick="removerPedidoUnico('${uid}', '${pid}')" class="text-zinc-800 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>
+                            <div class="glass-panel p-4 flex justify-between items-center opacity-60 hover:opacity-100">
+                                <span class="text-[10px] font-black">${o.data} - ${dadosGlobais[uid].perfil?.nome}</span>
+                                <div class="flex items-center gap-4">
+                                    <button onclick="verDetalhes('${uid}', '${pid}')" class="text-[9px] font-black underline">VER</button>
+                                    <span class="font-black italic">R$ ${o.total.toFixed(2)}</span>
+                                    <button onclick="cancelarPedido('${uid}', '${pid}')" class="text-zinc-800 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </div>`;
                     }
@@ -396,103 +351,84 @@
             });
         };
 
-        window.removerPedidoUnico = (uid, pid) => {
-            if(confirm("REMOVER ESTE REGISTRO PERMANENTEMENTE?")) {
-                remove(ref(db, `usuarios/${uid}/pedidos/${pid}`));
-            }
-        };
-
-        // AÇÕES PEDIDOS
-        window.aprovarPedido = (uid, pid) => {
-            if(confirm("CONFIRMAR RECEBIMENTO DE VALOR?")) {
-                update(ref(db, `usuarios/${uid}/pedidos/${pid}`), { status: "Aprovado" });
-                remove(ref(db, `usuarios/${uid}/carrinho`));
-            }
-        };
-
-        window.recusarPedido = (uid, pid) => {
-            if(confirm("CANCELAR REQUISIÇÃO? O cliente manterá os itens no carrinho.")) {
-                remove(ref(db, `usuarios/${uid}/pedidos/${pid}`));
-            }
-        };
-
         window.verDetalhes = (uid, pid) => {
-            const ped = dadosGlobais[uid].pedidos[pid];
-            const cont = document.getElementById('detalhes-itens');
-            document.getElementById('detalhes-total').innerText = `R$ ${ped.total.toFixed(2)}`;
-            cont.innerHTML = ped.itens.map(it => `
-                <div class="flex gap-4 items-center bg-zinc-900/40 p-4 rounded border border-zinc-800">
-                    <img src="${it.img}" class="w-16 h-20 object-cover border border-zinc-700">
-                    <div class="flex-1">
-                        <p class="text-[12px] font-black uppercase italic">${it.nome}</p>
-                        <p class="text-[10px] text-zinc-500 font-black uppercase">TAM: ${it.tamanho} | QTD: ${it.quantidade}</p>
-                    </div>
-                    <p class="text-sm font-black italic">R$ ${it.preco.toFixed(2)}</p>
+            const p = dadosGlobais[uid].pedidos[pid];
+            document.getElementById('detalhes-total').innerText = `R$ ${p.total.toFixed(2)}`;
+            document.getElementById('detalhes-itens').innerHTML = p.itens.map(i => `
+                <div class="flex justify-between items-center border-b border-zinc-900 pb-2">
+                    <span class="text-[11px] font-black uppercase">${i.nome} (${i.tamanho}) x${i.quantidade}</span>
+                    <span class="font-black">R$ ${i.preco.toFixed(2)}</span>
                 </div>
             `).join('');
             document.getElementById('modal-detalhes').classList.remove('hidden');
         };
-
         window.fecharDetalhes = () => document.getElementById('modal-detalhes').classList.add('hidden');
 
-        // GESTÃO DE PRODUTOS
+        // GESTÃO DE PRODUTOS (ORIGINAL)
         onValue(ref(db, 'produtos'), (snapshot) => {
             const data = snapshot.val();
-            const cont = document.getElementById('lista-produtos-adm');
-            cont.innerHTML = "";
+            const container = document.getElementById('lista-produtos-adm');
+            container.innerHTML = "";
             if(data) {
+                document.getElementById('total-count').innerText = `${Object.keys(data).length} ITENS NO CLOUD`;
                 Object.keys(data).forEach(id => {
                     const p = data[id];
-                    cont.innerHTML += `
-                        <div class="glass-panel p-5 group ${p.status === 'inativo' ? 'grayscale opacity-40' : ''}">
-                            <div class="relative overflow-hidden mb-4">
-                                <img src="${p.imgs?.[0]}" class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-110">
-                            </div>
-                            <h3 class="text-[11px] font-black uppercase italic truncate mb-1">${p.nome}</h3>
-                            <p class="text-lg font-black italic mb-4">R$ ${p.preco.toFixed(2)}</p>
-                            <div class="flex gap-2">
-                                <button onclick="editarProduto('${id}')" class="flex-1 bg-white text-black py-2 text-[10px] font-black uppercase hover:bg-zinc-200">Configurar</button>
-                                <button onclick="removerProduto('${id}')" class="p-2 text-zinc-700 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>
+                    container.innerHTML += `
+                        <div class="glass-panel p-5 flex gap-5 items-center ${p.status === 'inativo' ? 'status-off' : ''}">
+                            <img src="${p.imgs ? p.imgs[0] : ''}" class="w-20 h-24 object-cover border border-zinc-800">
+                            <div class="flex-1">
+                                <h3 class="text-[11px] font-black uppercase italic">${p.nome}</h3>
+                                <p class="text-[9px] text-zinc-500 mb-4 font-bold">R$ ${p.preco.toFixed(2)}</p>
+                                <div class="flex gap-2">
+                                    <button onclick="editarProduto('${id}')" class="bg-white text-black px-3 py-1 text-[9px] font-black uppercase">Editar</button>
+                                    <button onclick="remover('${id}')" class="text-zinc-700 hover:text-red-500 transition"><i class="fa-solid fa-trash"></i></button>
+                                </div>
                             </div>
                         </div>`;
                 });
             }
         });
 
-        window.adicionarCampoFoto = (v = '') => {
+        window.adicionarCampoFoto = (valor = '') => {
+            const container = document.getElementById('container-fotos');
             const div = document.createElement('div');
             div.className = "flex gap-2 animate-fade";
-            div.innerHTML = `<input type="text" class="input-mutt foto-url" value="${v}" placeholder="URL da Imagem"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 px-3"><i class="fa-solid fa-xmark"></i></button>`;
-            document.getElementById('container-fotos').appendChild(div);
-        };
+            div.innerHTML = `<input type="text" class="input-mutt foto-url" value="${valor}" placeholder="URL IMAGEM"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 p-2 font-black">X</button>`;
+            container.appendChild(div);
+        }
 
         document.querySelectorAll('.size-chip').forEach(c => c.onclick = () => c.classList.toggle('active'));
 
         document.getElementById('form-produto').onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit-id').value || Date.now().toString();
-            const prod = {
-                id, nome: document.getElementById('p-nome').value,
+            const urls = Array.from(document.querySelectorAll('.foto-url')).map(i => i.value).filter(v => v !== '');
+            const sizes = Array.from(document.querySelectorAll('.size-chip.active')).map(c => c.dataset.size);
+            
+            const produto = {
+                id: id, nome: document.getElementById('p-nome').value,
+                cat: document.getElementById('p-cat').value, status: document.getElementById('p-status').value,
                 preco: parseFloat(document.getElementById('p-preco').value),
-                status: document.getElementById('p-status').value,
-                imgs: Array.from(document.querySelectorAll('.foto-url')).map(i => i.value).filter(v => v),
-                tamanhos: Array.from(document.querySelectorAll('.size-chip.active')).map(c => c.dataset.size)
+                precoAntigo: parseFloat(document.getElementById('p-preco-antigo').value) || null,
+                desconto: parseInt(document.getElementById('p-desconto').value) || 0,
+                imgs: urls, desc: document.getElementById('p-desc').value, tamanhos: sizes
             };
-            await set(ref(db, 'produtos/' + id), prod);
+            await set(ref(db, 'produtos/' + id), produto);
             fecharModal();
         };
 
-        window.abrirModal = () => {
-            document.getElementById('form-produto').reset();
-            document.getElementById('edit-id').value = '';
-            document.getElementById('container-fotos').innerHTML = '';
-            document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active'));
-            adicionarCampoFoto();
-            document.getElementById('modal-produto').classList.remove('hidden');
+        window.abrirModal = () => { 
+            document.getElementById('form-produto').reset(); 
+            document.getElementById('edit-id').value = ''; 
+            document.getElementById('container-fotos').innerHTML = ''; 
+            adicionarCampoFoto(); 
+            document.getElementById('modal-produto').classList.remove('hidden'); 
+            document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active')); 
         };
-        window.fecharModal = () => document.getElementById('modal-produto').classList.add('hidden');
-        window.removerProduto = (id) => confirm("ESTA AÇÃO É IRREVERSÍVEL. DELETAR?") && remove(ref(db, 'produtos/' + id));
 
+        window.fecharModal = () => document.getElementById('modal-produto').classList.add('hidden');
+        window.remover = (id) => { if(confirm("Deletar produto permanentemente?")) remove(ref(db, 'produtos/' + id)); };
+        
         window.editarProduto = (id) => {
             onValue(ref(db, 'produtos/' + id), (snap) => {
                 const p = snap.val();
@@ -501,11 +437,15 @@
                 document.getElementById('edit-id').value = id;
                 document.getElementById('p-nome').value = p.nome;
                 document.getElementById('p-preco').value = p.preco;
+                document.getElementById('p-preco-antigo').value = p.precoAntigo || '';
+                document.getElementById('p-desconto').value = p.desconto || '';
+                document.getElementById('p-desc').value = p.desc || '';
+                document.getElementById('p-cat').value = p.cat;
                 document.getElementById('p-status').value = p.status;
                 document.getElementById('container-fotos').innerHTML = '';
-                p.imgs?.forEach(u => adicionarCampoFoto(u));
-                document.querySelectorAll('.size-chip').forEach(c => {
-                    if(p.tamanhos?.includes(c.dataset.size)) c.classList.add('active');
+                if(p.imgs) p.imgs.forEach(url => adicionarCampoFoto(url));
+                document.querySelectorAll('.size-chip').forEach(chip => {
+                    if(p.tamanhos && p.tamanhos.includes(chip.dataset.size)) chip.classList.add('active');
                 });
             }, { onlyOnce: true });
         };
