@@ -13,7 +13,7 @@
         .mutt-card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 2.5rem; border-radius: 2px; }
         .loader { border: 2px solid rgba(255,255,255,0.05); border-top: 2px solid #fff; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #qrcode img { margin: 0 auto; border: 8px solid #fff; border-radius: 4px; }
+        #qrcode img { margin: 0 auto; border: 8px solid #fff; border-radius: 4px; display: block; }
     </style>
 </head>
 <body>
@@ -28,40 +28,42 @@
         <div id="payment-screen" class="hidden space-y-8">
             <div class="text-center">
                 <h1 class="text-3xl font-black italic uppercase tracking-tighter text-white">Pagamento Pix</h1>
-                <p id="order-id-display" class="text-zinc-500 text-[9px] uppercase font-black tracking-[0.2em] mt-3 border border-zinc-900 px-4 py-1 inline-block">CARREGANDO...</p>
+                <p id="order-id-display" class="text-zinc-500 text-[9px] uppercase font-black tracking-[0.2em] mt-3 border border-zinc-900 px-4 py-1 inline-block italic">CARREGANDO...</p>
             </div>
 
             <div class="mutt-card space-y-8 text-center">
                 <div>
-                    <span class="text-zinc-600 text-[8px] font-black uppercase tracking-[0.3em]">Valor Total</span>
+                    <span class="text-zinc-600 text-[8px] font-black uppercase tracking-[0.3em]">Total a pagar</span>
                     <div id="total-pix" class="text-5xl font-black italic tracking-tighter text-white mt-1">R$ 0,00</div>
                 </div>
 
-                <div class="bg-white p-3 inline-block mx-auto">
+                <div class="bg-white p-3 inline-block mx-auto rounded-sm">
                     <div id="qrcode"></div>
                 </div>
 
                 <div class="space-y-4 text-left">
-                    <p class="text-[9px] font-black uppercase text-zinc-500 tracking-widest">Código Copia e Cola:</p>
+                    <p class="text-[9px] font-black uppercase text-zinc-500 tracking-widest">Pix Copia e Cola:</p>
                     <div class="flex gap-2">
-                        <input type="text" id="pix-payload" readonly class="bg-black border border-zinc-900 text-[10px] p-4 w-full outline-none text-zinc-400 font-mono truncate">
-                        <button onclick="copyField()" class="bg-white text-black px-4 font-black uppercase text-[10px]">COPIAR</button>
+                        <input type="text" id="pix-payload" readonly class="bg-black border border-zinc-900 text-[10px] p-4 w-full outline-none text-zinc-500 font-mono truncate">
+                        <button onclick="copyField()" class="bg-white text-black px-4 font-black uppercase text-[10px] hover:bg-zinc-200 active:scale-95 transition-all">COPIAR</button>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-center gap-4 pt-6 border-t border-zinc-900/50">
-                    <div class="loader"></div>
-                    <span class="text-[9px] font-black uppercase text-zinc-500 animate-pulse">Aguardando confirmação bancária...</span>
+                <div class="pt-6 border-t border-zinc-900/50">
+                    <div class="flex items-center justify-center gap-4">
+                        <div class="loader"></div>
+                        <span class="text-[9px] font-black uppercase text-zinc-500 animate-pulse">Aguardando confirmação bancária...</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div id="success-screen" class="hidden text-center space-y-8">
-            <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto">
+            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto">
                 <i class="fa-solid fa-check text-4xl text-black"></i>
             </div>
-            <h2 class="text-4xl font-black italic uppercase text-white">Pago com Sucesso</h2>
-            <button onclick="window.location.href='index.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px]">Voltar à Loja</button>
+            <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Aprovado</h2>
+            <button onclick="window.location.href='index.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Voltar ao Início</button>
         </div>
 
     </main>
@@ -85,12 +87,10 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        // ==========================================
-        // CONFIGURAÇÃO DOS SEUS DADOS (MUDE AQUI!)
-        // ==========================================
-        const CHAVE_PIX = "06937246250"; // <--- COLOQUE SEU CPF OU EMAIL DA CONTA AQUI
-        const NOME_RECEBEDOR = "MUTT STREETWEAR";
-        const CIDADE_RECEBEDOR = "parauapebas";
+        // ATENÇÃO: COLOQUE SUA CHAVE AQUI (E-MAIL OU CPF)
+        const CHAVE_PIX = "06937246250"; 
+        const NOME_RECEBEDOR = "MUTT STREETWEAR"; // Nome sem acentos se possível
+        const CIDADE_RECEBEDOR = "SAO PAULO";
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -100,7 +100,7 @@
                     if (data) {
                         const pedidoId = Object.keys(data)[0];
                         const pedido = data[pedidoId];
-                        if (pedido.status === "Aprovado") {
+                        if (pedido.status === "Aprovado" || pedido.status === "Pago") {
                             exibirTela('success-screen');
                         } else {
                             renderizarPagamento(pedido, pedidoId);
@@ -113,38 +113,45 @@
         function renderizarPagamento(pedido, id) {
             const valor = pedido.total.toFixed(2);
             document.getElementById('total-pix').innerText = `R$ ${valor.replace('.', ',')}`;
-            document.getElementById('order-id-display').innerText = `PEDIDO #${id.substring(id.length - 6).toUpperCase()}`;
+            document.getElementById('order-id-display').innerText = `ORDEM #${id.substring(id.length - 8).toUpperCase()}`;
             
-            const payload = gerarPayloadPix(CHAVE_PIX, valor, NOME_RECEBEDOR, CIDADE_RECEBEDOR, id.substring(0, 15));
+            // Gerar Payload Pix
+            const payload = gerarPayloadPix(CHAVE_PIX, valor, NOME_RECEBEDOR, CIDADE_RECEBEDOR, id.substring(0, 10));
             document.getElementById('pix-payload').value = payload;
 
+            // Gerar QR Code
             document.getElementById('qrcode').innerHTML = ""; 
             new QRCode(document.getElementById("qrcode"), {
                 text: payload,
-                width: 180,
-                height: 180,
+                width: 200,
+                height: 200,
                 colorDark : "#000000",
                 colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.M
+                correctLevel : QRCode.CorrectLevel.L // Nível L é mais compatível com scanners de celular
             });
 
             exibirTela('payment-screen');
         }
 
-        // Função Geradora do Payload do Banco Central
         function gerarPayloadPix(chave, valor, nome, cidade, txtId) {
-            const f = (id, v) => id + String(v.length).padStart(2, '0') + v;
-            let p = "000201";
-            p += f("26", f("00", "br.gov.bcb.pix") + f("01", chave));
-            p += "520400005303986";
-            p += f("54", valor);
-            p += "5802BR";
-            p += f("59", nome);
-            p += f("60", cidade);
-            p += f("62", f("05", txtId));
-            p += "6304";
+            const format = (id, text) => id + String(text.length).padStart(2, '0') + text;
             
-            function crc16(data) {
+            // Informações da conta e chave
+            const merchantAccount = format("00", "br.gov.bcb.pix") + format("01", chave);
+            
+            let payload = "000201"; // Versão do Payload
+            payload += format("26", merchantAccount);
+            payload += "52040000"; // Categoria (Geral)
+            payload += "5303986";  // Moeda (BRL)
+            payload += format("54", valor); // Valor
+            payload += "5802BR";  // País
+            payload += format("59", nome.substring(0, 25)); // Nome Recebedor
+            payload += format("60", cidade.substring(0, 15)); // Cidade Recebedor
+            payload += format("62", format("05", txtId)); // TXID (ID da transação)
+            payload += "6304"; // Início do CRC16
+
+            // Cálculo do CRC16 (Essencial para o banco aceitar)
+            function getCRC16(data) {
                 let crc = 0xFFFF;
                 for (let i = 0; i < data.length; i++) {
                     crc ^= data.charCodeAt(i) << 8;
@@ -155,7 +162,8 @@
                 }
                 return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
             }
-            return p + crc16(p);
+
+            return payload + getCRC16(payload);
         }
 
         function exibirTela(id) {
@@ -166,8 +174,10 @@
         window.copyField = () => {
             const input = document.getElementById('pix-payload');
             input.select();
-            navigator.clipboard.writeText(input.value);
-            alert("Código Copiado!");
+            input.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(input.value).then(() => {
+                alert("Código Pix copiado!");
+            });
         }
     </script>
 </body>
