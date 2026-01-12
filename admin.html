@@ -89,14 +89,35 @@
         </main>
     </div>
 
-    <div id="modal-detalhes" class="fixed inset-0 bg-black/95 z-[700] hidden flex items-center justify-center p-4">
-        <div class="w-full max-w-2xl glass-panel p-8 relative rounded-lg">
+    <div id="modal-detalhes" class="fixed inset-0 bg-black/95 z-[700] hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="w-full max-w-2xl glass-panel p-8 relative rounded-lg my-8">
             <button onclick="fecharDetalhes()" class="absolute top-6 right-6 text-2xl">&times;</button>
-            <h3 class="text-xl font-black uppercase italic mb-8 border-b border-zinc-800 pb-4">Itens do Pedido</h3>
+            <h3 class="text-xl font-black uppercase italic mb-6 border-b border-zinc-800 pb-4">Dados do Pedido</h3>
+            
+            <div id="info-cliente-pedido" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-[11px] uppercase">
+                <div class="space-y-2">
+                    <p class="text-zinc-500 font-black tracking-widest">Documentação</p>
+                    <p class="text-white">NOME: <span id="det-nome" class="font-black text-zinc-300"></span></p>
+                    <p class="text-white">CPF: <span id="det-cpf" class="font-black text-zinc-300"></span></p>
+                    <p class="text-white">WHATSAPP: <span id="det-whats" class="font-black text-zinc-300"></span></p>
+                </div>
+                <div class="space-y-2">
+                    <p class="text-zinc-500 font-black tracking-widest">Endereço de Entrega</p>
+                    <p id="det-endereco" class="text-white font-black leading-relaxed"></p>
+                </div>
+            </div>
+
             <div id="detalhes-itens" class="space-y-4 mb-8"></div>
-            <div class="flex justify-between items-center bg-white text-black p-4 font-black">
-                <span class="text-[10px] uppercase">Total Pago</span>
-                <span id="detalhes-total" class="text-2xl italic">R$ 0,00</span>
+            
+            <div class="border-t border-zinc-900 pt-6 space-y-2">
+                <div class="flex justify-between text-[10px] font-black uppercase text-zinc-500">
+                    <span>Frete Calculado</span>
+                    <span id="detalhes-frete">R$ 0,00</span>
+                </div>
+                <div class="flex justify-between items-center bg-white text-black p-4 font-black">
+                    <span class="text-[10px] uppercase">Total do Pedido</span>
+                    <span id="detalhes-total" class="text-2xl italic">R$ 0,00</span>
+                </div>
             </div>
         </div>
     </div>
@@ -115,7 +136,10 @@
                             </select>
                             <select id="p-status" class="input-mutt"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
                         </div>
-                        <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="PREÇO" required>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" step="0.01" id="p-preco-antigo" class="input-mutt" placeholder="PREÇO ANTIGO (DE)">
+                            <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="PREÇO ATUAL (POR)" required>
+                        </div>
                         <textarea id="p-desc" rows="3" class="input-mutt" placeholder="DESCRIÇÃO"></textarea>
                         <div id="grade-tamanhos" class="grid grid-cols-5 gap-2">
                             <div class="size-chip" data-size="P">P</div><div class="size-chip" data-size="M">M</div><div class="size-chip" data-size="G">G</div><div class="size-chip" data-size="GG">GG</div><div class="size-chip" data-size="XG">XG</div>
@@ -149,7 +173,6 @@
         const db = getDatabase(app);
         let dadosGlobais = {};
 
-        // LOGIN
         window.fazerLogin = () => {
             if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === 'mutt2026') {
                 document.getElementById('login-screen').classList.add('hidden');
@@ -158,7 +181,6 @@
         };
         document.getElementById('btn-login-trigger').onclick = window.fazerLogin;
 
-        // NAVEGAÇÃO
         window.switchTab = (tab) => {
             ['produtos', 'pedidos', 'historico', 'usuarios'].forEach(t => {
                 document.getElementById(`section-${t}`).classList.toggle('hidden', t !== tab);
@@ -168,7 +190,6 @@
             if(tab === 'historico') renderizarHistorico();
         };
 
-        // MONITORAMENTO EM TEMPO REAL
         onValue(ref(db, 'usuarios'), (snapshot) => {
             const users = snapshot.val();
             dadosGlobais = users || {};
@@ -186,7 +207,6 @@
                     const status = usr.presenca || 'offline';
                     if(status === 'online') onlineCount++;
 
-                    // Tabela Clientes
                     containerUser.innerHTML += `
                         <tr class="border-b border-zinc-900">
                             <td class="p-4">${status === 'online' ? '<span class="dot-online"></span>' : '<span class="dot-offline"></span>'}</td>
@@ -198,7 +218,6 @@
                             </td>
                         </tr>`;
 
-                    // Pedidos Pendentes
                     if(usr.pedidos) {
                         Object.keys(usr.pedidos).forEach(pid => {
                             const ped = usr.pedidos[pid];
@@ -210,7 +229,7 @@
                                             <h3 class="text-lg font-black uppercase italic">${perfil.nome || 'Cliente'}</h3>
                                         </div>
                                         <div class="flex items-center gap-6">
-                                            <button onclick="verDetalhes('${uid}', '${pid}')" class="text-[10px] font-black underline">ITENS</button>
+                                            <button onclick="verDetalhes('${uid}', '${pid}')" class="text-[10px] font-black underline">VER TUDO</button>
                                             <p class="font-black italic">R$ ${ped.total.toFixed(2)}</p>
                                             <div class="flex gap-2">
                                                 <button onclick="aprovarPedido('${uid}', '${pid}')" class="bg-white text-black px-6 py-2 text-[9px] font-black">APROVAR</button>
@@ -227,41 +246,40 @@
             document.getElementById('counter-total').innerText = Object.keys(users || {}).length;
         });
 
-        // FUNÇÕES DE AÇÃO (EXPOSTAS AO WINDOW)
-        window.aprovarPedido = (uid, pid) => {
-            if(confirm("Confirmar que recebeu o dinheiro?")) {
-                update(ref(db, `usuarios/${uid}/pedidos/${pid}`), { status: "Aprovado" })
-                .then(() => {
-                    remove(ref(db, `usuarios/${uid}/carrinho`)); // Limpa carrinho ao aprovar
-                    alert("Pedido Aprovado!");
-                });
-            }
-        };
-
-        window.cancelarPedido = (uid, pid) => {
-            if(confirm("Deseja realmente apagar/negar este pedido?")) {
-                remove(ref(db, `usuarios/${uid}/pedidos/${pid}`));
-            }
-        };
-
-        window.removerUsuario = (uid) => {
-            if(confirm("Apagar cliente permanentemente?")) remove(ref(db, `usuarios/${uid}`));
-        };
-
         window.verDetalhes = (uid, pid) => {
-            const p = dadosGlobais[uid].pedidos[pid];
+            const user = dadosGlobais[uid];
+            const p = user.pedidos[pid];
+            const perfil = user.perfil || {};
+            const end = p.endereco || {};
+
+            // Preencher Textos
+            document.getElementById('det-nome').innerText = perfil.nome || 'N/A';
+            document.getElementById('det-cpf').innerText = perfil.cpf || 'NÃO INFORMADO';
+            document.getElementById('det-whats').innerText = perfil.whatsapp || 'N/A';
+            document.getElementById('det-endereco').innerHTML = `
+                ${end.rua || 'RUA N/A'}, ${end.numero || 'S/N'}<br>
+                ${end.bairro || 'BAIRRO N/A'} - ${end.cidade || 'CIDADE'}/${end.estado || 'UF'}<br>
+                CEP: ${end.cep || '00000-000'}`;
+
+            document.getElementById('detalhes-frete').innerText = `R$ ${(p.frete || 0).toFixed(2)}`;
             document.getElementById('detalhes-total').innerText = `R$ ${p.total.toFixed(2)}`;
+            
+            // Itens com Imagem
             document.getElementById('detalhes-itens').innerHTML = p.itens.map(i => `
-                <div class="flex justify-between items-center border-b border-zinc-900 pb-2">
-                    <span class="text-[11px] font-black uppercase">${i.nome} (${i.tamanho}) x${i.quantidade}</span>
-                    <span class="font-black">R$ ${(i.preco * i.quantidade).toFixed(2)}</span>
+                <div class="flex gap-4 items-center border-b border-zinc-900 pb-4">
+                    <img src="${i.img || (i.imgs ? i.imgs[0] : '') || 'https://via.placeholder.com/50'}" class="w-12 h-16 object-cover border border-zinc-800">
+                    <div class="flex-1">
+                        <span class="text-[11px] font-black uppercase block">${i.nome}</span>
+                        <span class="text-[9px] text-zinc-500 block">TAMANHO: ${i.tamanho} | QTD: ${i.quantidade}</span>
+                    </div>
+                    <span class="font-black text-[11px]">R$ ${(i.preco * i.quantidade).toFixed(2)}</span>
                 </div>`).join('');
+
             document.getElementById('modal-detalhes').classList.remove('hidden');
         };
 
         window.fecharDetalhes = () => document.getElementById('modal-detalhes').classList.add('hidden');
 
-        // GESTÃO DE PRODUTOS
         onValue(ref(db, 'produtos'), (snapshot) => {
             const data = snapshot.val();
             const container = document.getElementById('lista-produtos-adm');
@@ -270,12 +288,13 @@
                 document.getElementById('total-count').innerText = `${Object.keys(data).length} ITENS NO CLOUD`;
                 Object.keys(data).forEach(id => {
                     const p = data[id];
+                    const precoAntigoHTML = p.precoAntigo ? `<span class="line-through mr-2 opacity-50">R$ ${p.precoAntigo.toFixed(2)}</span>` : '';
                     container.innerHTML += `
                         <div class="glass-panel p-5 flex gap-5 items-center ${p.status === 'inativo' ? 'opacity-30' : ''}">
                             <img src="${p.imgs ? p.imgs[0] : ''}" class="w-20 h-24 object-cover">
                             <div class="flex-1">
                                 <h3 class="text-[11px] font-black uppercase italic">${p.nome}</h3>
-                                <p class="text-[9px] text-zinc-500 mb-4">R$ ${p.preco.toFixed(2)}</p>
+                                <p class="text-[9px] text-zinc-500 mb-4">${precoAntigoHTML} R$ ${p.preco.toFixed(2)}</p>
                                 <div class="flex gap-2">
                                     <button onclick="editarProduto('${id}')" class="bg-white text-black px-3 py-1 text-[9px] font-black">EDITAR</button>
                                     <button onclick="remover('${id}')" class="text-zinc-700 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
@@ -286,16 +305,6 @@
             }
         });
 
-        window.adicionarCampoFoto = (valor = '') => {
-            const container = document.getElementById('container-fotos');
-            const div = document.createElement('div');
-            div.className = "flex gap-2";
-            div.innerHTML = `<input type="text" class="input-mutt foto-url" value="${valor}" placeholder="URL"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 px-2 font-black">X</button>`;
-            container.appendChild(div);
-        };
-
-        document.querySelectorAll('.size-chip').forEach(c => c.onclick = () => c.classList.toggle('active'));
-
         document.getElementById('form-produto').onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit-id').value || Date.now().toString();
@@ -305,12 +314,23 @@
             const produto = {
                 id: id, nome: document.getElementById('p-nome').value,
                 cat: document.getElementById('p-cat').value, status: document.getElementById('p-status').value,
+                precoAntigo: parseFloat(document.getElementById('p-preco-antigo').value) || 0,
                 preco: parseFloat(document.getElementById('p-preco').value),
                 imgs: urls, desc: document.getElementById('p-desc').value, tamanhos: sizes
             };
             await set(ref(db, 'produtos/' + id), produto);
             fecharModal();
         };
+
+        window.adicionarCampoFoto = (valor = '') => {
+            const container = document.getElementById('container-fotos');
+            const div = document.createElement('div');
+            div.className = "flex gap-2";
+            div.innerHTML = `<input type="text" class="input-mutt foto-url" value="${valor}" placeholder="URL"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 px-2 font-black">X</button>`;
+            container.appendChild(div);
+        };
+
+        document.querySelectorAll('.size-chip').forEach(c => c.onclick = () => c.classList.toggle('active'));
 
         window.abrirModal = () => { 
             document.getElementById('form-produto').reset(); 
@@ -331,6 +351,7 @@
                 abrirModal();
                 document.getElementById('edit-id').value = id;
                 document.getElementById('p-nome').value = p.nome;
+                document.getElementById('p-preco-antigo').value = p.precoAntigo || '';
                 document.getElementById('p-preco').value = p.preco;
                 document.getElementById('p-desc').value = p.desc || '';
                 document.getElementById('p-cat').value = p.cat;
@@ -341,6 +362,23 @@
                     if(p.tamanhos && p.tamanhos.includes(chip.dataset.size)) chip.classList.add('active');
                 });
             }, { onlyOnce: true });
+        };
+
+        window.aprovarPedido = (uid, pid) => {
+            if(confirm("Confirmar que recebeu o dinheiro?")) {
+                update(ref(db, `usuarios/${uid}/pedidos/${pid}`), { status: "Aprovado" })
+                .then(() => alert("Pedido Aprovado!"));
+            }
+        };
+
+        window.cancelarPedido = (uid, pid) => {
+            if(confirm("Deseja realmente apagar/negar este pedido?")) {
+                remove(ref(db, `usuarios/${uid}/pedidos/${pid}`));
+            }
+        };
+
+        window.removerUsuario = (uid) => {
+            if(confirm("Apagar cliente permanentemente?")) remove(ref(db, `usuarios/${uid}`));
         };
 
         function renderizarHistorico() {
@@ -355,7 +393,7 @@
                             <div class="glass-panel p-4 flex justify-between items-center opacity-60">
                                 <span class="text-[10px] font-black">${o.data} - ${dadosGlobais[uid].perfil?.nome || 'Cliente'}</span>
                                 <div class="flex items-center gap-4">
-                                    <button onclick="verDetalhes('${uid}', '${pid}')" class="text-[9px] font-black underline">VER</button>
+                                    <button onclick="verDetalhes('${uid}', '${pid}')" class="text-[9px] font-black underline">VER TUDO</button>
                                     <span class="font-black italic">R$ ${o.total.toFixed(2)}</span>
                                     <button onclick="cancelarPedido('${uid}', '${pid}')" class="text-zinc-800 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
                                 </div>
