@@ -8,83 +8,34 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap');
-        
-        :root {
-            --mutt-bg: #000000;
-            --mutt-card: #0a0a0a;
-            --mutt-border: #1a1a1a;
-            --mutt-accent: #ffffff;
-        }
-
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--mutt-bg); 
-            color: #fff; 
-            overflow-x: hidden;
-        }
-
+        :root { --mutt-bg: #000000; --mutt-card: #0a0a0a; --mutt-border: #1a1a1a; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--mutt-bg); color: #fff; overflow-x: hidden; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade { animation: fadeIn 0.5s ease forwards; }
-
-        .input-mutt { 
-            background: #0a0a0a; 
-            border: 1px solid #1a1a1a; 
-            color: white; 
-            padding: 14px; 
-            border-radius: 4px; 
-            width: 100%; 
-            font-size: 13px; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
-        .input-mutt:focus { border-color: #fff; outline: none; background: #111; box-shadow: 0 0 15px rgba(255,255,255,0.05); }
-
-        .glass-panel { 
-            background: rgba(10, 10, 10, 0.8); 
-            backdrop-filter: blur(25px); 
-            border: 1px solid #1a1a1a; 
-            transition: all 0.3s;
-        }
-
-        .tab-btn {
-            font-size: 10px;
-            font-weight: 900;
-            text-transform: uppercase;
-            padding: 15px 25px;
-            border-bottom: 2px solid transparent;
-            color: #444;
-            transition: 0.3s;
-        }
-        .tab-btn.active {
-            color: #fff;
-            border-bottom-color: #fff;
-        }
-
+        .input-mutt { background: #0a0a0a; border: 1px solid #1a1a1a; color: white; padding: 14px; border-radius: 4px; width: 100%; font-size: 13px; }
+        .input-mutt:focus { border-color: #fff; outline: none; }
+        .glass-panel { background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(25px); border: 1px solid #1a1a1a; }
+        .tab-btn { font-size: 10px; font-weight: 900; text-transform: uppercase; padding: 15px 25px; border-bottom: 2px solid transparent; color: #444; transition: 0.3s; }
+        .tab-btn.active { color: #fff; border-bottom-color: #fff; }
         .dot-online { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px #10b981; }
         .dot-offline { width: 8px; height: 8px; background: #3f3f46; border-radius: 50%; display: inline-block; }
-
-        .size-chip { border: 1px solid #1a1a1a; padding: 10px; cursor: pointer; text-align: center; font-weight: 900; text-transform: uppercase; font-size: 10px; transition: 0.3s; background: #0a0a0a; }
+        .size-chip { border: 1px solid #1a1a1a; padding: 10px; cursor: pointer; text-align: center; font-weight: 900; text-transform: uppercase; font-size: 10px; background: #0a0a0a; }
         .size-chip.active { background: #fff; color: #000; border-color: #fff; }
-        
-        .status-off { opacity: 0.4; filter: grayscale(1); }
-
-        /* AJUSTE DE VISIBILIDADE DA LOGO */
-        .logo-mutt {
-            filter: brightness(0) invert(1) drop-shadow(0 0 15px rgba(255,255,255,0.3));
-        }
+        .logo-mutt { filter: brightness(0) invert(1) drop-shadow(0 0 15px rgba(255,255,255,0.3)); }
     </style>
 </head>
 <body class="bg-black">
 
-    <div id="login-screen" class="fixed inset-0 z-[1000] bg-black flex items-center justify-center p-6 transition-all duration-700">
+    <div id="login-screen" class="fixed inset-0 z-[1000] bg-black flex items-center justify-center p-6">
         <div class="w-full max-w-md animate-fade">
             <div class="text-center mb-10">
                 <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-64 mx-auto mb-6 logo-mutt">
-                <h2 class="text-[10px] font-black tracking-[0.6em] text-zinc-500 uppercase">Autenticação do Sistema</h2>
+                <h2 class="text-[10px] font-black tracking-[0.6em] text-zinc-500 uppercase">Autenticação</h2>
             </div>
             <div class="space-y-4">
                 <input type="text" id="user" placeholder="USUÁRIO" class="input-mutt text-center tracking-[0.3em] uppercase">
                 <input type="password" id="pass" placeholder="SENHA" class="input-mutt text-center tracking-[0.3em]">
-                <button id="btn-login-trigger" class="w-full bg-white text-black py-4 font-black uppercase text-[11px] tracking-[0.3em] hover:tracking-[0.5em] transition-all duration-500">Acessar Terminal</button>
+                <button id="btn-login-trigger" class="w-full bg-white text-black py-4 font-black uppercase text-[11px] tracking-[0.3em]">Acessar Terminal</button>
             </div>
         </div>
     </div>
@@ -94,14 +45,8 @@
             <div class="flex items-center gap-6">
                 <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-20 logo-mutt">
                 <div class="flex gap-6 border-l border-zinc-800 pl-6">
-                    <div>
-                        <p class="text-[8px] text-zinc-500 uppercase font-black">Online Agora</p>
-                        <p id="counter-online" class="text-sm font-black text-green-500">0</p>
-                    </div>
-                    <div>
-                        <p class="text-[8px] text-zinc-500 uppercase font-black">Acessos Totais</p>
-                        <p id="counter-total" class="text-sm font-black">0</p>
-                    </div>
+                    <div><p class="text-[8px] text-zinc-500 uppercase font-black">Online</p><p id="counter-online" class="text-sm font-black text-green-500">0</p></div>
+                    <div><p class="text-[8px] text-zinc-500 uppercase font-black">Total</p><p id="counter-total" class="text-sm font-black">0</p></div>
                 </div>
             </div>
             <div class="flex gap-2">
@@ -110,52 +55,33 @@
                 <button onclick="switchTab('historico')" id="tab-hist" class="tab-btn">Histórico</button>
                 <button onclick="switchTab('usuarios')" id="tab-user" class="tab-btn">Clientes</button>
             </div>
-            <button onclick="abrirModal()" class="bg-white text-black px-6 py-3 font-black uppercase text-[10px] tracking-tighter">Novo Produto</button>
+            <button onclick="abrirModal()" class="bg-white text-black px-6 py-3 font-black uppercase text-[10px]">Novo Produto</button>
         </nav>
 
         <main class="container mx-auto px-6 py-12">
             <section id="section-produtos" class="animate-fade">
-                <div class="mb-12 flex justify-between items-end border-b border-zinc-900 pb-8">
-                    <div>
-                        <h2 class="text-5xl font-black uppercase italic tracking-tighter">Inventário</h2>
-                        <p id="total-count" class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Carregando...</p>
-                    </div>
+                <div class="mb-12 border-b border-zinc-900 pb-8">
+                    <h2 class="text-5xl font-black uppercase italic tracking-tighter">Inventário</h2>
+                    <p id="total-count" class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Carregando...</p>
                 </div>
                 <div id="lista-produtos-adm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </section>
 
             <section id="section-pedidos" class="hidden animate-fade">
-                <div class="mb-12">
-                    <h2 class="text-5xl font-black uppercase italic tracking-tighter">Pendentes</h2>
-                    <p class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Aguardando aprovação de pagamento</p>
-                </div>
+                <div class="mb-12"><h2 class="text-5xl font-black uppercase italic tracking-tighter">Pendentes</h2></div>
                 <div id="lista-pedidos-adm" class="space-y-4"></div>
             </section>
 
             <section id="section-historico" class="hidden animate-fade">
-                <div class="mb-12">
-                    <h2 class="text-5xl font-black uppercase italic tracking-tighter">Histórico</h2>
-                    <p class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Vendas finalizadas</p>
-                </div>
+                <div class="mb-12"><h2 class="text-5xl font-black uppercase italic tracking-tighter">Vendas</h2></div>
                 <div id="lista-historico-adm" class="space-y-3"></div>
             </section>
 
             <section id="section-usuarios" class="hidden animate-fade">
-                <div class="mb-8">
-                    <h2 class="text-5xl font-black uppercase italic tracking-tighter">Base de Clientes</h2>
-                    <p class="text-[10px] text-zinc-500 font-black uppercase mt-2 tracking-widest">Controle de acessos e dados</p>
-                </div>
+                <div class="mb-8"><h2 class="text-5xl font-black uppercase italic tracking-tighter">Clientes</h2></div>
                 <div class="glass-panel overflow-hidden">
-                    <table class="w-full text-left text-[11px] uppercase font-bold">
-                        <thead class="bg-zinc-900 text-zinc-500">
-                            <tr>
-                                <th class="p-4">Status</th>
-                                <th class="p-4">Nome do Cliente</th>
-                                <th class="p-4">WhatsApp / Email</th>
-                                <th class="p-4">Membro desde</th>
-                                <th class="p-4 text-right">Ações</th>
-                            </tr>
-                        </thead>
+                    <table class="w-full text-[11px] uppercase font-bold">
+                        <thead class="bg-zinc-900 text-zinc-500"><tr class="text-left"><th class="p-4">Status</th><th class="p-4">Nome</th><th class="p-4">WhatsApp</th><th class="p-4">Cadastro</th><th class="p-4 text-right">Ação</th></tr></thead>
                         <tbody id="lista-usuarios-adm"></tbody>
                     </table>
                 </div>
@@ -163,55 +89,42 @@
         </main>
     </div>
 
-    <div id="modal-detalhes" class="fixed inset-0 bg-black/95 z-[700] hidden flex items-center justify-center p-4 backdrop-blur-md">
+    <div id="modal-detalhes" class="fixed inset-0 bg-black/95 z-[700] hidden flex items-center justify-center p-4">
         <div class="w-full max-w-2xl glass-panel p-8 relative rounded-lg">
             <button onclick="fecharDetalhes()" class="absolute top-6 right-6 text-2xl">&times;</button>
-            <h3 class="text-2xl font-black italic uppercase mb-8 border-b border-zinc-800 pb-4">Itens do Pedido</h3>
-            <div id="detalhes-itens" class="space-y-4 max-h-[50vh] overflow-y-auto mb-8"></div>
-            <div class="flex justify-between items-center bg-white text-black p-4">
-                <span class="font-black text-[10px] uppercase">Total</span>
-                <span id="detalhes-total" class="text-2xl font-black italic">R$ 0,00</span>
+            <h3 class="text-xl font-black uppercase italic mb-8 border-b border-zinc-800 pb-4">Itens do Pedido</h3>
+            <div id="detalhes-itens" class="space-y-4 mb-8"></div>
+            <div class="flex justify-between items-center bg-white text-black p-4 font-black">
+                <span class="text-[10px] uppercase">Total Pago</span>
+                <span id="detalhes-total" class="text-2xl italic">R$ 0,00</span>
             </div>
         </div>
     </div>
 
-    <div id="modal-produto" class="fixed inset-0 bg-black/95 z-[600] hidden overflow-y-auto backdrop-blur-sm">
+    <div id="modal-produto" class="fixed inset-0 bg-black/95 z-[600] hidden overflow-y-auto">
         <div class="min-h-screen flex items-center justify-center p-4">
-            <div class="w-full max-w-5xl glass-panel p-8 md:p-12 relative rounded-lg border-zinc-800">
-                <button onclick="fecharModal()" class="absolute top-8 right-8 text-white text-2xl">&times;</button>
-                <h2 id="modal-title" class="text-3xl font-black uppercase italic tracking-tighter mb-10">Configurar Produto</h2>
-                <form id="form-produto" class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div class="w-full max-w-4xl glass-panel p-8 relative">
+                <button onclick="fecharModal()" class="absolute top-8 right-8 text-2xl">&times;</button>
+                <form id="form-produto" class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <input type="hidden" id="edit-id">
-                    <div class="space-y-6">
-                        <input type="text" id="p-nome" class="input-mutt" placeholder="NOME DO PRODUTO" required>
-                        <div class="grid grid-cols-2 gap-4">
-                           <select id="p-cat" class="input-mutt">
-                                <option value="camisetas">Camisetas</option>
-                                <option value="jaquetas">Jaquetas</option>
-                                <option value="shorts">Shorts</option>
-                                <option value="calcas">Calças</option>
-                                <option value="acessorios">Acessórios</option>
+                    <div class="space-y-4">
+                        <input type="text" id="p-nome" class="input-mutt" placeholder="NOME" required>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="p-cat" class="input-mutt">
+                                <option value="camisetas">Camisetas</option><option value="jaquetas">Jaquetas</option><option value="shorts">Shorts</option><option value="calcas">Calças</option><option value="acessorios">Acessórios</option>
                             </select>
                             <select id="p-status" class="input-mutt"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
                         </div>
-                        <div class="grid grid-cols-3 gap-4">
-                            <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="PREÇO" required>
-                            <input type="number" step="0.01" id="p-preco-antigo" class="input-mutt" placeholder="ANTIGO">
-                            <input type="number" id="p-desconto" class="input-mutt" placeholder="DESC %">
-                        </div>
-                        <textarea id="p-desc" rows="4" class="input-mutt" placeholder="DESCRIÇÃO"></textarea>
+                        <input type="number" step="0.01" id="p-preco" class="input-mutt" placeholder="PREÇO" required>
+                        <textarea id="p-desc" rows="3" class="input-mutt" placeholder="DESCRIÇÃO"></textarea>
                         <div id="grade-tamanhos" class="grid grid-cols-5 gap-2">
-                            <div class="size-chip" data-size="P">P</div>
-                            <div class="size-chip" data-size="M">M</div>
-                            <div class="size-chip" data-size="G">G</div>
-                            <div class="size-chip" data-size="GG">GG</div>
-                            <div class="size-chip" data-size="XG">XG</div> 
+                            <div class="size-chip" data-size="P">P</div><div class="size-chip" data-size="M">M</div><div class="size-chip" data-size="G">G</div><div class="size-chip" data-size="GG">GG</div><div class="size-chip" data-size="XG">XG</div>
                         </div>
                     </div>
-                    <div class="space-y-6 flex flex-col">
-                        <div id="container-fotos" class="space-y-3 max-h-[300px] overflow-y-auto"></div>
-                        <button type="button" onclick="adicionarCampoFoto()" class="w-full border border-dashed border-zinc-800 py-4 text-[10px] uppercase font-black">+ Link de Foto</button>
-                        <button type="submit" class="mt-auto w-full bg-white text-black py-5 font-black uppercase text-[12px] tracking-[0.4em]">Salvar na Nuvem</button>
+                    <div class="flex flex-col gap-4">
+                        <div id="container-fotos" class="space-y-2"></div>
+                        <button type="button" onclick="adicionarCampoFoto()" class="border border-zinc-800 py-3 text-[9px] font-black">+ ADICIONAR FOTO</button>
+                        <button type="submit" class="mt-auto bg-white text-black py-5 font-black uppercase text-[12px]">Salvar Produto</button>
                     </div>
                 </form>
             </div>
@@ -241,14 +154,13 @@
             if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === 'mutt2026') {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('admin-panel').classList.remove('hidden');
-            } else { alert("Acesso Negado"); }
+            } else { alert("Senha Incorreta"); }
         };
         document.getElementById('btn-login-trigger').onclick = window.fazerLogin;
 
         // NAVEGAÇÃO
         window.switchTab = (tab) => {
-            const tabs = ['produtos', 'pedidos', 'historico', 'usuarios'];
-            tabs.forEach(t => {
+            ['produtos', 'pedidos', 'historico', 'usuarios'].forEach(t => {
                 document.getElementById(`section-${t}`).classList.toggle('hidden', t !== tab);
                 const btnMap = {produtos: 'prod', pedidos: 'order', historico: 'hist', usuarios: 'user'};
                 document.getElementById(`tab-${btnMap[t]}`).classList.toggle('active', t === tab);
@@ -256,55 +168,53 @@
             if(tab === 'historico') renderizarHistorico();
         };
 
-        // MONITOR DE USUÁRIOS E PEDIDOS
+        // MONITORAMENTO EM TEMPO REAL
         onValue(ref(db, 'usuarios'), (snapshot) => {
             const users = snapshot.val();
             dadosGlobais = users || {};
             const containerUser = document.getElementById('lista-usuarios-adm');
             const containerOrder = document.getElementById('lista-pedidos-adm');
             
-            let totalAcessos = 0; let onlineCount = 0;
+            let onlineCount = 0;
             containerUser.innerHTML = "";
             containerOrder.innerHTML = "";
 
             if(users) {
                 Object.keys(users).forEach(uid => {
                     const usr = users[uid];
-                    const dados = usr.perfil || {};
+                    const perfil = usr.perfil || {};
                     const status = usr.presenca || 'offline';
-                    totalAcessos++;
                     if(status === 'online') onlineCount++;
 
-                    // Renderizar Tabela de Clientes
+                    // Tabela Clientes
                     containerUser.innerHTML += `
-                        <tr class="border-b border-zinc-900 hover:bg-zinc-950 transition">
+                        <tr class="border-b border-zinc-900">
                             <td class="p-4">${status === 'online' ? '<span class="dot-online"></span>' : '<span class="dot-offline"></span>'}</td>
-                            <td class="p-4"><span class="text-white block font-black">${dados.nome || 'VISITANTE'}</span></td>
-                            <td class="p-4"><span class="text-zinc-400 block">${dados.whatsapp || '---'}</span></td>
-                            <td class="p-4 text-zinc-500">${dados.dataCadastro || '---'}</td>
+                            <td class="p-4 text-white font-black">${perfil.nome || 'Visitante'}</td>
+                            <td class="p-4 text-zinc-400">${perfil.whatsapp || '---'}</td>
+                            <td class="p-4 text-zinc-500">${perfil.dataCadastro || '---'}</td>
                             <td class="p-4 text-right">
-                                <a href="https://wa.me/${dados.whatsapp}" target="_blank" class="text-white mx-2"><i class="fa-brands fa-whatsapp"></i></a>
-                                <button onclick="removerUsuario('${uid}')" class="text-zinc-800 hover:text-red-500 mx-2"><i class="fa-solid fa-trash"></i></button>
+                                <button onclick="removerUsuario('${uid}')" class="text-red-500/50 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
                             </td>
                         </tr>`;
 
-                    // Renderizar Pedidos Pendentes
+                    // Pedidos Pendentes
                     if(usr.pedidos) {
                         Object.keys(usr.pedidos).forEach(pid => {
-                            const o = usr.pedidos[pid];
-                            if(o.status === 'Pendente') {
+                            const ped = usr.pedidos[pid];
+                            if(ped.status === 'Pendente') {
                                 containerOrder.innerHTML += `
                                     <div class="glass-panel p-6 flex justify-between items-center border-l-2 border-white">
                                         <div>
-                                            <p class="text-[9px] text-zinc-500 font-black mb-1">${o.data} | ID: ${pid.slice(-5)}</p>
-                                            <h3 class="text-lg font-black uppercase italic">${dados.nome || 'Desconhecido'}</h3>
+                                            <p class="text-[9px] text-zinc-500 font-black">ID: ${pid.slice(-6).toUpperCase()}</p>
+                                            <h3 class="text-lg font-black uppercase italic">${perfil.nome || 'Cliente'}</h3>
                                         </div>
                                         <div class="flex items-center gap-6">
                                             <button onclick="verDetalhes('${uid}', '${pid}')" class="text-[10px] font-black underline">ITENS</button>
-                                            <p class="font-black italic">R$ ${o.total.toFixed(2)}</p>
+                                            <p class="font-black italic">R$ ${ped.total.toFixed(2)}</p>
                                             <div class="flex gap-2">
-                                                <button onclick="aprovarPedido('${uid}', '${pid}')" class="bg-white text-black px-4 py-2 text-[9px] font-black">APROVAR</button>
-                                                <button onclick="cancelarPedido('${uid}', '${pid}')" class="border border-zinc-800 px-4 py-2 text-[9px] font-black hover:bg-red-600">X</button>
+                                                <button onclick="aprovarPedido('${uid}', '${pid}')" class="bg-white text-black px-6 py-2 text-[9px] font-black">APROVAR</button>
+                                                <button onclick="cancelarPedido('${uid}', '${pid}')" class="bg-red-600 text-white px-4 py-2 text-[9px] font-black">NEGAR</button>
                                             </div>
                                         </div>
                                     </div>`;
@@ -314,41 +224,28 @@
                 });
             }
             document.getElementById('counter-online').innerText = onlineCount;
-            document.getElementById('counter-total').innerText = totalAcessos;
+            document.getElementById('counter-total').innerText = Object.keys(users || {}).length;
         });
 
-        // FUNÇÕES GLOBAIS
-        window.removerUsuario = (uid) => { if(confirm("Excluir cliente e todos os dados dele?")) remove(ref(db, `usuarios/${uid}`)); };
-        
+        // FUNÇÕES DE AÇÃO (EXPOSTAS AO WINDOW)
         window.aprovarPedido = (uid, pid) => {
-            if(confirm("Confirmar pagamento e enviar para histórico?")) {
-                update(ref(db, `usuarios/${uid}/pedidos/${pid}`), { status: "Aprovado" });
-                remove(ref(db, `usuarios/${uid}/carrinho`));
+            if(confirm("Confirmar que recebeu o dinheiro?")) {
+                update(ref(db, `usuarios/${uid}/pedidos/${pid}`), { status: "Aprovado" })
+                .then(() => {
+                    remove(ref(db, `usuarios/${uid}/carrinho`)); // Limpa carrinho ao aprovar
+                    alert("Pedido Aprovado!");
+                });
             }
         };
 
-        window.cancelarPedido = (uid, pid) => { if(confirm("Excluir este pedido pendente?")) remove(ref(db, `usuarios/${uid}/pedidos/${pid}`)); };
+        window.cancelarPedido = (uid, pid) => {
+            if(confirm("Deseja realmente apagar/negar este pedido?")) {
+                remove(ref(db, `usuarios/${uid}/pedidos/${pid}`));
+            }
+        };
 
-        window.renderizarHistorico = () => {
-            const cont = document.getElementById('lista-historico-adm');
-            cont.innerHTML = "";
-            Object.keys(dadosGlobais).forEach(uid => {
-                const peds = dadosGlobais[uid].pedidos || {};
-                Object.keys(peds).forEach(pid => {
-                    const o = peds[pid];
-                    if(o.status === 'Aprovado') {
-                        cont.innerHTML += `
-                            <div class="glass-panel p-4 flex justify-between items-center opacity-60 hover:opacity-100">
-                                <span class="text-[10px] font-black">${o.data} - ${dadosGlobais[uid].perfil?.nome}</span>
-                                <div class="flex items-center gap-4">
-                                    <button onclick="verDetalhes('${uid}', '${pid}')" class="text-[9px] font-black underline">VER</button>
-                                    <span class="font-black italic">R$ ${o.total.toFixed(2)}</span>
-                                    <button onclick="cancelarPedido('${uid}', '${pid}')" class="text-zinc-800 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
-                                </div>
-                            </div>`;
-                    }
-                });
-            });
+        window.removerUsuario = (uid) => {
+            if(confirm("Apagar cliente permanentemente?")) remove(ref(db, `usuarios/${uid}`));
         };
 
         window.verDetalhes = (uid, pid) => {
@@ -357,14 +254,14 @@
             document.getElementById('detalhes-itens').innerHTML = p.itens.map(i => `
                 <div class="flex justify-between items-center border-b border-zinc-900 pb-2">
                     <span class="text-[11px] font-black uppercase">${i.nome} (${i.tamanho}) x${i.quantidade}</span>
-                    <span class="font-black">R$ ${i.preco.toFixed(2)}</span>
-                </div>
-            `).join('');
+                    <span class="font-black">R$ ${(i.preco * i.quantidade).toFixed(2)}</span>
+                </div>`).join('');
             document.getElementById('modal-detalhes').classList.remove('hidden');
         };
+
         window.fecharDetalhes = () => document.getElementById('modal-detalhes').classList.add('hidden');
 
-        // GESTÃO DE PRODUTOS (ORIGINAL)
+        // GESTÃO DE PRODUTOS
         onValue(ref(db, 'produtos'), (snapshot) => {
             const data = snapshot.val();
             const container = document.getElementById('lista-produtos-adm');
@@ -374,14 +271,14 @@
                 Object.keys(data).forEach(id => {
                     const p = data[id];
                     container.innerHTML += `
-                        <div class="glass-panel p-5 flex gap-5 items-center ${p.status === 'inativo' ? 'status-off' : ''}">
-                            <img src="${p.imgs ? p.imgs[0] : ''}" class="w-20 h-24 object-cover border border-zinc-800">
+                        <div class="glass-panel p-5 flex gap-5 items-center ${p.status === 'inativo' ? 'opacity-30' : ''}">
+                            <img src="${p.imgs ? p.imgs[0] : ''}" class="w-20 h-24 object-cover">
                             <div class="flex-1">
                                 <h3 class="text-[11px] font-black uppercase italic">${p.nome}</h3>
-                                <p class="text-[9px] text-zinc-500 mb-4 font-bold">R$ ${p.preco.toFixed(2)}</p>
+                                <p class="text-[9px] text-zinc-500 mb-4">R$ ${p.preco.toFixed(2)}</p>
                                 <div class="flex gap-2">
-                                    <button onclick="editarProduto('${id}')" class="bg-white text-black px-3 py-1 text-[9px] font-black uppercase">Editar</button>
-                                    <button onclick="remover('${id}')" class="text-zinc-700 hover:text-red-500 transition"><i class="fa-solid fa-trash"></i></button>
+                                    <button onclick="editarProduto('${id}')" class="bg-white text-black px-3 py-1 text-[9px] font-black">EDITAR</button>
+                                    <button onclick="remover('${id}')" class="text-zinc-700 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </div>
                         </div>`;
@@ -392,10 +289,10 @@
         window.adicionarCampoFoto = (valor = '') => {
             const container = document.getElementById('container-fotos');
             const div = document.createElement('div');
-            div.className = "flex gap-2 animate-fade";
-            div.innerHTML = `<input type="text" class="input-mutt foto-url" value="${valor}" placeholder="URL IMAGEM"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 p-2 font-black">X</button>`;
+            div.className = "flex gap-2";
+            div.innerHTML = `<input type="text" class="input-mutt foto-url" value="${valor}" placeholder="URL"><button type="button" onclick="this.parentElement.remove()" class="text-red-500 px-2 font-black">X</button>`;
             container.appendChild(div);
-        }
+        };
 
         document.querySelectorAll('.size-chip').forEach(c => c.onclick = () => c.classList.toggle('active'));
 
@@ -409,8 +306,6 @@
                 id: id, nome: document.getElementById('p-nome').value,
                 cat: document.getElementById('p-cat').value, status: document.getElementById('p-status').value,
                 preco: parseFloat(document.getElementById('p-preco').value),
-                precoAntigo: parseFloat(document.getElementById('p-preco-antigo').value) || null,
-                desconto: parseInt(document.getElementById('p-desconto').value) || 0,
                 imgs: urls, desc: document.getElementById('p-desc').value, tamanhos: sizes
             };
             await set(ref(db, 'produtos/' + id), produto);
@@ -427,7 +322,7 @@
         };
 
         window.fecharModal = () => document.getElementById('modal-produto').classList.add('hidden');
-        window.remover = (id) => { if(confirm("Deletar produto permanentemente?")) remove(ref(db, 'produtos/' + id)); };
+        window.remover = (id) => { if(confirm("Deletar produto?")) remove(ref(db, 'produtos/' + id)); };
         
         window.editarProduto = (id) => {
             onValue(ref(db, 'produtos/' + id), (snap) => {
@@ -437,8 +332,6 @@
                 document.getElementById('edit-id').value = id;
                 document.getElementById('p-nome').value = p.nome;
                 document.getElementById('p-preco').value = p.preco;
-                document.getElementById('p-preco-antigo').value = p.precoAntigo || '';
-                document.getElementById('p-desconto').value = p.desconto || '';
                 document.getElementById('p-desc').value = p.desc || '';
                 document.getElementById('p-cat').value = p.cat;
                 document.getElementById('p-status').value = p.status;
@@ -449,6 +342,28 @@
                 });
             }, { onlyOnce: true });
         };
+
+        function renderizarHistorico() {
+            const cont = document.getElementById('lista-historico-adm');
+            cont.innerHTML = "";
+            Object.keys(dadosGlobais).forEach(uid => {
+                const peds = dadosGlobais[uid].pedidos || {};
+                Object.keys(peds).forEach(pid => {
+                    const o = peds[pid];
+                    if(o.status === 'Aprovado') {
+                        cont.innerHTML += `
+                            <div class="glass-panel p-4 flex justify-between items-center opacity-60">
+                                <span class="text-[10px] font-black">${o.data} - ${dadosGlobais[uid].perfil?.nome || 'Cliente'}</span>
+                                <div class="flex items-center gap-4">
+                                    <button onclick="verDetalhes('${uid}', '${pid}')" class="text-[9px] font-black underline">VER</button>
+                                    <span class="font-black italic">R$ ${o.total.toFixed(2)}</span>
+                                    <button onclick="cancelarPedido('${uid}', '${pid}')" class="text-zinc-800 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>`;
+                    }
+                });
+            });
+        }
     </script>
 </body>
 </html>
