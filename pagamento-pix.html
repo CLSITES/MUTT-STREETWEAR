@@ -58,12 +58,22 @@
             </div>
         </div>
 
-        <div id="success-screen" class="hidden text-center space-y-8">
+        <div id="success-screen" class="hidden text-center space-y-8 animate-fade">
             <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(255,255,255,0.2)]">
                 <i class="fa-solid fa-check text-4xl text-black"></i>
             </div>
             <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Aprovado</h2>
+            <p class="text-zinc-500 text-[10px] uppercase font-black">Seu pagamento foi confirmado com sucesso.</p>
             <button onclick="window.location.href='index.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Voltar ao Início</button>
+        </div>
+
+        <div id="error-screen" class="hidden text-center space-y-8 animate-fade">
+            <div class="w-20 h-20 border-2 border-red-600 rounded-full flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(220,38,38,0.2)]">
+                <i class="fa-solid fa-xmark text-4xl text-red-600"></i>
+            </div>
+            <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Recusado</h2>
+            <p class="text-zinc-500 text-[10px] uppercase font-black">O pedido foi negado pelo sistema ou não existe.</p>
+            <button onclick="window.location.href='index.html'" class="w-full border border-zinc-800 text-white py-6 font-black uppercase text-[11px] tracking-[0.2em]">Tentar Novamente</button>
         </div>
 
     </main>
@@ -87,26 +97,41 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        // CONFIGURAÇÃO DOS DADOS
         const CHAVE_PIX = "06937246250"; 
         const NOME_RECEBEDOR = "MUTT STREETWEAR"; 
         const CIDADE_RECEBEDOR = "SAO PAULO";
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                // Monitora o último pedido do usuário em tempo real
                 const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
                 onValue(pedidosRef, (snapshot) => {
                     const data = snapshot.val();
-                    if (data) {
-                        const pedidoId = Object.keys(data)[0];
-                        const pedido = data[pedidoId];
-                        if (pedido.status === "Aprovado" || pedido.status === "Pago") {
-                            exibirTela('success-screen');
-                        } else {
-                            renderizarPagamento(pedido, pedidoId);
-                        }
+                    
+                    // Se o pedido sumir (ADM negou/excluiu)
+                    if (!data) {
+                        exibirTela('error-screen');
+                        return;
+                    }
+
+                    const pedidoId = Object.keys(data)[0];
+                    const pedido = data[pedidoId];
+
+                    // Se o ADM aprovou
+                    if (pedido.status === "Aprovado" || pedido.status === "Pago") {
+                        exibirTela('success-screen');
+                    } 
+                    // Se ainda estiver pendente, mostra o QR Code
+                    else if (pedido.status === "Pendente") {
+                        renderizarPagamento(pedido, pedidoId);
+                    }
+                    // Qualquer outro status (Negado, Cancelado)
+                    else {
+                        exibirTela('error-screen');
                     }
                 });
+            } else {
+                window.location.href = 'index.html'; // Proteção básica
             }
         });
 
@@ -115,7 +140,6 @@
             document.getElementById('total-pix').innerText = `R$ ${valor.replace('.', ',')}`;
             document.getElementById('order-id-display').innerText = `ORDEM #${id.substring(id.length - 8).toUpperCase()}`;
             
-            // Gerar Payload Pix (TXID limpo sem caracteres especiais)
             const cleanId = id.replace(/[^a-zA-Z0-9]/g, '').substring(0, 15);
             const payload = gerarPayloadPix(CHAVE_PIX, valor, NOME_RECEBEDOR, CIDADE_RECEBEDOR, cleanId);
             
@@ -135,7 +159,6 @@
         }
 
         function gerarPayloadPix(chave, valor, nome, cidade, txtId) {
-            // Remove espaços e acentos para compatibilidade máxima
             const cleanString = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
             const format = (id, text) => id + String(text.length).padStart(2, '0') + text;
             
@@ -168,8 +191,12 @@
         }
 
         function exibirTela(id) {
-            ['loading-screen', 'payment-screen', 'success-screen'].forEach(t => document.getElementById(t).classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
+            ['loading-screen', 'payment-screen', 'success-screen', 'error-screen'].forEach(t => {
+                const el = document.getElementById(t);
+                if(el) el.classList.add('hidden');
+            });
+            const target = document.getElementById(id);
+            if(target) target.classList.remove('hidden');
         }
 
         window.copyField = () => {
