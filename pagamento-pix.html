@@ -104,32 +104,40 @@
         const NOME_RECEBEDOR = "MUTT STREETWEAR"; 
         const CIDADE_RECEBEDOR = "SAO PAULO";
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Monitora o último pedido do usuário em tempo real
-                const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
-                onValue(pedidosRef, (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        const pedidoId = Object.keys(data)[0];
-                        const pedido = data[pedidoId];
-                        
-                        // LÓGICA DE STATUS
-                        if (pedido.status === "Aprovado" || pedido.status === "Pago") {
-                            exibirTela('success-screen');
-                        } 
-                        else if (pedido.status === "Recusado" || pedido.status === "Cancelado") {
-                            exibirTela('error-screen');
-                        }
-                        else {
-                            renderizarPagamento(pedido, pedidoId);
-                        }
-                    }
-                });
-            } else {
-                window.location.href = 'login.html';
+       onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // Monitora os pedidos para reagir a qualquer mudança de status
+        const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
+        onValue(pedidosRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data) {
+                // Se o pedido sumiu (foi deletado no ADM), mostra erro
+                exibirTela('error-screen');
+                return;
+            }
+
+            const pedidoId = Object.keys(data)[0];
+            const pedido = data[pedidoId];
+            
+            // Log para debug (aparece no F12 do navegador)
+            console.log("Status atual do pedido:", pedido.status);
+
+            // Se o status for Aprovado ou Pago
+            if (pedido.status === "Aprovado" || pedido.status === "Pago") {
+                exibirTela('success-screen');
+            } 
+            // Se o status for Recusado, Cancelado ou se o ADM marcou algo diferente de Pendente
+            else if (pedido.status === "Recusado" || pedido.status === "Cancelado") {
+                exibirTela('error-screen');
+            }
+            else {
+                renderizarPagamento(pedido, pedidoId);
             }
         });
+    } else {
+        window.location.href = 'login.html';
+    }
+});
 
         function renderizarPagamento(pedido, id) {
             const valor = pedido.total.toFixed(2);
