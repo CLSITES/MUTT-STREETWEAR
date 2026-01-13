@@ -5,204 +5,194 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MUTT | PAGAMENTO PIX</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
-        .mutt-card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 2.5rem; border-radius: 2px; }
-        .loader { border: 2px solid rgba(255,255,255,0.05); border-top: 2px solid #fff; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s linear infinite; }
+        .mutt-card { background: #050505; border: 1px solid #1a1a1a; padding: 2rem; }
+        .loader { border: 2px solid #1a1a1a; border-top: 2px solid #fff; border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #qrcode img { margin: 0 auto; border: 8px solid #fff; border-radius: 4px; display: block; }
     </style>
 </head>
 <body>
 
-    <main class="container mx-auto px-6 py-12 max-w-lg min-h-screen flex flex-col justify-center">
-        
-        <div id="loading-screen" class="text-center space-y-4">
-            <div class="loader mx-auto"></div>
-            <p class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">Sincronizando Terminal...</p>
+<main class="container mx-auto px-6 py-12 max-w-lg">
+    <div id="loading-screen" class="text-center py-20">
+        <div class="loader mx-auto mb-4 w-10 h-10"></div>
+        <p class="text-[10px] font-black uppercase tracking-widest animate-pulse">Sincronizando com o Banco...</p>
+    </div>
+
+    <div id="payment-screen" class="hidden space-y-8">
+        <div class="text-center">
+            <h1 class="text-3xl font-black italic uppercase tracking-tighter text-white">Pagamento Pix</h1>
+            <p id="order-id-display" class="text-zinc-500 text-[9px] uppercase font-black tracking-[0.2em] mt-3 border border-zinc-900 px-4 py-1 inline-block italic">GERANDO...</p>
         </div>
 
-        <div id="payment-screen" class="hidden space-y-8">
-            <div class="text-center">
-                <h1 class="text-3xl font-black italic uppercase tracking-tighter text-white">Pagamento Pix</h1>
-                <p id="order-id-display" class="text-zinc-500 text-[9px] uppercase font-black tracking-[0.2em] mt-3 border border-zinc-900 px-4 py-1 inline-block italic">GERANDO QR CODE...</p>
+        <div class="mutt-card space-y-8 text-center">
+            <div id="qrcode" class="bg-white p-4 inline-block mx-auto border-4 border-white"></div>
+            
+            <div>
+                <p class="text-zinc-500 text-[10px] font-black uppercase mb-1">Valor a pagar</p>
+                <h2 id="total-pix" class="text-4xl font-black italic tracking-tighter">R$ 0,00</h2>
             </div>
 
-            <div class="mutt-card space-y-8 text-center">
-                <div>
-                    <span class="text-zinc-600 text-[8px] font-black uppercase tracking-[0.3em]">Total a pagar</span>
-                    <div id="total-pix" class="text-5xl font-black italic tracking-tighter text-white mt-1">R$ 0,00</div>
-                </div>
+            <div class="space-y-3">
+                <input type="text" id="pix-payload" readonly class="w-full bg-black border border-zinc-900 p-4 text-[10px] text-zinc-400 font-mono text-center outline-none">
+                <button onclick="copyField()" class="w-full bg-white text-black py-5 font-black uppercase text-[11px] tracking-[0.2em] hover:bg-zinc-200 transition-all">Copiar Código Pix</button>
+            </div>
 
-                <div class="bg-white p-3 inline-block mx-auto rounded-sm">
-                    <div id="qrcode"></div>
-                </div>
-
-                <div class="space-y-4 text-left">
-                    <p class="text-[9px] font-black uppercase text-zinc-500 tracking-widest">Pix Copia e Cola:</p>
-                    <div class="flex gap-2">
-                        <input type="text" id="pix-payload" readonly class="bg-black border border-zinc-900 text-[10px] p-4 w-full outline-none text-zinc-500 font-mono truncate">
-                        <button onclick="copyField()" class="bg-white text-black px-4 font-black uppercase text-[10px] hover:bg-zinc-200">COPIAR</button>
-                    </div>
-                </div>
-
-                <div class="pt-6 border-t border-zinc-900/50">
-                    <div class="flex items-center justify-center gap-4">
-                        <div class="loader"></div>
-                        <span class="text-[9px] font-black uppercase text-zinc-500 animate-pulse">Aguardando confirmação bancária...</span>
-                    </div>
+            <div class="pt-6 border-t border-zinc-900/50">
+                <div class="flex items-center justify-center gap-4">
+                    <div class="loader"></div>
+                    <span class="text-[9px] font-black uppercase text-zinc-500 animate-pulse">Aguardando confirmação bancária...</span>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div id="success-screen" class="hidden text-center space-y-8">
-            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto">
-                <i class="fa-solid fa-check text-4xl text-black"></i>
-            </div>
-            <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Pago</h2>
-            <p class="text-zinc-500 text-[10px] uppercase font-black">Pagamento confirmado. Verifique "Meus Pedidos".</p>
-            <button onclick="window.location.href='index.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Sair do Terminal</button>
+    <div id="success-screen" class="hidden text-center space-y-8 py-10">
+        <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto">
+            <i class="fa-solid fa-check text-4xl text-black"></i>
         </div>
+        <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Pago</h2>
+        <p class="text-zinc-500 text-[10px] uppercase font-black">Pagamento confirmado. Verifique "Meus Pedidos".</p>
+        <button onclick="window.location.href='index.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Sair do Terminal</button>
+    </div>
 
-        <div id="error-screen" class="hidden text-center space-y-8">
-            <div class="w-20 h-20 border-2 border-red-600 rounded-full flex items-center justify-center mx-auto">
-                <i class="fa-solid fa-xmark text-4xl text-red-600"></i>
-            </div>
-            <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido não encontrado</h2>
-            <p class="text-zinc-500 text-[10px] uppercase font-black">Não conseguimos localizar seu pedido recente. Tente novamente.</p>
-            <button onclick="window.location.href='index.html'" class="w-full border border-zinc-800 text-white py-6 font-black uppercase text-[11px]">Voltar para a Loja</button>
+    <div id="error-screen" class="hidden text-center space-y-8 py-10">
+        <div class="w-20 h-20 border-2 border-red-600 rounded-full flex items-center justify-center mx-auto">
+            <i class="fa-solid fa-xmark text-4xl text-red-600"></i>
         </div>
+        <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido não encontrado</h2>
+        <p class="text-zinc-500 text-[10px] uppercase font-black">Não conseguimos localizar seu pedido recente.</p>
+        <button onclick="window.location.href='index.html'" class="w-full border border-zinc-800 text-white py-6 font-black uppercase text-[11px]">Voltar para a Loja</button>
+    </div>
+</main>
 
-    </main>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    const firebaseConfig = {
+        apiKey: "AIzaSyDr-W03cp72jHiyALGWlI4vBfxH2xrC-6w",
+        authDomain: "mutt-streetwear.firebaseapp.com",
+        databaseURL: "https://mutt-streetwear-default-rtdb.firebaseio.com",
+        projectId: "mutt-streetwear",
+        storageBucket: "mutt-streetwear.firebasestorage.app",
+        messagingSenderId: "65929911570",
+        appId: "1:65929911570:web:86299846ef5401b5c0a7cb"
+    };
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDr-W03cp72jHiyALGWlI4vBfxH2xrC-6w",
-            authDomain: "mutt-streetwear.firebaseapp.com",
-            databaseURL: "https://mutt-streetwear-default-rtdb.firebaseio.com",
-            projectId: "mutt-streetwear",
-            storageBucket: "mutt-streetwear.firebasestorage.app",
-            messagingSenderId: "65929911570",
-            appId: "1:65929911570:web:86299846ef5401b5c0a7cb"
-        };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const auth = getAuth(app);
+    const CHAVE_PIX = "06937246250"; 
+    const NOME_RECEBEDOR = "MUTT STREETWEAR"; 
+    const CIDADE_RECEBEDOR = "PARAUAPEBAS";
 
-        // CONFIGURAÇÕES DO SEU BANCO/PIX
-        const CHAVE_PIX = "06937246250"; 
-        const NOME_RECEBEDOR = "MUTT STREETWEAR"; 
-        const CIDADE_RECEBEDOR = "PARAUAPEBAS";
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
+            
+            onValue(pedidosRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const pedidoId = Object.keys(data)[0];
+                    const pedido = data[pedidoId];
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Busca o pedido mais recente na pasta do usuário
-                const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
-                
-                onValue(pedidosRef, (snapshot) => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        const pedidoId = Object.keys(data)[0];
-                        const pedido = data[pedidoId];
+                    // Monitora o status no banco global
+                    const globalPedidoRef = ref(db, `pedidos/${pedidoId}`);
+                    onValue(globalPedidoRef, (globalSnap) => {
+                        const pedidoAtualizado = globalSnap.val();
+                        const status = pedidoAtualizado ? pedidoAtualizado.status : pedido.status;
 
-                        // Verifica o status em tempo real
-                        if (pedido.status === "Aprovado" || pedido.status === "Pago") {
+                        if (status === "Aprovado" || status === "Pago") {
                             exibirTela('success-screen');
-                        } else if (pedido.status === "Recusado" || pedido.status === "Cancelado") {
+                        } else if (status === "Recusado" || status === "Cancelado") {
                             exibirTela('error-screen');
                         } else {
                             renderizarPagamento(pedido, pedidoId);
                         }
-                    } else {
-                        // Se não encontrar de imediato, espera 5 segundos antes de mostrar erro
-                        setTimeout(() => {
-                            if (document.getElementById('payment-screen').classList.contains('hidden')) {
-                                exibirTela('error-screen');
-                            }
-                        }, 5000);
-                    }
-                });
-            } else {
-                window.location.href = 'login.html';
-            }
+                    });
+                } else {
+                    setTimeout(() => {
+                        if (document.getElementById('payment-screen').classList.contains('hidden')) {
+                            exibirTela('error-screen');
+                        }
+                    }, 5000);
+                }
+            });
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+
+    function renderizarPagamento(pedido, id) {
+        const totalRaw = pedido.total || 0;
+        const valor = parseFloat(totalRaw).toFixed(2);
+
+        document.getElementById('total-pix').innerText = `R$ ${valor.replace('.', ',')}`;
+        document.getElementById('order-id-display').innerText = `ORDEM #${id.substring(0, 8).toUpperCase()}`;
+
+        const payload = gerarPayloadPix(CHAVE_PIX, valor, NOME_RECEBEDOR, CIDADE_RECEBEDOR, id.substring(0, 10));
+        document.getElementById('pix-payload').value = payload;
+
+        const qrContainer = document.getElementById('qrcode');
+        qrContainer.innerHTML = ""; 
+        new QRCode(qrContainer, {
+            text: payload,
+            width: 200,
+            height: 200,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
         });
 
-        function renderizarPagamento(pedido, id) {
-            // Garante que o total seja um número
-            const totalRaw = pedido.total || 0;
-            const valor = parseFloat(totalRaw).toFixed(2);
-            
-            document.getElementById('total-pix').innerText = `R$ ${valor.replace('.', ',')}`;
-            document.getElementById('order-id-display').innerText = `ORDEM #${id.substring(0, 8).toUpperCase()}`;
-            
-            const payload = gerarPayloadPix(CHAVE_PIX, valor, NOME_RECEBEDOR, CIDADE_RECEBEDOR, id.substring(0, 10));
-            document.getElementById('pix-payload').value = payload;
+        exibirTela('payment-screen');
+    }
 
-            // Limpa e gera o QR Code
-            const qrContainer = document.getElementById('qrcode');
-            qrContainer.innerHTML = ""; 
-            new QRCode(qrContainer, {
-                text: payload,
-                width: 200,
-                height: 200,
-                colorDark : "#000000",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.M
-            });
+    function exibirTela(id) {
+        ['loading-screen', 'payment-screen', 'success-screen', 'error-screen'].forEach(tela => {
+            document.getElementById(tela).classList.add('hidden');
+        });
+        document.getElementById(id).classList.remove('hidden');
+    }
 
-            exibirTela('payment-screen');
-        }
+    function gerarPayloadPix(chave, valor, nome, cidade, txtId) {
+        const clean = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+        const f = (id, val) => id + String(val.length).padStart(2, '0') + val;
+        
+        const payload = "000201" +
+            f("26", f("00", "BR.GOV.BCB.PIX") + f("01", chave)) +
+            "52040000" +
+            "5303986" +
+            f("54", valor) +
+            "5802BR" +
+            f("59", clean(nome)) +
+            f("60", clean(cidade)) +
+            f("62", f("05", txtId)) + 
+            "6304";
 
-        // GERADOR DE PAYLOAD PIX ESTÁTICO (PADRÃO BANCO CENTRAL)
-        function gerarPayloadPix(chave, valor, nome, cidade, txtId) {
-            const clean = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
-            const f = (id, val) => id + String(val.length).padStart(2, '0') + val;
-            
-            const merchantAccount = f("00", "br.gov.bcb.pix") + f("01", chave);
-            let payload = "000201" + 
-                          f("26", merchantAccount) + 
-                          "52040000" + 
-                          "5303986" + 
-                          f("54", valor) + 
-                          "5802BR" + 
-                          f("59", clean(nome.substring(0, 25))) + 
-                          f("60", clean(cidade.substring(0, 15))) + 
-                          f("62", f("05", txtId)) + 
-                          "6304";
-            
-            // Cálculo do CRC16
-            let crc = 0xFFFF;
-            for (let i = 0; i < payload.length; i++) {
-                crc ^= payload.charCodeAt(i) << 8;
-                for (let j = 0; j < 8; j++) {
-                    if ((crc & 0x8000) !== 0) crc = (crc << 1) ^ 0x1021;
-                    else crc <<= 1;
-                }
+        let crc = 0xFFFF;
+        for (let i = 0; i < payload.length; i++) {
+            crc ^= payload.charCodeAt(i) << 8;
+            for (let j = 0; j < 8; j++) {
+                crc = (crc & 0x8000) ? (crc << 1) ^ 0x1021 : (crc << 1);
             }
-            return payload + (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
         }
+        return payload + (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+    }
 
-        function exibirTela(id) {
-            const telas = ['loading-screen', 'payment-screen', 'success-screen', 'error-screen'];
-            telas.forEach(t => document.getElementById(t).classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        window.copyField = () => {
-            const el = document.getElementById('pix-payload');
-            el.select();
-            navigator.clipboard.writeText(el.value).then(() => {
-                alert("Código Pix copiado!");
-            });
-        }
-    </script>
+    window.copyField = () => {
+        const el = document.getElementById('pix-payload');
+        el.select();
+        navigator.clipboard.writeText(el.value).then(() => {
+            alert("Código Pix copiado!");
+        });
+    }
+</script>
 </body>
 </html>
