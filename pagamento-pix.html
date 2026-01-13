@@ -28,7 +28,7 @@
         <div id="payment-screen" class="hidden space-y-8">
             <div class="text-center">
                 <h1 class="text-3xl font-black italic uppercase tracking-tighter text-white">Pagamento Pix</h1>
-                <p id="order-id-display" class="text-zinc-500 text-[9px] uppercase font-black tracking-[0.2em] mt-3 border border-zinc-900 px-4 py-1 inline-block italic">GERANDO QR CODE...</p>
+                <p id="order-id-display" class="text-zinc-500 text-[9px] uppercase font-black tracking-[0.2em] mt-3 border border-zinc-900 px-4 py-1 inline-block italic">PROCESSANDO...</p>
             </div>
 
             <div class="mutt-card space-y-8 text-center">
@@ -52,7 +52,7 @@
                 <div class="pt-6 border-t border-zinc-900/50">
                     <div class="flex items-center justify-center gap-4">
                         <div class="loader"></div>
-                        <span class="text-[9px] font-black uppercase text-zinc-500 animate-pulse">Aguardando confirmação bancária...</span>
+                        <span class="text-[9px] font-black uppercase text-zinc-500 animate-pulse">Aguardando confirmação...</span>
                     </div>
                 </div>
             </div>
@@ -63,16 +63,16 @@
                 <i class="fa-solid fa-check text-4xl text-black"></i>
             </div>
             <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Pago</h2>
-            <p class="text-zinc-500 text-[10px] uppercase font-black">Pagamento confirmado. Verifique "Meus Pedidos".</p>
-            <button onclick="window.location.href='index.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Sair do Terminal</button>
+            <p class="text-zinc-500 text-[10px] uppercase font-black">Verifique "Meus Pedidos".</p>
+            <button onclick="window.location.href='index.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Sair</button>
         </div>
 
         <div id="error-screen" class="hidden text-center space-y-8">
             <div class="w-20 h-20 border-2 border-red-600 rounded-full flex items-center justify-center mx-auto">
                 <i class="fa-solid fa-xmark text-4xl text-red-600"></i>
             </div>
-            <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Negado</h2>
-            <p class="text-zinc-500 text-[10px] uppercase font-black">Este pedido foi recusado pelo administrador.</p>
+            <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Erro no Pedido</h2>
+            <p class="text-zinc-500 text-[10px] uppercase font-black">Não encontramos o pedido ou foi cancelado.</p>
             <button onclick="window.location.href='index.html'" class="w-full border border-zinc-800 text-white py-6 font-black uppercase text-[11px]">Voltar</button>
         </div>
 
@@ -103,37 +103,37 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // BUSCA O ÚLTIMO PEDIDO DO USUÁRIO
+                // Melhoria: Escuta a pasta de pedidos do usuário
                 const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
                 
                 onValue(pedidosRef, (snapshot) => {
-                    if (!snapshot.exists()) {
-                        // Se não encontrar em 3 segundos, exibe erro
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        const pedidoId = Object.keys(data)[0];
+                        const pedido = data[pedidoId];
+
+                        // Escuta em tempo real se o status mudar no banco global (pelo ADM)
+                        const globalPedidoRef = ref(db, `pedidos/${pedidoId}`);
+                        onValue(globalPedidoRef, (globalSnap) => {
+                            const pedidoAtualizado = globalSnap.val();
+                            const status = pedidoAtualizado ? pedidoAtualizado.status : pedido.status;
+
+                            if (status === "Aprovado" || status === "Pago") {
+                                exibirTela('success-screen');
+                            } else if (status === "Recusado" || status === "Cancelado") {
+                                exibirTela('error-screen');
+                            } else {
+                                renderizarPagamento(pedido, pedidoId);
+                            }
+                        });
+                    } else {
+                        // Se não encontrar nada após 4 segundos, mostra tela de erro
                         setTimeout(() => {
-                            if (document.getElementById('payment-screen').classList.contains('hidden')) {
+                            if (document.getElementById('loading-screen').classList.contains('hidden') === false) {
                                 exibirTela('error-screen');
                             }
-                        }, 3000);
-                        return;
+                        }, 4000);
                     }
-
-                    const data = snapshot.val();
-                    const pedidoId = Object.keys(data)[0];
-                    const pedido = data[pedidoId];
-
-                    // MONITORAMENTO DE STATUS VIA PASTA GLOBAL (Sincronizado com ADM)
-                    const statusRef = ref(db, `pedidos/${pedidoId}/status`);
-                    onValue(statusRef, (statusSnap) => {
-                        const statusAtual = statusSnap.val() || pedido.status;
-                        
-                        if (statusAtual === "Aprovado" || statusAtual === "Pago") {
-                            exibirTela('success-screen');
-                        } else if (statusAtual === "Recusado" || statusAtual === "Cancelado") {
-                            exibirTela('error-screen');
-                        } else {
-                            renderizarPagamento(pedido, pedidoId);
-                        }
-                    });
                 });
             } else {
                 window.location.href = 'login.html';
@@ -141,20 +141,24 @@
         });
 
         function renderizarPagamento(pedido, id) {
-            const valor = parseFloat(pedido.total).toFixed(2);
-            document.getElementById('total-pix').innerText = `R$ ${valor.replace('.', ',')}`;
-            document.getElementById('order-id-display').innerText = `ORDEM #${id.substring(id.length - 6).toUpperCase()}`;
+            const valorTotal = pedido.total || 0;
+            const valorFormatado = parseFloat(valorTotal).toFixed(2);
             
-            const payload = gerarPayloadPix(CHAVE_PIX, valor, NOME_RECEBEDOR, CIDADE_RECEBEDOR, "PEDIDO");
+            document.getElementById('total-pix').innerText = `R$ ${valorFormatado.replace('.', ',')}`;
+            document.getElementById('order-id-display').innerText = `ORDEM #${id.substring(0, 8).toUpperCase()}`;
+            
+            const payload = gerarPayloadPix(CHAVE_PIX, valorFormatado, NOME_RECEBEDOR, CIDADE_RECEBEDOR, id.substring(0, 10));
             document.getElementById('pix-payload').value = payload;
 
-            document.getElementById('qrcode').innerHTML = ""; 
-            new QRCode(document.getElementById("qrcode"), {
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = ""; 
+            new QRCode(qrContainer, {
                 text: payload,
                 width: 200,
                 height: 200,
                 colorDark : "#000000",
-                colorLight : "#ffffff"
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.M
             });
 
             exibirTela('payment-screen');
@@ -163,32 +167,43 @@
         function gerarPayloadPix(chave, valor, nome, cidade, txtId) {
             const clean = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
             const f = (id, val) => id + String(val.length).padStart(2, '0') + val;
-            const account = f("00", "br.gov.bcb.pix") + f("01", chave);
-            let p = "000201" + f("26", account) + "520400005303986" + f("54", valor) + "5802BR" + f("59", clean(nome)) + f("60", clean(cidade)) + f("62", f("05", txtId)) + "6304";
+            
+            const merchantAccount = f("00", "br.gov.bcb.pix") + f("01", chave);
+            let payload = "000201" + 
+                          f("26", merchantAccount) + 
+                          "52040000" + 
+                          "5303986" + 
+                          f("54", valor) + 
+                          "5802BR" + 
+                          f("59", clean(nome.substring(0, 25))) + 
+                          f("60", clean(cidade.substring(0, 15))) + 
+                          f("62", f("05", txtId)) + 
+                          "6304";
             
             let crc = 0xFFFF;
-            for (let i = 0; i < p.length; i++) {
-                crc ^= p.charCodeAt(i) << 8;
+            for (let i = 0; i < payload.length; i++) {
+                crc ^= payload.charCodeAt(i) << 8;
                 for (let j = 0; j < 8; j++) {
                     if ((crc & 0x8000) !== 0) crc = (crc << 1) ^ 0x1021;
                     else crc <<= 1;
                 }
             }
-            return p + (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+            return payload + (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
         }
 
         function exibirTela(id) {
-            ['loading-screen', 'payment-screen', 'success-screen', 'error-screen'].forEach(t => {
-                document.getElementById(t).classList.add('hidden');
-            });
+            const telas = ['loading-screen', 'payment-screen', 'success-screen', 'error-screen'];
+            telas.forEach(t => document.getElementById(t).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
         }
 
         window.copyField = () => {
             const el = document.getElementById('pix-payload');
             el.select();
-            navigator.clipboard.writeText(el.value);
-            alert("Copiado!");
+            el.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(el.value).then(() => {
+                alert("Código Copiado!");
+            });
         }
     </script>
 </body>
