@@ -99,37 +99,41 @@
 
         const CHAVE_PIX = "06937246250"; 
         const NOME_RECEBEDOR = "MUTT STREETWEAR"; 
-        const CIDADE_RECEBEDOR = "PARAUAPEBAS"; // Atualizado para sua cidade
+        const CIDADE_RECEBEDOR = "PARAUAPEBAS";
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Busca o pedido mais recente
+                // BUSCA O ÚLTIMO PEDIDO DO USUÁRIO
                 const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
                 
                 onValue(pedidosRef, (snapshot) => {
-                    const data = snapshot.val();
-                    
-                    if (!data) {
-                        // Aguarda 2 segundos antes de dar erro, para dar tempo do Firebase salvar
+                    if (!snapshot.exists()) {
+                        // Se não encontrar em 3 segundos, exibe erro
                         setTimeout(() => {
-                            if (!document.getElementById('payment-screen').classList.contains('hidden')) return;
-                            exibirTela('error-screen');
-                        }, 2000);
+                            if (document.getElementById('payment-screen').classList.contains('hidden')) {
+                                exibirTela('error-screen');
+                            }
+                        }, 3000);
                         return;
                     }
 
+                    const data = snapshot.val();
                     const pedidoId = Object.keys(data)[0];
                     const pedido = data[pedidoId];
 
-                    // LOGICA DE STATUS
-                    if (pedido.status === "Aprovado" || pedido.status === "Pago") {
-                        exibirTela('success-screen');
-                    } else if (pedido.status === "Recusado" || pedido.status === "Cancelado") {
-                        exibirTela('error-screen');
-                    } else {
-                        // Se o status for "Pendente" ou qualquer outro, mostra o pagamento
-                        renderizarPagamento(pedido, pedidoId);
-                    }
+                    // MONITORAMENTO DE STATUS VIA PASTA GLOBAL (Sincronizado com ADM)
+                    const statusRef = ref(db, `pedidos/${pedidoId}/status`);
+                    onValue(statusRef, (statusSnap) => {
+                        const statusAtual = statusSnap.val() || pedido.status;
+                        
+                        if (statusAtual === "Aprovado" || statusAtual === "Pago") {
+                            exibirTela('success-screen');
+                        } else if (statusAtual === "Recusado" || statusAtual === "Cancelado") {
+                            exibirTela('error-screen');
+                        } else {
+                            renderizarPagamento(pedido, pedidoId);
+                        }
+                    });
                 });
             } else {
                 window.location.href = 'login.html';
@@ -156,14 +160,12 @@
             exibirTela('payment-screen');
         }
 
-        // FUNÇÃO DE PAYLOAD PIX (PADRÃO BC)
         function gerarPayloadPix(chave, valor, nome, cidade, txtId) {
             const clean = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
             const f = (id, val) => id + String(val.length).padStart(2, '0') + val;
             const account = f("00", "br.gov.bcb.pix") + f("01", chave);
             let p = "000201" + f("26", account) + "520400005303986" + f("54", valor) + "5802BR" + f("59", clean(nome)) + f("60", clean(cidade)) + f("62", f("05", txtId)) + "6304";
             
-            // CRC16 Simples
             let crc = 0xFFFF;
             for (let i = 0; i < p.length; i++) {
                 crc ^= p.charCodeAt(i) << 8;
