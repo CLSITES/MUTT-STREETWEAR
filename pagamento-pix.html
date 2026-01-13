@@ -63,7 +63,20 @@
                 <i class="fa-solid fa-check text-4xl text-black"></i>
             </div>
             <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Aprovado</h2>
-            <button onclick="window.location.href='index.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Voltar ao Início</button>
+            <p class="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Seu pagamento foi confirmado com sucesso.</p>
+            <button onclick="window.location.href='meus-pedidos.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Ver Meus Pedidos</button>
+        </div>
+
+        <div id="error-screen" class="hidden text-center space-y-8">
+            <div class="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(220,38,38,0.4)]">
+                <i class="fa-solid fa-xmark text-4xl text-white"></i>
+            </div>
+            <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pagamento Recusado</h2>
+            <p class="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Não conseguimos validar seu pagamento. Tente novamente.</p>
+            <div class="space-y-3">
+                <button onclick="window.location.href='carrinho.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Tentar Novamente</button>
+                <button onclick="window.location.href='index.html'" class="w-full border border-zinc-900 text-zinc-500 py-4 font-black uppercase text-[9px] tracking-[0.2em]">Voltar para a loja</button>
+            </div>
         </div>
 
     </main>
@@ -87,26 +100,34 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        // CONFIGURAÇÃO DOS DADOS
         const CHAVE_PIX = "06937246250"; 
         const NOME_RECEBEDOR = "MUTT STREETWEAR"; 
         const CIDADE_RECEBEDOR = "SAO PAULO";
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                // Monitora o último pedido do usuário em tempo real
                 const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
                 onValue(pedidosRef, (snapshot) => {
                     const data = snapshot.val();
                     if (data) {
                         const pedidoId = Object.keys(data)[0];
                         const pedido = data[pedidoId];
+                        
+                        // LÓGICA DE STATUS
                         if (pedido.status === "Aprovado" || pedido.status === "Pago") {
                             exibirTela('success-screen');
-                        } else {
+                        } 
+                        else if (pedido.status === "Recusado" || pedido.status === "Cancelado") {
+                            exibirTela('error-screen');
+                        }
+                        else {
                             renderizarPagamento(pedido, pedidoId);
                         }
                     }
                 });
+            } else {
+                window.location.href = 'login.html';
             }
         });
 
@@ -115,12 +136,10 @@
             document.getElementById('total-pix').innerText = `R$ ${valor.replace('.', ',')}`;
             document.getElementById('order-id-display').innerText = `ORDEM #${id.substring(id.length - 8).toUpperCase()}`;
             
-            // Gerar Payload Pix (TXID limpo sem caracteres especiais)
             const cleanId = id.replace(/[^a-zA-Z0-9]/g, '').substring(0, 15);
             const payload = gerarPayloadPix(CHAVE_PIX, valor, NOME_RECEBEDOR, CIDADE_RECEBEDOR, cleanId);
             
             document.getElementById('pix-payload').value = payload;
-
             document.getElementById('qrcode').innerHTML = ""; 
             new QRCode(document.getElementById("qrcode"), {
                 text: payload,
@@ -135,12 +154,9 @@
         }
 
         function gerarPayloadPix(chave, valor, nome, cidade, txtId) {
-            // Remove espaços e acentos para compatibilidade máxima
             const cleanString = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
             const format = (id, text) => id + String(text.length).padStart(2, '0') + text;
-            
             const merchantAccount = format("00", "br.gov.bcb.pix") + format("01", chave);
-            
             let payload = "000201"; 
             payload += format("26", merchantAccount);
             payload += "52040000"; 
@@ -163,12 +179,15 @@
                 }
                 return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
             }
-
             return payload + getCRC16(payload);
         }
 
         function exibirTela(id) {
-            ['loading-screen', 'payment-screen', 'success-screen'].forEach(t => document.getElementById(t).classList.add('hidden'));
+            // Esconde todas e mostra a desejada
+            ['loading-screen', 'payment-screen', 'success-screen', 'error-screen'].forEach(t => {
+                const el = document.getElementById(t);
+                if(el) el.classList.add('hidden');
+            });
             document.getElementById(id).classList.remove('hidden');
         }
 
