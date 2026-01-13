@@ -45,8 +45,7 @@
             <div class="flex items-center gap-6">
                 <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-20 logo-mutt">
                 <div class="flex gap-6 border-l border-zinc-800 pl-6">
-                    <div><p class="text-[8px] text-zinc-500 uppercase font-black">Online</p><p id="counter-online" class="text-sm font-black text-green-500">0</p></div>
-                    <div><p class="text-[8px] text-zinc-500 uppercase font-black">Total</p><p id="counter-total" class="text-sm font-black">0</p></div>
+                    <div><p class="text-[8px] text-zinc-500 uppercase font-black">Clientes</p><p id="counter-total" class="text-sm font-black">0</p></div>
                 </div>
             </div>
             <div class="flex gap-2">
@@ -81,7 +80,14 @@
                 <div class="mb-8"><h2 class="text-5xl font-black uppercase italic tracking-tighter">Clientes</h2></div>
                 <div class="glass-panel overflow-hidden">
                     <table class="w-full text-[11px] uppercase font-bold">
-                        <thead class="bg-zinc-900 text-zinc-500"><tr class="text-left"><th class="p-4">Status</th><th class="p-4">Nome</th><th class="p-4">WhatsApp</th><th class="p-4">Cadastro</th><th class="p-4 text-right">Ação</th></tr></thead>
+                        <thead class="bg-zinc-900 text-zinc-500">
+                            <tr class="text-left">
+                                <th class="p-4">Nome</th>
+                                <th class="p-4">WhatsApp</th>
+                                <th class="p-4">CPF</th>
+                                <th class="p-4 text-right">Ação</th>
+                            </tr>
+                        </thead>
                         <tbody id="lista-usuarios-adm"></tbody>
                     </table>
                 </div>
@@ -92,17 +98,19 @@
     <div id="modal-detalhes" class="fixed inset-0 bg-black/95 z-[700] hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="w-full max-w-2xl glass-panel p-8 relative rounded-lg my-8">
             <button onclick="fecharDetalhes()" class="absolute top-6 right-6 text-2xl">&times;</button>
-            <h3 class="text-xl font-black uppercase italic mb-6 border-b border-zinc-800 pb-4">Dados do Pedido</h3>
+            <h3 class="text-xl font-black uppercase italic mb-6 border-b border-zinc-800 pb-4">Detalhes do Pedido</h3>
             
             <div id="info-cliente-pedido" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-[11px] uppercase">
-                <div class="space-y-2">
-                    <p class="text-zinc-500 font-black tracking-widest">Documentação</p>
+                <div class="space-y-3">
+                    <p class="text-zinc-500 font-black tracking-widest border-b border-zinc-900 pb-1">Identificação</p>
                     <p class="text-white">NOME: <span id="det-nome" class="font-black text-zinc-300"></span></p>
                     <p class="text-white">CPF: <span id="det-cpf" class="font-black text-zinc-300"></span></p>
                     <p class="text-white">WHATSAPP: <span id="det-whats" class="font-black text-zinc-300"></span></p>
+                    <p class="text-white">PAGAMENTO: <span id="det-metodo" class="font-black text-green-500"></span></p>
+                    <p class="text-white">DATA/HORA: <span id="det-data" class="font-black text-zinc-300"></span></p>
                 </div>
-                <div class="space-y-2">
-                    <p class="text-zinc-500 font-black tracking-widest">Endereço de Entrega</p>
+                <div class="space-y-3">
+                    <p class="text-zinc-500 font-black tracking-widest border-b border-zinc-900 pb-1">Endereço de Entrega</p>
                     <p id="det-endereco" class="text-white font-black leading-relaxed"></p>
                 </div>
             </div>
@@ -115,7 +123,7 @@
                     <span id="detalhes-frete">R$ 0,00</span>
                 </div>
                 <div class="flex justify-between items-center bg-white text-black p-4 font-black">
-                    <span class="text-[10px] uppercase">Total do Pedido</span>
+                    <span class="text-[10px] uppercase">Total Pago</span>
                     <span id="detalhes-total" class="text-2xl italic">R$ 0,00</span>
                 </div>
             </div>
@@ -171,8 +179,9 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        let dadosGlobais = {};
+        let dadosUsuarios = {};
 
+        // LOGIN
         window.fazerLogin = () => {
             if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === 'mutt2026') {
                 document.getElementById('login-screen').classList.add('hidden');
@@ -181,6 +190,7 @@
         };
         document.getElementById('btn-login-trigger').onclick = window.fazerLogin;
 
+        // TABS
         window.switchTab = (tab) => {
             ['produtos', 'pedidos', 'historico', 'usuarios'].forEach(t => {
                 document.getElementById(`section-${t}`).classList.toggle('hidden', t !== tab);
@@ -190,87 +200,94 @@
             if(tab === 'historico') renderizarHistorico();
         };
 
+        // ESCUTAR USUÁRIOS E PEDIDOS
         onValue(ref(db, 'usuarios'), (snapshot) => {
-            const users = snapshot.val();
-            dadosGlobais = users || {};
+            const users = snapshot.val() || {};
+            dadosUsuarios = users;
             const containerUser = document.getElementById('lista-usuarios-adm');
             const containerOrder = document.getElementById('lista-pedidos-adm');
             
-            let onlineCount = 0;
             containerUser.innerHTML = "";
             containerOrder.innerHTML = "";
 
-            if(users) {
-                Object.keys(users).forEach(uid => {
-                    const usr = users[uid];
-                    const perfil = usr.perfil || {};
-                    const status = usr.presenca || 'offline';
-                    if(status === 'online') onlineCount++;
+            Object.keys(users).forEach(uid => {
+                const usr = users[uid];
+                
+                // Renderizar Tabela de Clientes (Baseado nos pedidos ou perfil)
+                // Pegamos o último pedido para saber o nome/cpf do cliente
+                let ultimoCliente = { nome: "Visitante", whatsapp: "---", cpf: "---" };
+                if(usr.pedidos) {
+                    const keys = Object.keys(usr.pedidos);
+                    const lastPed = usr.pedidos[keys[keys.length-1]];
+                    if(lastPed.cliente) ultimoCliente = lastPed.cliente;
+                }
 
-                    containerUser.innerHTML += `
-                        <tr class="border-b border-zinc-900">
-                            <td class="p-4">${status === 'online' ? '<span class="dot-online"></span>' : '<span class="dot-offline"></span>'}</td>
-                            <td class="p-4 text-white font-black">${perfil.nome || 'Visitante'}</td>
-                            <td class="p-4 text-zinc-400">${perfil.whatsapp || '---'}</td>
-                            <td class="p-4 text-zinc-500">${perfil.dataCadastro || '---'}</td>
-                            <td class="p-4 text-right">
-                                <button onclick="removerUsuario('${uid}')" class="text-red-500/50 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>`;
+                containerUser.innerHTML += `
+                    <tr class="border-b border-zinc-900">
+                        <td class="p-4 text-white font-black">${ultimoCliente.nome}</td>
+                        <td class="p-4 text-zinc-400">${ultimoCliente.whatsapp}</td>
+                        <td class="p-4 text-zinc-500">${ultimoCliente.cpf}</td>
+                        <td class="p-4 text-right">
+                            <button onclick="removerUsuario('${uid}')" class="text-red-500/50 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>`;
 
-                    if(usr.pedidos) {
-                        Object.keys(usr.pedidos).forEach(pid => {
-                            const ped = usr.pedidos[pid];
-                            if(ped.status === 'Pendente') {
-                                containerOrder.innerHTML += `
-                                    <div class="glass-panel p-6 flex justify-between items-center border-l-2 border-white">
-                                        <div>
-                                            <p class="text-[9px] text-zinc-500 font-black">ID: ${pid.slice(-6).toUpperCase()}</p>
-                                            <h3 class="text-lg font-black uppercase italic">${perfil.nome || 'Cliente'}</h3>
+                // Renderizar Pedidos Pendentes
+                if(usr.pedidos) {
+                    Object.keys(usr.pedidos).forEach(pid => {
+                        const ped = usr.pedidos[pid];
+                        if(ped.status === 'Pendente') {
+                            containerOrder.innerHTML += `
+                                <div class="glass-panel p-6 flex justify-between items-center border-l-2 border-white">
+                                    <div>
+                                        <p class="text-[9px] text-zinc-500 font-black uppercase">PAGAMENTO: ${ped.metodo || 'PIX'}</p>
+                                        <h3 class="text-lg font-black uppercase italic">${ped.cliente?.nome || 'Cliente'}</h3>
+                                        <p class="text-[10px] text-zinc-400">${ped.data}</p>
+                                    </div>
+                                    <div class="flex items-center gap-6">
+                                        <button onclick="verDetalhes('${uid}', '${pid}')" class="text-[10px] font-black underline">VER TUDO</button>
+                                        <p class="font-black italic">R$ ${(ped.total || 0).toFixed(2)}</p>
+                                        <div class="flex gap-2">
+                                            <button onclick="aprovarPedido('${uid}', '${pid}')" class="bg-white text-black px-6 py-2 text-[9px] font-black">APROVAR</button>
+                                            <button onclick="cancelarPedido('${uid}', '${pid}')" class="bg-red-600 text-white px-4 py-2 text-[9px] font-black">NEGAR</button>
                                         </div>
-                                        <div class="flex items-center gap-6">
-                                            <button onclick="verDetalhes('${uid}', '${pid}')" class="text-[10px] font-black underline">VER TUDO</button>
-                                            <p class="font-black italic">R$ ${ped.total.toFixed(2)}</p>
-                                            <div class="flex gap-2">
-                                                <button onclick="aprovarPedido('${uid}', '${pid}')" class="bg-white text-black px-6 py-2 text-[9px] font-black">APROVAR</button>
-                                                <button onclick="cancelarPedido('${uid}', '${pid}')" class="bg-red-600 text-white px-4 py-2 text-[9px] font-black">NEGAR</button>
-                                            </div>
-                                        </div>
-                                    </div>`;
-                            }
-                        });
-                    }
-                });
-            }
-            document.getElementById('counter-online').innerText = onlineCount;
-            document.getElementById('counter-total').innerText = Object.keys(users || {}).length;
+                                    </div>
+                                </div>`;
+                        }
+                    });
+                }
+            });
+            document.getElementById('counter-total').innerText = Object.keys(users).length;
         });
 
+        // VER DETALHES (CORRIGIDO PARA O SEU FORMATO)
         window.verDetalhes = (uid, pid) => {
-            const user = dadosGlobais[uid];
+            const user = dadosUsuarios[uid];
             const p = user.pedidos[pid];
-            const perfil = user.perfil || {};
-            const end = p.endereco || {};
+            const c = p.cliente || {};
 
-            // Preencher Textos
-            document.getElementById('det-nome').innerText = perfil.nome || 'N/A';
-            document.getElementById('det-cpf').innerText = perfil.cpf || 'NÃO INFORMADO';
-            document.getElementById('det-whats').innerText = perfil.whatsapp || 'N/A';
+            document.getElementById('det-nome').innerText = c.nome || 'N/A';
+            document.getElementById('det-cpf').innerText = c.cpf || 'N/A';
+            document.getElementById('det-whats').innerText = c.whatsapp || 'N/A';
+            document.getElementById('det-metodo').innerText = p.metodo || 'PIX';
+            document.getElementById('det-data').innerText = p.data || '---';
+            
+            // Endereço completo (Rua, Número, Cidade, UF, CEP)
             document.getElementById('det-endereco').innerHTML = `
-                ${end.rua || 'RUA N/A'}, ${end.numero || 'S/N'}<br>
-                ${end.bairro || 'BAIRRO N/A'} - ${end.cidade || 'CIDADE'}/${end.estado || 'UF'}<br>
-                CEP: ${end.cep || '00000-000'}`;
+                ${c.endereco || '---'}<br>
+                ${c.cidade || '---'} / ${c.uf || '--'}<br>
+                CEP: ${c.cep || '---'}`;
 
             document.getElementById('detalhes-frete').innerText = `R$ ${(p.frete || 0).toFixed(2)}`;
-            document.getElementById('detalhes-total').innerText = `R$ ${p.total.toFixed(2)}`;
+            document.getElementById('detalhes-total').innerText = `R$ ${(p.total || 0).toFixed(2)}`;
             
-            // Itens com Imagem
+            // Itens do Pedido
             document.getElementById('detalhes-itens').innerHTML = p.itens.map(i => `
                 <div class="flex gap-4 items-center border-b border-zinc-900 pb-4">
-                    <img src="${i.img || (i.imgs ? i.imgs[0] : '') || 'https://via.placeholder.com/50'}" class="w-12 h-16 object-cover border border-zinc-800">
+                    <img src="${i.img}" class="w-12 h-16 object-cover border border-zinc-800">
                     <div class="flex-1">
                         <span class="text-[11px] font-black uppercase block">${i.nome}</span>
-                        <span class="text-[9px] text-zinc-500 block">TAMANHO: ${i.tamanho} | QTD: ${i.quantidade}</span>
+                        <span class="text-[9px] text-zinc-500 block">TAM: ${i.tamanho} | QTD: ${i.quantidade}</span>
                     </div>
                     <span class="font-black text-[11px]">R$ ${(i.preco * i.quantidade).toFixed(2)}</span>
                 </div>`).join('');
@@ -280,39 +297,37 @@
 
         window.fecharDetalhes = () => document.getElementById('modal-detalhes').classList.add('hidden');
 
+        // GESTÃO DE PRODUTOS (IGUAL)
         onValue(ref(db, 'produtos'), (snapshot) => {
-            const data = snapshot.val();
+            const data = snapshot.val() || {};
             const container = document.getElementById('lista-produtos-adm');
             container.innerHTML = "";
-            if(data) {
-                document.getElementById('total-count').innerText = `${Object.keys(data).length} ITENS NO CLOUD`;
-                Object.keys(data).forEach(id => {
-                    const p = data[id];
-                    const precoAntigoHTML = p.precoAntigo ? `<span class="line-through mr-2 opacity-50">R$ ${p.precoAntigo.toFixed(2)}</span>` : '';
-                    container.innerHTML += `
-                        <div class="glass-panel p-5 flex gap-5 items-center ${p.status === 'inativo' ? 'opacity-30' : ''}">
-                            <img src="${p.imgs ? p.imgs[0] : ''}" class="w-20 h-24 object-cover">
-                            <div class="flex-1">
-                                <h3 class="text-[11px] font-black uppercase italic">${p.nome}</h3>
-                                <p class="text-[9px] text-zinc-500 mb-4">${precoAntigoHTML} R$ ${p.preco.toFixed(2)}</p>
-                                <div class="flex gap-2">
-                                    <button onclick="editarProduto('${id}')" class="bg-white text-black px-3 py-1 text-[9px] font-black">EDITAR</button>
-                                    <button onclick="remover('${id}')" class="text-zinc-700 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
-                                </div>
+            document.getElementById('total-count').innerText = `${Object.keys(data).length} ITENS NO CLOUD`;
+            Object.keys(data).forEach(id => {
+                const p = data[id];
+                container.innerHTML += `
+                    <div class="glass-panel p-5 flex gap-5 items-center ${p.status === 'inativo' ? 'opacity-30' : ''}">
+                        <img src="${p.imgs ? p.imgs[0] : ''}" class="w-20 h-24 object-cover">
+                        <div class="flex-1">
+                            <h3 class="text-[11px] font-black uppercase italic">${p.nome}</h3>
+                            <p class="text-[9px] text-zinc-500 mb-4">R$ ${(p.preco || 0).toFixed(2)}</p>
+                            <div class="flex gap-2">
+                                <button onclick="editarProduto('${id}')" class="bg-white text-black px-3 py-1 text-[9px] font-black">EDITAR</button>
+                                <button onclick="remover('${id}')" class="text-zinc-700 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
                             </div>
-                        </div>`;
-                });
-            }
+                        </div>
+                    </div>`;
+            });
         });
 
+        // FORM PRODUTO
         document.getElementById('form-produto').onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit-id').value || Date.now().toString();
             const urls = Array.from(document.querySelectorAll('.foto-url')).map(i => i.value).filter(v => v !== '');
             const sizes = Array.from(document.querySelectorAll('.size-chip.active')).map(c => c.dataset.size);
-            
             const produto = {
-                id: id, nome: document.getElementById('p-nome').value,
+                id, nome: document.getElementById('p-nome').value,
                 cat: document.getElementById('p-cat').value, status: document.getElementById('p-status').value,
                 precoAntigo: parseFloat(document.getElementById('p-preco-antigo').value) || 0,
                 preco: parseFloat(document.getElementById('p-preco').value),
@@ -331,70 +346,41 @@
         };
 
         document.querySelectorAll('.size-chip').forEach(c => c.onclick = () => c.classList.toggle('active'));
-
-        window.abrirModal = () => { 
-            document.getElementById('form-produto').reset(); 
-            document.getElementById('edit-id').value = ''; 
-            document.getElementById('container-fotos').innerHTML = ''; 
-            adicionarCampoFoto(); 
-            document.getElementById('modal-produto').classList.remove('hidden'); 
-            document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active')); 
-        };
-
+        window.abrirModal = () => { document.getElementById('form-produto').reset(); document.getElementById('container-fotos').innerHTML = ''; adicionarCampoFoto(); document.getElementById('modal-produto').classList.remove('hidden'); };
         window.fecharModal = () => document.getElementById('modal-produto').classList.add('hidden');
-        window.remover = (id) => { if(confirm("Deletar produto?")) remove(ref(db, 'produtos/' + id)); };
-        
-        window.editarProduto = (id) => {
-            onValue(ref(db, 'produtos/' + id), (snap) => {
-                const p = snap.val();
-                if(!p) return;
-                abrirModal();
-                document.getElementById('edit-id').value = id;
-                document.getElementById('p-nome').value = p.nome;
-                document.getElementById('p-preco-antigo').value = p.precoAntigo || '';
-                document.getElementById('p-preco').value = p.preco;
-                document.getElementById('p-desc').value = p.desc || '';
-                document.getElementById('p-cat').value = p.cat;
-                document.getElementById('p-status').value = p.status;
-                document.getElementById('container-fotos').innerHTML = '';
-                if(p.imgs) p.imgs.forEach(url => adicionarCampoFoto(url));
-                document.querySelectorAll('.size-chip').forEach(chip => {
-                    if(p.tamanhos && p.tamanhos.includes(chip.dataset.size)) chip.classList.add('active');
-                });
-            }, { onlyOnce: true });
-        };
+        window.remover = (id) => confirm("Deletar produto?") && remove(ref(db, 'produtos/' + id));
 
+        // PEDIDOS AÇÕES
         window.aprovarPedido = (uid, pid) => {
-            if(confirm("Confirmar que recebeu o dinheiro?")) {
-                update(ref(db, `usuarios/${uid}/pedidos/${pid}`), { status: "Aprovado" })
-                .then(() => alert("Pedido Aprovado!"));
+            if(confirm("Confirmar aprovação?")) {
+                update(ref(db, `usuarios/${uid}/pedidos/${pid}`), { status: "Aprovado" });
             }
         };
-
         window.cancelarPedido = (uid, pid) => {
-            if(confirm("Deseja realmente apagar/negar este pedido?")) {
+            if(confirm("Remover este pedido?")) {
                 remove(ref(db, `usuarios/${uid}/pedidos/${pid}`));
             }
         };
-
         window.removerUsuario = (uid) => {
-            if(confirm("Apagar cliente permanentemente?")) remove(ref(db, `usuarios/${uid}`));
+            if(confirm("Remover cliente do sistema?")) {
+                remove(ref(db, `usuarios/${uid}`));
+            }
         };
 
         function renderizarHistorico() {
             const cont = document.getElementById('lista-historico-adm');
             cont.innerHTML = "";
-            Object.keys(dadosGlobais).forEach(uid => {
-                const peds = dadosGlobais[uid].pedidos || {};
+            Object.keys(dadosUsuarios).forEach(uid => {
+                const peds = dadosUsuarios[uid].pedidos || {};
                 Object.keys(peds).forEach(pid => {
                     const o = peds[pid];
                     if(o.status === 'Aprovado') {
                         cont.innerHTML += `
                             <div class="glass-panel p-4 flex justify-between items-center opacity-60">
-                                <span class="text-[10px] font-black">${o.data} - ${dadosGlobais[uid].perfil?.nome || 'Cliente'}</span>
+                                <span class="text-[10px] font-black">${o.data} - ${o.cliente?.nome || 'Cliente'}</span>
                                 <div class="flex items-center gap-4">
                                     <button onclick="verDetalhes('${uid}', '${pid}')" class="text-[9px] font-black underline">VER TUDO</button>
-                                    <span class="font-black italic">R$ ${o.total.toFixed(2)}</span>
+                                    <span class="font-black italic">R$ ${(o.total || 0).toFixed(2)}</span>
                                     <button onclick="cancelarPedido('${uid}', '${pid}')" class="text-zinc-800 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </div>`;
