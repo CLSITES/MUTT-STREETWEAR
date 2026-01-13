@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MUTT | PAGAMENTO PIX</title>
+    <title>MUTT | TERMINAL DE PAGAMENTO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -26,7 +26,7 @@
     <div id="payment-screen" class="hidden space-y-8">
         <div class="text-center">
             <h1 class="text-3xl font-black italic uppercase tracking-tighter text-white">Pagamento Pix</h1>
-            <p id="order-id-display" class="text-zinc-500 text-[9px] uppercase font-black tracking-[0.2em] mt-3 border border-zinc-900 px-4 py-1 inline-block italic">GERANDO...</p>
+            <p id="order-id-display" class="text-zinc-500 text-[9px] uppercase font-black tracking-[0.2em] mt-3 border border-zinc-900 px-4 py-1 inline-block italic">GERANDO QR CODE...</p>
         </div>
 
         <div class="mutt-card space-y-8 text-center">
@@ -34,7 +34,7 @@
             
             <div>
                 <p class="text-zinc-500 text-[10px] font-black uppercase mb-1">Valor a pagar</p>
-                <h2 id="total-pix" class="text-4xl font-black italic tracking-tighter">R$ 0,00</h2>
+                <h2 id="total-pix" class="text-4xl font-black italic tracking-tighter text-white">R$ 0,00</h2>
             </div>
 
             <div class="space-y-3">
@@ -45,7 +45,7 @@
             <div class="pt-6 border-t border-zinc-900/50">
                 <div class="flex items-center justify-center gap-4">
                     <div class="loader"></div>
-                    <span class="text-[9px] font-black uppercase text-zinc-500 animate-pulse">Aguardando confirmação bancária...</span>
+                    <span class="text-[9px] font-black uppercase text-zinc-500 animate-pulse">Aguardando aprovação do ADM...</span>
                 </div>
             </div>
         </div>
@@ -56,16 +56,16 @@
             <i class="fa-solid fa-check text-4xl text-black"></i>
         </div>
         <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Pago</h2>
-        <p class="text-zinc-500 text-[10px] uppercase font-black">Pagamento confirmado. Verifique "Meus Pedidos".</p>
-        <button onclick="window.location.href='index.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Sair do Terminal</button>
+        <p class="text-zinc-500 text-[10px] uppercase font-black">Pagamento confirmado pelo sistema. Seu pedido está em processamento.</p>
+        <button onclick="window.location.href='index.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Voltar para Home</button>
     </div>
 
     <div id="error-screen" class="hidden text-center space-y-8 py-10">
         <div class="w-20 h-20 border-2 border-red-600 rounded-full flex items-center justify-center mx-auto">
             <i class="fa-solid fa-xmark text-4xl text-red-600"></i>
         </div>
-        <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido não encontrado</h2>
-        <p class="text-zinc-500 text-[10px] uppercase font-black">Não conseguimos localizar seu pedido recente.</p>
+        <h2 id="error-title" class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Cancelado</h2>
+        <p id="error-desc" class="text-zinc-500 text-[10px] uppercase font-black">Seu pedido foi cancelado ou não foi encontrado.</p>
         <button onclick="window.location.href='index.html'" class="w-full border border-zinc-800 text-white py-6 font-black uppercase text-[11px]">Voltar para a Loja</button>
     </div>
 </main>
@@ -95,26 +95,28 @@
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
+            // Busca o pedido mais recente do usuário logado
             const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
             
             onValue(pedidosRef, (snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
                     const pedidoId = Object.keys(data)[0];
-                    const pedido = data[pedidoId];
+                    const pedidoLocal = data[pedidoId];
 
-                    // Monitora o status no banco global
+                    // MONITORAMENTO GLOBAL: Fica olhando o status no banco central
                     const globalPedidoRef = ref(db, `pedidos/${pedidoId}`);
                     onValue(globalPedidoRef, (globalSnap) => {
-                        const pedidoAtualizado = globalSnap.val();
-                        const status = pedidoAtualizado ? pedidoAtualizado.status : pedido.status;
+                        const pedidoDB = globalSnap.val();
+                        const status = pedidoDB ? pedidoDB.status : pedidoLocal.status;
 
                         if (status === "Aprovado" || status === "Pago") {
                             exibirTela('success-screen');
                         } else if (status === "Recusado" || status === "Cancelado") {
+                            document.getElementById('error-title').innerText = "Pedido Recusado";
                             exibirTela('error-screen');
                         } else {
-                            renderizarPagamento(pedido, pedidoId);
+                            renderizarPagamento(pedidoLocal, pedidoId);
                         }
                     });
                 } else {
@@ -122,7 +124,7 @@
                         if (document.getElementById('payment-screen').classList.contains('hidden')) {
                             exibirTela('error-screen');
                         }
-                    }, 5000);
+                    }, 4000);
                 }
             });
         } else {
@@ -144,8 +146,8 @@
         qrContainer.innerHTML = ""; 
         new QRCode(qrContainer, {
             text: payload,
-            width: 200,
-            height: 200,
+            width: 220,
+            height: 220,
             colorDark: "#000000",
             colorLight: "#ffffff",
             correctLevel: QRCode.CorrectLevel.H
@@ -190,7 +192,7 @@
         const el = document.getElementById('pix-payload');
         el.select();
         navigator.clipboard.writeText(el.value).then(() => {
-            alert("Código Pix copiado!");
+            alert("Código Pix copiado! Cole no seu banco.");
         });
     }
 </script>
