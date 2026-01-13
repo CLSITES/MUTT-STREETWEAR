@@ -387,10 +387,15 @@
         };
 
         window.cancelarPedido = (uid, pid) => {
-            if(confirm("Deseja realmente apagar/negar este pedido?")) {
-                remove(ref(db, `usuarios/${uid}/pedidos/${pid}`));
-            }
-        };
+    if(confirm("Deseja realmente RECUSAR este pedido?")) {
+        // Em vez de remove(), usamos update() para o cliente saber que foi negado
+        update(ref(db, `usuarios/${uid}/pedidos/${pid}`), { 
+            status: "Recusado" 
+        }).then(() => {
+            alert("Pedido marcado como Recusado!");
+        });
+    }
+};
 
         window.removerUsuario = (uid) => {
             if(confirm("Apagar cliente permanentemente?")) remove(ref(db, `usuarios/${uid}`));
