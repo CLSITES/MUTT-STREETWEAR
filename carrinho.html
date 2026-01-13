@@ -129,7 +129,7 @@
                             <span id="total" class="text-4xl font-black italic tracking-tighter">R$ 0,00</span>
                         </div>
                     </div>
-                    <button onclick="finalizarPedido()" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.3em] hover:bg-zinc-200 transition-all">Finalizar Compra</button>
+                    <button onclick="finalizarPedido()" id="btn-finalizar" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.3em] hover:bg-zinc-200 transition-all">Finalizar Compra</button>
                 </div>
             </div>
         </div>
@@ -154,13 +154,14 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
+        // TABELA DE FRETE ATUALIZADA (PARÁ MAIS BARATO)
         const TABELA_FRETE = { 
-            "PA": { pac: 45.0, sedex: 85.0 }, 
+            "PA": { pac: 25.0, sedex: 35.0 }, // Frete para Parauapebas/PA ajustado
             "SP": { pac: 22.0, sedex: 35.0 }, 
             "RJ": { pac: 28.0, sedex: 45.0 },
-            "MA": { pac: 35.0, sedex: 60.0 },
-            "TO": { pac: 35.0, sedex: 60.0 },
-            "OUTROS": { pac: 40.0, sedex: 75.0 } 
+            "MA": { pac: 30.0, sedex: 50.0 },
+            "TO": { pac: 30.0, sedex: 50.0 },
+            "OUTROS": { pac: 35.0, sedex: 65.0 } 
         };
 
         let carrinhoGlobal = [];
@@ -184,14 +185,12 @@
 
         window.renderCarrinho = () => {
             const container = document.getElementById('cart-items-container');
-            let subtotal = 0;
             if(carrinhoGlobal.length === 0) {
                 container.innerHTML = `<div class="py-20 text-center border border-zinc-900 uppercase text-[9px] font-black text-zinc-700 italic">Carrinho Vazio</div>`;
-                atualizarResumo(0); return;
+                recalcularTudo(); return;
             }
             container.innerHTML = carrinhoGlobal.map((item) => {
                 const totalItem = (item.preco || 0) * (item.quantidade || 1);
-                subtotal += totalItem;
                 return `
                     <div class="flex gap-6 border-b border-zinc-950 pb-8 items-start">
                         <div class="w-20 h-24 bg-zinc-900 border border-zinc-800 overflow-hidden">
@@ -259,7 +258,7 @@
             document.getElementById('total').innerText = `R$ ${(sub + freteSelecionado).toFixed(2)}`;
         };
 
-        // --- FUNÇÃO CORRIGIDA PARA APARECER NO ADM ---
+        // --- FUNÇÃO FINALIZAR CORRIGIDA ---
         window.finalizarPedido = async () => {
             if(!carrinhoGlobal.length) return alert("CARRINHO VAZIO");
             
@@ -268,11 +267,15 @@
                 if(!document.getElementById(id).value) return alert("PREENCHA OS DADOS DE ENTREGA");
             }
 
+            const btn = document.getElementById('btn-finalizar');
+            btn.innerText = "PROCESSANDO...";
+            btn.disabled = true;
+
             const sub = carrinhoGlobal.reduce((acc, i) => acc + (i.preco * i.quantidade), 0);
             const totalFinal = sub + freteSelecionado;
 
             const pedidoObj = {
-                uid: currentUser.uid, // Referência do cliente
+                uid: currentUser.uid,
                 data: new Date().toLocaleString('pt-BR'),
                 status: "Pendente",
                 total: totalFinal,
@@ -291,21 +294,24 @@
             };
 
             try {
-                // 1. SALVA NA PASTA GLOBAL (ONDE O SEU ADM LÊ)
-                const refGeral = push(ref(db, `pedidos`));
-                const pedidoId = refGeral.key;
-                await set(refGeral, pedidoObj);
+                // Gerar uma ID única para o pedido
+                const novaPedidoRef = push(ref(db, `pedidos`));
+                const pedidoId = novaPedidoRef.key;
 
-                // 2. SALVA NO HISTÓRICO DO USUÁRIO (PARA O CLIENTE VER)
+                // Salvar nos dois locais de forma independente para evitar travas
+                await set(ref(db, `pedidos/${pedidoId}`), pedidoObj);
                 await set(ref(db, `usuarios/${currentUser.uid}/pedidos/${pedidoId}`), pedidoObj);
                 
-                // 3. LIMPA O CARRINHO
+                // Limpar carrinho
                 await remove(ref(db, `usuarios/${currentUser.uid}/carrinho`));
                 
-                // REDIRECIONA
-                location.href = pedidoObj.metodo === 'pix' ? "pagamento-pix.html" : "pagamento-cartao.html";
+                // Redirecionar
+                location.href = pedidoObj.metodo === 'pix' ? "pagamento.html" : "index.html";
             } catch (e) {
-                alert("ERRO AO PROCESSAR PEDIDO NO BANCO");
+                console.error(e);
+                alert("ERRO AO CONECTAR COM O BANCO. TENTE NOVAMENTE.");
+                btn.innerText = "Finalizar Compra";
+                btn.disabled = false;
             }
         };
     </script>
