@@ -154,9 +154,8 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        // AJUSTADO PARA PARAUAPEBAS / PARÁ
         const TABELA_FRETE = { 
-            "PA": { pac: 45.0, sedex: 85.0 }, // Frete otimizado para sua região
+            "PA": { pac: 45.0, sedex: 85.0 }, 
             "SP": { pac: 22.0, sedex: 35.0 }, 
             "RJ": { pac: 28.0, sedex: 45.0 },
             "MA": { pac: 35.0, sedex: 60.0 },
@@ -260,6 +259,7 @@
             document.getElementById('total').innerText = `R$ ${(sub + freteSelecionado).toFixed(2)}`;
         };
 
+        // --- FUNÇÃO CORRIGIDA PARA APARECER NO ADM ---
         window.finalizarPedido = async () => {
             if(!carrinhoGlobal.length) return alert("CARRINHO VAZIO");
             
@@ -272,8 +272,9 @@
             const totalFinal = sub + freteSelecionado;
 
             const pedidoObj = {
+                uid: currentUser.uid, // Referência do cliente
                 data: new Date().toLocaleString('pt-BR'),
-                status: "PENDENTE",
+                status: "Pendente",
                 total: totalFinal,
                 frete: freteSelecionado,
                 metodo: document.querySelector('input[name="pay"]:checked').value,
@@ -281,24 +282,30 @@
                 cliente: {
                     nome: document.getElementById('nome-completo').value,
                     whatsapp: document.getElementById('whatsapp').value,
+                    cpf: document.getElementById('cpf').value,
                     endereco: `${document.getElementById('rua').value}, ${document.getElementById('numero').value}`,
                     cidade: document.getElementById('cidade').value,
-                    uf: document.getElementById('estado').value.toUpperCase()
+                    uf: document.getElementById('estado').value.toUpperCase(),
+                    cep: document.getElementById('cep').value
                 }
             };
 
             try {
-                // SALVA NO HISTÓRICO DO USUÁRIO
-                const novoPedidoRef = push(ref(db, `usuarios/${currentUser.uid}/pedidos`));
-                await set(novoPedidoRef, pedidoObj);
+                // 1. SALVA NA PASTA GLOBAL (ONDE O SEU ADM LÊ)
+                const refGeral = push(ref(db, `pedidos`));
+                const pedidoId = refGeral.key;
+                await set(refGeral, pedidoObj);
+
+                // 2. SALVA NO HISTÓRICO DO USUÁRIO (PARA O CLIENTE VER)
+                await set(ref(db, `usuarios/${currentUser.uid}/pedidos/${pedidoId}`), pedidoObj);
                 
-                // LIMPA O CARRINHO
+                // 3. LIMPA O CARRINHO
                 await remove(ref(db, `usuarios/${currentUser.uid}/carrinho`));
                 
                 // REDIRECIONA
                 location.href = pedidoObj.metodo === 'pix' ? "pagamento-pix.html" : "pagamento-cartao.html";
             } catch (e) {
-                alert("ERRO AO PROCESSAR PEDIDO");
+                alert("ERRO AO PROCESSAR PEDIDO NO BANCO");
             }
         };
     </script>
