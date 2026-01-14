@@ -74,7 +74,7 @@
             <h2 class="text-4xl font-black italic uppercase text-white tracking-tighter">Pagamento Recusado</h2>
             <p class="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Não conseguimos validar seu pagamento. Tente novamente.</p>
             <div class="space-y-3">
-                <button onclick="window.location.href='carrinho.html'" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Tentar Novamente</button>
+                <button onclick="recuperarCarrinho()" class="w-full bg-white text-black py-6 font-black uppercase text-[11px] tracking-[0.2em]">Tentar Novamente</button>
                 <button onclick="window.location.href='index.html'" class="w-full border border-zinc-900 text-zinc-500 py-4 font-black uppercase text-[9px] tracking-[0.2em]">Voltar para a loja</button>
             </div>
         </div>
@@ -104,40 +104,47 @@
         const NOME_RECEBEDOR = "MUTT STREETWEAR"; 
         const CIDADE_RECEBEDOR = "SAO PAULO";
 
-       onAuthStateChanged(auth, (user) => {
-    if (user) {
-        // Monitora os pedidos para reagir a qualquer mudança de status
-        const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
-        onValue(pedidosRef, (snapshot) => {
-            const data = snapshot.val();
-            if (!data) {
-                // Se o pedido sumiu (foi deletado no ADM), mostra erro
-                exibirTela('error-screen');
-                return;
-            }
+        // ADICIONADO: Variável para guardar os itens e não deixar sumir
+        let itensDoPedidoAtual = [];
 
-            const pedidoId = Object.keys(data)[0];
-            const pedido = data[pedidoId];
-            
-            // Log para debug (aparece no F12 do navegador)
-            console.log("Status atual do pedido:", pedido.status);
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const pedidosRef = query(ref(db, `usuarios/${user.uid}/pedidos`), limitToLast(1));
+                onValue(pedidosRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (!data) {
+                        exibirTela('error-screen');
+                        return;
+                    }
 
-            // Se o status for Aprovado ou Pago
-            if (pedido.status === "Aprovado" || pedido.status === "Pago") {
-                exibirTela('success-screen');
-            } 
-            // Se o status for Recusado, Cancelado ou se o ADM marcou algo diferente de Pendente
-            else if (pedido.status === "Recusado" || pedido.status === "Cancelado") {
-                exibirTela('error-screen');
-            }
-            else {
-                renderizarPagamento(pedido, pedidoId);
+                    const pedidoId = Object.keys(data)[0];
+                    const pedido = data[pedidoId];
+                    
+                    // ADICIONADO: Guardamos os itens do pedido aqui
+                    itensDoPedidoAtual = pedido.itens;
+
+                    if (pedido.status === "Aprovado" || pedido.status === "Pago") {
+                        exibirTela('success-screen');
+                    } 
+                    else if (pedido.status === "Recusado" || pedido.status === "Cancelado") {
+                        exibirTela('error-screen');
+                    }
+                    else {
+                        renderizarPagamento(pedido, pedidoId);
+                    }
+                });
+            } else {
+                window.location.href = 'login.html';
             }
         });
-    } else {
-        window.location.href = 'login.html';
-    }
-});
+
+        // ADICIONADO: Função que coloca os produtos de volta no carrinho antes de sair
+        window.recuperarCarrinho = () => {
+            if (itensDoPedidoAtual && itensDoPedidoAtual.length > 0) {
+                localStorage.setItem('carrinho', JSON.stringify(itensDoPedidoAtual));
+            }
+            window.location.href = 'carrinho.html';
+        };
 
         function renderizarPagamento(pedido, id) {
             const valor = pedido.total.toFixed(2);
@@ -191,7 +198,6 @@
         }
 
         function exibirTela(id) {
-            // Esconde todas e mostra a desejada
             ['loading-screen', 'payment-screen', 'success-screen', 'error-screen'].forEach(t => {
                 const el = document.getElementById(t);
                 if(el) el.classList.add('hidden');
