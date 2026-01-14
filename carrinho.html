@@ -277,7 +277,7 @@
             const pedidoObj = {
                 uid: currentUser.uid,
                 data: new Date().toLocaleString('pt-BR'),
-                status: "Pendente",
+                status: "Aguardando Pagamento", // Status inicial
                 total: totalFinal,
                 frete: freteSelecionado,
                 metodo: metodoPagamento,
@@ -297,24 +297,24 @@
                 const novaPedidoRef = push(ref(db, `pedidos`));
                 const pedidoId = novaPedidoRef.key;
 
+                // Salva o pedido no banco de dados
                 await set(ref(db, `pedidos/${pedidoId}`), pedidoObj);
                 await set(ref(db, `usuarios/${currentUser.uid}/pedidos/${pedidoId}`), pedidoObj);
                 
-                // --- ALTERAÇÃO AQUI: Salva no LocalStorage antes de apagar do Firebase ---
-                localStorage.setItem('carrinho', JSON.stringify(carrinhoGlobal));
-                
+                // Limpa o carrinho para o próximo pedido
                 await remove(ref(db, `usuarios/${currentUser.uid}/carrinho`));
                 
+                // REDIRECIONAMENTO EXATO
                 if(metodoPagamento === 'pix') {
                     window.location.href = "pagamento-pix.html";
                 } else {
-                    alert("Pedido realizado! Aguarde o contato para o cartão.");
-                    window.location.href = "meus-pedidos.html";
+                    // SE FOR CARTÃO, VAI PARA A PÁGINA QUE TE MANDEI
+                    window.location.href = "pagamento-cartao.html";
                 }
 
             } catch (e) {
                 console.error(e);
-                alert("ERRO AO CONECTAR COM O BANCO. TENTE NOVAMENTE.");
+                alert("ERRO AO PROCESSAR. TENTE NOVAMENTE.");
                 btn.innerText = "Finalizar Compra";
                 btn.disabled = false;
             }
