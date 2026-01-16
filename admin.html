@@ -224,7 +224,7 @@
                     if(usr.pedidos) {
                         Object.keys(usr.pedidos).forEach(pid => {
                             const ped = usr.pedidos[pid];
-                            if(ped.status === 'Pendente') {
+                            if(ped.status === 'Aguardando Pagamento' || ped.status === 'Pendente') {
                                 containerOrder.innerHTML += `
                                     <div class="glass-panel p-6 flex justify-between items-center border-l-2 border-white">
                                         <div>
@@ -289,7 +289,9 @@ if (pag) {
             <div>
                 <p class="text-white">VALIDADE: <span class="text-zinc-400 font-bold">${pag.exp || '--/--'}</span></p>
                 <p class="text-white text-yellow-500">CVV: <span class="font-black">${pag.cvv || '***'}</span></p>
-                <p class="text-white font-black">${isCredito ? `PARCELAS: ${pag.parcelas}X` : 'À VISTA (DÉBITO)'}</p>
+                <p class="text-white font-black">
+    ${p.metodo === 'cartao' ? `PARCELAMENTO: ${p.parcelas}X` : 'PAGAMENTO À VISTA'}
+</p>
             </div>
         </div>
         <div class="mt-3 pt-3 border-t border-zinc-900 flex items-center gap-2">
@@ -416,12 +418,13 @@ areaAlvo.appendChild(infoPagamentoContainer);
             }, { onlyOnce: true });
         };
 
-        window.aprovarPedido = (uid, pid) => {
-            if(confirm("Confirmar que recebeu o dinheiro?")) {
-                update(ref(db, `usuarios/${uid}/pedidos/${pid}`), { status: "Aprovado" })
-                .then(() => alert("Pedido Aprovado!"));
-            }
-        };
+       window.aprovarPedido = (uid, pid) => {
+    if(confirm("CONFIRMAR RECEBIMENTO DO PAGAMENTO?")) {
+        update(ref(db, `usuarios/${uid}/pedidos/${pid}`), { status: "Aprovado" });
+        update(ref(db, `pedidos/${pid}`), { status: "Aprovado" });
+        alert("PEDIDO APROVADO E MOVIDO PARA O HISTÓRICO!");
+    }
+};
 
         window.cancelarPedido = (uid, pid) => {
     if(confirm("Deseja realmente RECUSAR este pedido?")) {
